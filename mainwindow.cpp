@@ -261,7 +261,7 @@ void MainWindow::sendAll()
     MidiEvent *midiev = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));
     QByteArray *reqArr = midiev->sysExData();
 
-    //Bulk out all start?
+    //Bulk out all start
     reqArr->append(QByteArray(reinterpret_cast<const char*>(&sysExBulkHeader[0]), sysExBulkHeaderLength));
     reqArr->append(static_cast<char>(0x00));
     reqArr->append(static_cast<char>(0x00));
@@ -390,6 +390,7 @@ void MainWindow::putGuiToTransmissionState(bool isTransmitting, bool sending)
         requestButton->setEnabled(false);
         sendButton->setEnabled(false);
         patchListView->setEnabled(false);
+        centralWidget()->setEnabled( false);
 
         progressWidget = new ProgressWidget();
         connect(progressWidget, SIGNAL(cancel()), this, SLOT(cancelTransmission()));
@@ -402,6 +403,9 @@ void MainWindow::putGuiToTransmissionState(bool isTransmitting, bool sending)
     }
     else
     {
+        ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>(centralWidget());
+        if( editWidget->DataArray() != nullptr )
+            editWidget->setEnabled( true);
         requestButton->setEnabled(true);
         sendButton->setEnabled(true);
         patchListView->setEnabled(true);
