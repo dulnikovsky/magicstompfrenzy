@@ -3,7 +3,8 @@
 
 #include "arraydataeditwidget.h"
 
-class QLineEdit;
+class QVBoxLayout;
+class QLabel;
 
 class PatchEditorWidget : public ArrayDataEditWidget
 {
@@ -11,9 +12,13 @@ class PatchEditorWidget : public ArrayDataEditWidget
 public:
     explicit PatchEditorWidget(QWidget *parent = nullptr);
 
-signals:
+    void setDataArray(QByteArray *arr) override;
 
-public slots:
+private:
+    QVBoxLayout *mainLayout;
+    QWidget *effectEditWidget;
+    QLabel *copyrightLabel;
+    constexpr static const char *copyrightStr="MagicstompFrenzy (C) 2018 Robert Vetter";
 };
 
 #endif // PATCHCOMMONEDITOR_H

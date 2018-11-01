@@ -1,7 +1,7 @@
 #ifndef MAGICSTOMP_H
 #define MAGICSTOMP_H
 
-const int numOfPatches = 99;
+static const int numOfPatches = 99;
 static const int PatchNameLength = 12;
 
 enum MagistompPatchDesc
@@ -84,6 +84,20 @@ enum EffectTypeIds
     DistorionMultiPhaser = 0x3E,
     BassPreamp = 0x3F,
     EffectTypeNUMBER
+};
+
+enum EffectParameterOffsets
+{
+    AmpType = 0x16,
+    SpeakerSimulator = 0x17,
+    Gain = 0x1E,
+    Master = 0x1F,
+    Tone = 0x22,
+    Treble = 0x24,
+    HighMiddle = 0x25,
+    LowMiddle = 0x26,
+    Bass = 0x27,
+    Presence = 0x28,
 };
 
 #endif

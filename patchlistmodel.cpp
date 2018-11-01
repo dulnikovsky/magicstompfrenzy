@@ -2,6 +2,9 @@
 #include <QColor>
 #include <QSet>
 
+#include "magicstomp.h"
+#include "magicstomptext.h"
+
 PatchListModel::PatchListModel( const QList<QByteArray> &patchDataList, const QSet<int> &dirtyPatchesSet, QObject *parent)
     :QAbstractItemModel(parent), patchDataRef(patchDataList), dirtyPatchesSet(dirtyPatchesSet)
 {
@@ -10,22 +13,57 @@ PatchListModel::PatchListModel( const QList<QByteArray> &patchDataList, const QS
 
 QVariant PatchListModel::data(const QModelIndex &index, int role) const
 {
-    if(role==Qt::DisplayRole)
+    if(index.column() == 0)
     {
-        QString number = QString::number(index.row()+1).rightJustified(2, '0');
-        QString patchName;
-        if( patchDataRef.at(index.row()).size()>= 32)
+        if(role==Qt::DisplayRole)
         {
-            patchName = QString::fromLatin1( patchDataRef.at(index.row()).mid(16, 12));
+            QString patchName;
+            if( patchDataRef.at(index.row()).size() == PatchTotalLength)
+            {
+                patchName = QString::fromLatin1( patchDataRef.at(index.row()).mid(PatchName, PatchNameLength));
+            }
+            return patchName;
         }
-        return number + " " + patchName;
+        else if(role==Qt::DecorationRole)
+        {
+            if(dirtyPatchesSet.contains( index.row()))
+                return QColor(Qt::yellow);
+        }
     }
-    else if(role==Qt::DecorationRole)
+    if(index.column() == 1)
     {
-        if(dirtyPatchesSet.contains( index.row()))
-            return QColor(Qt::yellow);
+        if(role==Qt::DisplayRole)
+        {
+            QString effectTypeName;
+            if( patchDataRef.at(index.row()).size() == PatchTotalLength)
+            {
+                int patchId = patchDataRef.at(index.row()).at(PatchType+1); // Only last byte us used
+                if( patchId>=0 && patchId<EffectTypeNUMBER)
+                    effectTypeName = EffectTypeNameList.at(patchId);
+            }
+            return effectTypeName;
+        }
     }
     return QVariant();
+}
+
+QVariant PatchListModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if(role==Qt::DisplayRole)
+    {
+        if( orientation==Qt::Horizontal)
+        {
+            if(section==0)
+                return tr("Name");
+            else if(section==1)
+                return tr("Type");
+        }
+        else
+        {
+            return QString::number(section+1).rightJustified(2, '0');
+        }
+    }
+    return QAbstractItemModel::headerData(section, orientation, role);
 }
 
 int PatchListModel::rowCount(const QModelIndex &parent) const
@@ -33,7 +71,6 @@ int PatchListModel::rowCount(const QModelIndex &parent) const
     Q_UNUSED(parent);
     return patchDataRef.size();
 }
-
 
 QModelIndex PatchListModel::index(int row, int column, const QModelIndex &parent) const
 {
@@ -49,5 +86,5 @@ QModelIndex PatchListModel::parent(const QModelIndex &child) const
 
 void PatchListModel::patchUpdated( int index)
 {
-    emit dataChanged( createIndex(index, 0), createIndex(index, 0));
+    emit dataChanged( createIndex(index, 0), createIndex(index, 1));
 }

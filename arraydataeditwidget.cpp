@@ -3,8 +3,9 @@
 
 #include <QKeyEvent>
 #include <QMetaProperty>
-#include <QAbstractSpinBox>
 #include <QAbstractButton>
+#include <QSpinBox>
+#include <QDoubleSpinBox>
 #include <QComboBox>
 #include <QLineEdit>
 #include <QChildEvent>
@@ -202,21 +203,36 @@ void ArrayDataEditWidget::connectObjectToValueChangedSlot( QObject *object)
     if(!(offset.isValid() && length.isValid()))
         return;
 
-    QAbstractSpinBox *sbox = dynamic_cast<QAbstractSpinBox *>(object);
+    QSpinBox *sbox = dynamic_cast<QSpinBox *>(object);
     if( sbox != nullptr)
+    {
         connect(sbox, SIGNAL(valueChanged(int)), this, SLOT(valueChanged()));
-
+        return;
+    }
+    QDoubleSpinBox *dbox = dynamic_cast<QDoubleSpinBox*>(object);
+    if( dbox != nullptr)
+    {
+        connect(dbox, SIGNAL(valueChanged(double)), this, SLOT(valueChanged()));
+        return;
+    }
     QComboBox *cbox = dynamic_cast<QComboBox *>(object);
     if( cbox != nullptr)
+    {
         connect(cbox, SIGNAL(currentIndexChanged(int)), this, SLOT(valueChanged()));
-
+        return;
+    }
     QAbstractButton *button = dynamic_cast<QAbstractButton *>(object);
     if( button != nullptr)
+    {
         connect(button, SIGNAL(toggled(bool)), this, SLOT(valueChanged()));
-
+        return;
+    }
     QLineEdit *lineedit = dynamic_cast<QLineEdit *>(object);
     if( lineedit != nullptr)
+    {
         connect(lineedit, SIGNAL(textEdited(QString)), this, SLOT(valueChanged()));
+        return;
+    }
 }
 
 QVariant ArrayDataEditWidget::invokeConvertMethod(const QString &method, const QByteArray *data, int offset, int length)
@@ -256,9 +272,9 @@ bool ArrayDataEditWidget::invokeConvertMethodBackwards(const QString &method, co
     {
         Q_ASSERT(argList.size()==2);
 
-        int valInt = value.toLongLong();
-        valInt = addAndScale( -argList.at(1).toInt(), 1.0 / argList.at(0).toDouble(), valInt);
-        eightToSeven(valInt, *data, offset, length );
+        double valReal = value.toDouble();
+        valReal = addAndScale( -argList.at(1).toInt(), 1.0 / argList.at(0).toDouble(), valReal);
+        eightToSeven(valReal+0.5, *data, offset, length );
         return true;
     }
     if(methodName==QStringLiteral("invertedBool"))
@@ -290,14 +306,14 @@ bool ArrayDataEditWidget::parseConvertMethodString(const QString &sourceStr, QSt
     return true;
 }
 
-int ArrayDataEditWidget::scaleAndAdd( double scalingFactor, int augend, int srcValue)
+double ArrayDataEditWidget::scaleAndAdd( double scalingFactor, int augend, double srcValue)
 {
-    return static_cast<int>(scalingFactor*srcValue+0.5)+augend;
+    return (scalingFactor*srcValue)+augend;
 }
 
-int ArrayDataEditWidget::addAndScale( int augend, double scalingFactor, int srcValue)
+double ArrayDataEditWidget::addAndScale( int augend, double scalingFactor, double srcValue)
 {
-    return static_cast<int>(scalingFactor*(srcValue+augend)+0.5);
+    return scalingFactor*(srcValue+augend);
 }
 
 quint64 ArrayDataEditWidget::sevenToEight( const QByteArray &array, int offset, int length)

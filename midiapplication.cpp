@@ -63,7 +63,7 @@ bool MidiApplication::event(QEvent *e)
     {
         emit midiEventReceived(me);
     }
-    QApplication::event(e);
+    return QApplication::event(e);
 }
 
 snd_seq_t * MidiApplication::midiSystemInit()

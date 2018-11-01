@@ -9,7 +9,7 @@
 
 #include <QGroupBox>
 #include <QComboBox>
-#include <QListView>
+#include <QTableView>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QFormLayout>
@@ -75,7 +75,8 @@ MainWindow::MainWindow(MidiPortModel *readableportsmodel, MidiPortModel *writabl
     patchButtonsLayout->addWidget(sendButton);
 
     patchListLayout = new QVBoxLayout();
-    patchListView = new QListView();
+    patchListView = new QTableView();
+    patchListView->setSelectionBehavior(QAbstractItemView::SelectRows);
     patchListView->setModel(patchListModel);
     connect(patchListView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(patchListDoubleClicked(QModelIndex)));
     patchListLayout->addWidget(patchListView);
@@ -366,6 +367,12 @@ void MainWindow::parameterChanged(int offset, int length)
     if( offset == PatchName) // Name needs to be sent as single chars
     {
         length = 1;
+        patchListModel->patchUpdated(currentPatchEdited);
+    }
+
+    if( offset == PatchType)
+    {
+        patchListModel->patchUpdated(currentPatchEdited);
     }
 
     MidiEvent *midiev = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));

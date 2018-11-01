@@ -1,0 +1,118 @@
+#ifndef MAGICSTOMPTEXT_H
+#define MAGICSTOMPTEXT_H
+
+#include <QStringList>
+
+const QStringList EffectTypeNameList =
+{
+    QStringLiteral("Acoustic Multi"),
+    QStringLiteral("8 Band Paralell Delay"),
+    QStringLiteral("8 Band Series Delay"),
+    QStringLiteral("4 Band 2 Tap Mod. Delay"),
+    QStringLiteral("2 Band 4 Tap Mod. Delay"),
+    QStringLiteral("8 Multi Tap Mod. Delay"),
+    QStringLiteral("2 Band Long + 4 Short Mod. Delay"),
+    QStringLiteral("Short + Medium + Long Mod. Delay"),
+
+    QStringLiteral("Amp Simulator"),
+    QStringLiteral("Reverb"),
+    QStringLiteral("Early Reflections"),
+    QStringLiteral("Gate Reverb"),
+    QStringLiteral("Reverse Gate"),
+    QStringLiteral("Mono Delay"),
+    QStringLiteral("Stereo Delay"),
+    QStringLiteral("Mod. Delay"),
+
+    QStringLiteral("Delay LCR"),
+    QStringLiteral("Echo"),
+    QStringLiteral("Chorus"),
+    QStringLiteral("Flange"),
+    QStringLiteral("Symphonic"),
+    QStringLiteral("Phaser"),
+    QStringLiteral("AutoPan"),
+    QStringLiteral("Tremolo"),
+
+    QStringLiteral("HQ Pitch"),
+    QStringLiteral("Dual Pitch"),
+    QStringLiteral("Rotary"),
+    QStringLiteral("Ring Mod."),
+    QStringLiteral("Mod. Filter"),
+    QStringLiteral("Digital Distortion"),
+    QStringLiteral("Dynamic Filter"),
+    QStringLiteral("Dynamic Flange"),
+
+    QStringLiteral("Dynamic Phaser"),
+    QStringLiteral("Reverb + Chorus"),
+    QStringLiteral("Reverb -> Chorus"),
+    QStringLiteral("Reverb + Flange"),
+    QStringLiteral("Reverb -> Flange"),
+    QStringLiteral("Reverb + Symphonic"),
+    QStringLiteral("Reverb -> Symphonic"),
+    QStringLiteral("Reverb -> Pan"),
+
+    QStringLiteral("Delay + Early Ref."),
+    QStringLiteral("Delay -> Early Ref."),
+    QStringLiteral("Delay + Reverb"),
+    QStringLiteral("Delay -> Reverb"),
+    QStringLiteral("Distortion -> Delay"),
+    QStringLiteral("Multi Filter"),
+    QStringLiteral("M. Band Dynamic Processor"),
+    QStringLiteral("Distortion"),
+
+    QStringLiteral("Vintage Flange"),
+    QStringLiteral("Mono Vintage Flange"),
+    QStringLiteral("Stereo Vintage Phaser"),
+    QStringLiteral("3 Band Parametric EQ"),
+    QStringLiteral("Spring Reverb"),
+    QStringLiteral("Tape Echo"),
+    QStringLiteral("Compressor"),
+
+    QStringLiteral("Amp Multi (Chorus)"),
+    QStringLiteral("Amp Multi (Flange)"),
+    QStringLiteral("Amp Multi (Tremolo)"),
+    QStringLiteral("Amp Multi (Phaser)"),
+    QStringLiteral("Distortion Multi (Chorus)"),
+    QStringLiteral("Distortion Multi (Flange)"),
+    QStringLiteral("Distortion Multi (Tremolo)"),
+    QStringLiteral("Distortion Multi (Phaser)"),
+
+    QStringLiteral("Bass Preamp")
+};
+
+const QStringList GuitarAmpTypeNameList =
+{
+    QStringLiteral("Heavy 1"),
+    QStringLiteral("Heavy 2"),
+    QStringLiteral("Lead 1"),
+    QStringLiteral("Lead 2"),
+    QStringLiteral("Drive 1"),
+    QStringLiteral("Drive 2"),
+    QStringLiteral("Crunch 1"),
+    QStringLiteral("Crunch 2"),
+    QStringLiteral("Clean 1"),
+    QStringLiteral("Clean 2"),
+    QStringLiteral("Solid"),
+};
+
+const QStringList GuitarCabTypeNameList =
+{
+    QStringLiteral("Off"),
+    QStringLiteral("American 4x12"),
+    QStringLiteral("British 4x12"),
+    QStringLiteral("Modern 4x12"),
+    QStringLiteral("YAMAHA 4x12"),
+    QStringLiteral("Hybrid 4x12"),
+    QStringLiteral("American 2x12"),
+    QStringLiteral("British 2x12"),
+    QStringLiteral("Modern 2x12"),
+    QStringLiteral("YAMAHA 2x12"),
+    QStringLiteral("Hybrid 2x12"),
+    QStringLiteral("American 1x12"),
+    QStringLiteral("Modern 1x12"),
+    QStringLiteral("YAMAHA 1x12"),
+    QStringLiteral("Hybrid 1x12"),
+    QStringLiteral("4x10"),
+    QStringLiteral("2x10"),
+};
+
+#endif

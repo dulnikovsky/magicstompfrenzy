@@ -34,7 +34,9 @@ SOURCES += main.cpp\
     arraydataeditwidget.cpp \
     patchcommoneditorwidget.cpp \
     patcheditorwidget.cpp \
-    midiapplication.cpp
+    midiapplication.cpp \
+    effecteditwidgets/ampmultiwidget.cpp \
+    effecteditwidgets/effecteditbasewidget.cpp
 
 HEADERS  += mainwindow.h \
     midiportmodel.h \
@@ -47,7 +49,10 @@ HEADERS  += mainwindow.h \
     patchcommoneditorwidget.h \
     patcheditorwidget.h \
     midiapplication.h \
-    magicstomp.h
+    magicstomp.h \
+    effecteditwidgets/ampmultiwidget.h \
+    effecteditwidgets/effecteditbasewidget.h \
+    magicstomptext.h
 
 
 LIBS += -lasound

@@ -9,7 +9,7 @@ class MidiPortModel;
 class QComboBox;
 
 class PatchListModel;
-class QListView;
+class QTableView;
 class QPushButton;
 class QVBoxLayout;
 class ProgressWidget;
@@ -64,7 +64,7 @@ private:
 
     QComboBox *portsInCombo;
     QComboBox *portsOutCombo;
-    QListView *patchListView;
+    QTableView *patchListView;
     QPushButton *requestButton;
     QPushButton *sendButton;
     ProgressWidget *progressWidget;

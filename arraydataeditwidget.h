@@ -10,7 +10,7 @@ public:
     explicit ArrayDataEditWidget( QWidget *parent = nullptr);
 
     QByteArray *DataArray() const { return dataArray; }
-    void setDataArray(QByteArray *arr);
+    virtual void setDataArray(QByteArray *arr);
 
     void refreshData(int offset, int length);
 
@@ -43,8 +43,8 @@ private:
 
     bool invokeConvertMethodBackwards(const QString &method, const QVariant &value, QByteArray *data, int offset, int length);
 
-    static int scaleAndAdd( double scalingFactor, int augend, int srcValue);
-    static int addAndScale( int augend, double scalingFactor, int srcValue);
+    static double scaleAndAdd( double scalingFactor, int augend, double srcValue);
+    static double addAndScale( int augend, double scalingFactor, double srcValue);
 };
 
 #endif // ARRAYDATAEDITWIDGET_H
