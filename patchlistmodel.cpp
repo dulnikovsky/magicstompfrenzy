@@ -1,8 +1,9 @@
 #include "patchlistmodel.h"
 #include <QColor>
+#include <QSet>
 
-PatchListModel::PatchListModel( const QList<QByteArray> &patchDataList, QObject *parent)
-    :QAbstractItemModel(parent), patchDataRef(patchDataList)
+PatchListModel::PatchListModel( const QList<QByteArray> &patchDataList, const QSet<int> &dirtyPatchesSet, QObject *parent)
+    :QAbstractItemModel(parent), patchDataRef(patchDataList), dirtyPatchesSet(dirtyPatchesSet)
 {
 
 }
@@ -19,10 +20,11 @@ QVariant PatchListModel::data(const QModelIndex &index, int role) const
         }
         return number + " " + patchName;
     }
-//    else if(role==Qt::DecorationRole)
-//    {
-//        return QColor(Qt::yellow);
-//    }
+    else if(role==Qt::DecorationRole)
+    {
+        if(dirtyPatchesSet.contains( index.row()))
+            return QColor(Qt::yellow);
+    }
     return QVariant();
 }
 

@@ -35,6 +35,8 @@ private slots:
 private:
     QByteArray *dataArray;
 
+    void connectObjectToValueChangedSlot( QObject *widget);
+
     bool parseConvertMethodString(const QString &sourceStr, QString &methodName, QStringList &srguments);
 
     QVariant invokeConvertMethod(const QString &method, const QByteArray *data, int offset, int length);

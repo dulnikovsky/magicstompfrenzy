@@ -13,9 +13,9 @@ class MidiPortModel : public QAbstractItemModel
 public:
 
     enum UserRoles{ ClientIdRole = Qt::UserRole, PortIdRole};
-    enum Direction{ InPorts, OutPorts };
+    enum Direction{ ReadablePorts, WritablePorts };
 
-    MidiPortModel(snd_seq_t *handle, Direction direction = InPorts, QObject *parent = Q_NULLPTR);
+    MidiPortModel(snd_seq_t *handle, Direction direction = ReadablePorts, QObject *parent = Q_NULLPTR);
 
     QVariant data(const QModelIndex &index, int role) const override;
 

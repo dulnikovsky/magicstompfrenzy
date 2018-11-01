@@ -3,14 +3,11 @@
 
 #include <QMainWindow>
 #include <QQueue>
-
-typedef struct _snd_seq snd_seq_t;
+#include <QSet>
 
 class MidiPortModel;
 class QComboBox;
 
-class MidiInThread;
-class MidiSender;
 class PatchListModel;
 class QListView;
 class QPushButton;
@@ -24,12 +21,16 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = 0);
+    MainWindow(MidiPortModel *readableportsmodel, MidiPortModel *writableportsmodel, QWidget *parent = 0);
     ~MainWindow();
 
-    bool event(QEvent *event) override;
-protected:
-    void closeEvent(QCloseEvent *event) override;
+public slots:
+    void midiEvent(MidiEvent *event);
+
+signals:
+    void readableMidiPortSelected( int clientId, int portId);
+    void writableMidiPortSelected( int clientId, int portId);
+    void sendMidiEvent(MidiEvent *);
 
 private slots:
     void portsInComboChanged(int index);
@@ -39,6 +40,8 @@ private slots:
     void requestPatch(int patchIndex);
     void sendPatch(int patchIndex, bool sendToTmpArea = true);
 
+    void parameterChanged(int offset, int length);
+
     void timeout();
     void midiOutTimeOut();
     void cancelTransmission();
@@ -46,26 +49,18 @@ private slots:
     void putGuiToTransmissionState( bool isTransmitting, bool sending);
 private:
     int currentPatchTransmitted;
+    int currentPatchEdited;
     bool cancelOperation;
     bool isInTransmissionState;
-    MidiInThread *midiInThread;
-    QThread *midiOutThread;
-    MidiSender *midiSender;
 
     PatchListModel *patchListModel;
-
-    MidiPortModel *portinmodel;
-    MidiPortModel *portoutmodel;
 
     QTimer *timeOutTimer;
     QTimer *midiOutTimer;
     QQueue< MidiEvent *> midiOutQueue;
 
     QList<QByteArray> patchDataList;
-    const int numOfPatches = 99;
-    const int PatchCommonLength = 0x20;
-    const int PatchEffectLength = 0x7F;
-    const int PatchLength = PatchCommonLength+PatchEffectLength;
+    QSet<int> dirtyPatchesIndexSet;
 
     QComboBox *portsInCombo;
     QComboBox *portsOutCombo;
@@ -75,11 +70,6 @@ private:
     ProgressWidget *progressWidget;
 
     QVBoxLayout *patchListLayout;
-
-    snd_seq_t *handle;
-    snd_seq_t * midiSystemInit();
-    int inport;
-    int outport;
 
     static char calcChecksum(const char *data, int dataLength);
 };

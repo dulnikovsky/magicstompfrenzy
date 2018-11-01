@@ -56,8 +56,8 @@ void MidiPortModel::scan()
         while (snd_seq_query_next_port(handle, pinfo) >= 0)
         {
             unsigned int cap = snd_seq_port_info_get_capability(pinfo);
-            if( ((cap & (SND_SEQ_PORT_CAP_READ|SND_SEQ_PORT_CAP_SUBS_READ)) && direction==InPorts) ||
-                    ((cap & (SND_SEQ_PORT_CAP_WRITE|SND_SEQ_PORT_CAP_SUBS_WRITE)) && direction==OutPorts) )
+            if( ((cap & (SND_SEQ_PORT_CAP_READ|SND_SEQ_PORT_CAP_SUBS_READ)) && direction==ReadablePorts) ||
+                    ((cap & (SND_SEQ_PORT_CAP_WRITE|SND_SEQ_PORT_CAP_SUBS_WRITE)) && direction==WritablePorts) )
             {
                 ClientPortId cpid;
                 cpid.clientId = clientId;

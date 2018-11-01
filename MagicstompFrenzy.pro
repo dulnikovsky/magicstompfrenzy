@@ -33,7 +33,8 @@ SOURCES += main.cpp\
     progresswidget.cpp \
     arraydataeditwidget.cpp \
     patchcommoneditorwidget.cpp \
-    patcheditorwidget.cpp
+    patcheditorwidget.cpp \
+    midiapplication.cpp
 
 HEADERS  += mainwindow.h \
     midiportmodel.h \
@@ -44,7 +45,9 @@ HEADERS  += mainwindow.h \
     progresswidget.h \
     arraydataeditwidget.h \
     patchcommoneditorwidget.h \
-    patcheditorwidget.h
+    patcheditorwidget.h \
+    midiapplication.h \
+    magicstomp.h
 
 
 LIBS += -lasound

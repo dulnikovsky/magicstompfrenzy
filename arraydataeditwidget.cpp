@@ -27,33 +27,17 @@ void ArrayDataEditWidget::setDataArray(QByteArray *arr)
 bool ArrayDataEditWidget::event(QEvent *event)
 {
     QChildEvent *childev = dynamic_cast<QChildEvent *>(event);
-    if(childev == nullptr)
+    if(childev == nullptr )
+        return QWidget::event(event);
+
+    if(childev->type() != QEvent::ChildAdded )
         return QWidget::event(event);
 
     QObject *child = childev->child();
-
-    QVariant offset, length;
-    offset = child->property(dataOffsetProperty);
-    length = child->property(dataLenghtProperty);
-
-    if(!(offset.isValid() && length.isValid()))
-        return QWidget::event(event);
-
-    QAbstractSpinBox *sbox = dynamic_cast<QAbstractSpinBox *>(child);
-    if( sbox != nullptr)
-        connect(sbox, SIGNAL(valueChanged(int)), this, SLOT(valueChanged()));
-
-    QComboBox *cbox = dynamic_cast<QComboBox *>(child);
-    if( cbox != nullptr)
-        connect(cbox, SIGNAL(currentIndexChanged(int)), this, SLOT(valueChanged()));
-
-    QAbstractButton *button = dynamic_cast<QAbstractButton *>(child);
-    if( button != nullptr)
-        connect(button, SIGNAL(toggled(bool)), this, SLOT(valueChanged()));
-
-    QLineEdit *lineedit = dynamic_cast<QLineEdit *>(child);
-    if( lineedit != nullptr)
-        connect(lineedit, SIGNAL(textEdited(QString)), this, SLOT(valueChanged()));
+    connectObjectToValueChangedSlot( child);
+    QList<QWidget *> objectList = child->findChildren<QWidget *>();
+    for(int i=0; i < objectList.size(); i++)
+        connectObjectToValueChangedSlot( objectList.at(i));
 
     return QWidget::event(event);
 }
@@ -72,7 +56,7 @@ void ArrayDataEditWidget::refreshData(int offset, int length)
     QList<QWidget *> widgetList = this->findChildren<QWidget *>();
     for(int i=0; i< widgetList.size(); i++)
     {
-        QWidget *widget=widgetList.at(i);
+        QWidget *widget = widgetList.at(i);
 
         unsigned int paramLength = widget->property(dataLenghtProperty).toUInt();
         if( paramLength == 0)
@@ -93,12 +77,14 @@ void ArrayDataEditWidget::refreshData(int offset, int length)
             parent = parent->parentWidget();
         }
 
-        //TODO Optimaze and refresh only affected edit widgets
+        //TODO Optimize and refresh only affected edit widgets
 //        if( intParamOffset < offset || offset > intParamOffset+intParamLength)
 //            return;
 
 //        if(offset+length > intParamOffset+intParamLength)
 //            return;
+
+        widget->blockSignals(true);
 
         QByteArray valPropNameArr;
         QVariant valPropName = widget->property(valuePropertyName);
@@ -132,6 +118,7 @@ void ArrayDataEditWidget::refreshData(int offset, int length)
                     qDebug("Property NOT set!!!!");
             }
         }
+        widget->blockSignals(false);
     }
 }
 
@@ -204,6 +191,32 @@ bool ArrayDataEditWidget::writeEditedParameter(QObject *editor)
         }
     }
     return false;
+}
+
+void ArrayDataEditWidget::connectObjectToValueChangedSlot( QObject *object)
+{
+    QVariant offset, length;
+    offset = object->property(dataOffsetProperty);
+    length = object->property(dataLenghtProperty);
+
+    if(!(offset.isValid() && length.isValid()))
+        return;
+
+    QAbstractSpinBox *sbox = dynamic_cast<QAbstractSpinBox *>(object);
+    if( sbox != nullptr)
+        connect(sbox, SIGNAL(valueChanged(int)), this, SLOT(valueChanged()));
+
+    QComboBox *cbox = dynamic_cast<QComboBox *>(object);
+    if( cbox != nullptr)
+        connect(cbox, SIGNAL(currentIndexChanged(int)), this, SLOT(valueChanged()));
+
+    QAbstractButton *button = dynamic_cast<QAbstractButton *>(object);
+    if( button != nullptr)
+        connect(button, SIGNAL(toggled(bool)), this, SLOT(valueChanged()));
+
+    QLineEdit *lineedit = dynamic_cast<QLineEdit *>(object);
+    if( lineedit != nullptr)
+        connect(lineedit, SIGNAL(textEdited(QString)), this, SLOT(valueChanged()));
 }
 
 QVariant ArrayDataEditWidget::invokeConvertMethod(const QString &method, const QByteArray *data, int offset, int length)

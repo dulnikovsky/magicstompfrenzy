@@ -1,14 +1,11 @@
 #include "mainwindow.h"
 #include "midiportmodel.h"
 #include "patchlistmodel.h"
-
 #include "midievent.h"
-#include "midiinthread.h"
-#include "midisender.h"
-
 #include "patcheditorwidget.h"
-
 #include "progresswidget.h"
+
+#include "magicstomp.h"
 
 #include <QGroupBox>
 #include <QComboBox>
@@ -23,43 +20,22 @@
 #include <QTimer>
 #include <QMessageBox>
 #include <QProgressDialog>
-
-#include <QApplication>
-
-#include <alsa/asoundlib.h>
+#include <QSettings>
 
 static const int sysExBulkHeaderLength = 8;
 static const unsigned char sysExBulkHeader[sysExBulkHeaderLength] = { 0xF0, 0x43, 0x7D, 0x30, 0x55, 0x42, 0x39, 0x39 };
 static const unsigned char dumpRequestHeader[] = { 0xF0, 0x43, 0x7D, 0x50, 0x55, 0x42, 0x30, 0x01 };
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), currentPatchTransmitted(-1), cancelOperation(false), isInTransmissionState(false)
+static const int parameterSendHeaderLength = 6;
+static const unsigned char sysExParameterSendHeader[parameterSendHeaderLength] = { 0xF0, 0x43, 0x7D, 0x40, 0x55, 0x42 };
+
+MainWindow::MainWindow(MidiPortModel *readableportsmodel, MidiPortModel *writableportsmodel, QWidget *parent)
+    : QMainWindow(parent), currentPatchTransmitted(-1), currentPatchEdited(-1),
+      cancelOperation(false), isInTransmissionState(false)
 {
-    int  midiEventType;
-    midiEventType = QEvent::registerEventType(MidiEvent::Common);
-    Q_ASSERT(midiEventType==MidiEvent::Common);
-    midiEventType = QEvent::registerEventType(MidiEvent::SysEx);
-    Q_ASSERT(midiEventType==MidiEvent::SysEx);
-
-    handle = midiSystemInit();
-
-    midiInThread = new MidiInThread(handle, this);
-    midiInThread->start();
-
-    midiSender = new MidiSender(handle, outport);
-
-    midiOutThread = new QThread(this);
-    midiSender->moveToThread(midiOutThread);
-    midiOutThread->start();
-
-    MidiPortModel *portinmodel = new MidiPortModel(handle, MidiPortModel::InPorts, this);
-    portinmodel->scan();
-    MidiPortModel *portoutmodel = new MidiPortModel(handle, MidiPortModel::OutPorts, this);
-    portoutmodel->scan();
-
     for(int i=0; i<numOfPatches; i++)
         patchDataList.append( QByteArray());
-    patchListModel = new PatchListModel( patchDataList, this);
+    patchListModel = new PatchListModel( patchDataList, dirtyPatchesIndexSet, this);
 
     timeOutTimer = new QTimer(this);
     timeOutTimer->setInterval(1000);
@@ -71,10 +47,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(midiOutTimer, SIGNAL(timeout()), this, SLOT(midiOutTimeOut()));
 
     portsInCombo = new QComboBox();
-    portsInCombo->setModel(portinmodel);
+    portsInCombo->setModel(readableportsmodel);
     connect(portsInCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(portsInComboChanged(int)));
     portsOutCombo = new QComboBox();
-    portsOutCombo->setModel(portoutmodel);
+    portsOutCombo->setModel(writableportsmodel);
     connect(portsOutCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(portsOutComboChanged(int)));
     //QSpinBox *deviceIdSpinbox = new QSpinBox();
     //deviceIdSpinbox->setMinimum(1);
@@ -122,108 +98,108 @@ MainWindow::MainWindow(QWidget *parent)
     addDockWidget(Qt::LeftDockWidgetArea, dockWidget);
 
     PatchEditorWidget *editor = new PatchEditorWidget();
+    connect(editor, SIGNAL(parameterChanged(int,int)), this, SLOT(parameterChanged(int,int)));
     setCentralWidget(editor);
+
+#ifdef QT_DEBUG
+    QSettings tmpsettings("/tmp/magicstompfrenzy.ini", QSettings::NativeFormat);
+    QByteArray arr;
+    arr = tmpsettings.value("Patch0data").toByteArray();
+    if(arr.size() == PatchTotalLength)
+        patchDataList[0] = arr;
+    arr = tmpsettings.value("Patch1data").toByteArray();
+    if(arr.size() == PatchTotalLength)
+        patchDataList[1] = arr;
+    patchListView->update();
+#endif
 }
 
 MainWindow::~MainWindow()
 {
+#ifdef QT_DEBUG
+    QSettings tmpsettings("/tmp/magicstompfrenzy.ini", QSettings::NativeFormat);
+    tmpsettings.setValue( "Patch0data", patchDataList.at(0));
+    tmpsettings.setValue( "Patch1data", patchDataList.at(1));
+#endif
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
+void MainWindow::midiEvent(MidiEvent *ev)
 {
-    snd_seq_close(handle);
-
-    midiOutThread->quit();
-    midiOutThread->wait();
-
-    midiInThread->terminate();
-    midiInThread->wait();
-
-    QMainWindow::closeEvent(event);
-}
-
-bool MainWindow::event(QEvent *ev)
-{
-    MidiEvent *me = dynamic_cast<MidiEvent *>(ev);
-    if(me != nullptr)
+    if( ev->type()==static_cast<QEvent::Type>(MidiEvent::SysEx))
     {
-        if( me->type()==static_cast<QEvent::Type>(MidiEvent::SysEx))
+        const QByteArray *inData = ev->sysExData();
+        if( inData->size() < 13)
+            return;
+
+        if( inData->left(sysExBulkHeaderLength) != QByteArray(reinterpret_cast<const char*>(&sysExBulkHeader[0]),sysExBulkHeaderLength) )
+            return;
+
+        ev->accept();
+
+        if( static_cast<unsigned char>(inData->at( inData->length()-1)) != 0xF7)
+            return;
+
+        char checkSum = calcChecksum(inData->constData()+sysExBulkHeaderLength, inData->length()-sysExBulkHeaderLength-2);
+        if( checkSum != inData->at( inData->length()-1-1))
         {
-            const QByteArray *inData = me->sysExData();
-            if( inData->size() < 13)
-                return false;
+            qDebug("Checksum Error!");
+            return;
+        }
 
-            if( inData->left(sysExBulkHeaderLength) != QByteArray(reinterpret_cast<const char*>(&sysExBulkHeader[0]),sysExBulkHeaderLength) )
-                return false;
-
-            if( static_cast<unsigned char>(inData->at( inData->length()-1)) != 0xF7)
-                return false;
-
-            char checkSum = calcChecksum(inData->constData()+sysExBulkHeaderLength, inData->length()-sysExBulkHeaderLength-2);
-            if( checkSum != inData->at( inData->length()-1-1))
+        //Dump message received
+        if( inData->at(8)==0x00 && inData->at(9)==0x00)
+        {
+            //patch dump start message. Lenght(?)==0
+            if( inData->at(10)==0x30 && inData->at(11)==0x01)
             {
-                qDebug("Checksum Error!");
-                return false;
+                qDebug("Patch %d Dump Start Message", inData->at(12));
+                currentPatchTransmitted = inData->at(12);
             }
-
-            //Dump message received
-            if( inData->at(8)==0x00 && inData->at(9)==0x00)
+            else if( inData->at(10)==0x30 && inData->at(11)==0x11)
             {
-                //patch dump start message. Lenght(?)==0
-                if( inData->at(10)==0x30 && inData->at(11)==0x01)
-                {
-                    qDebug("Patch %d Dump Start Message", inData->at(12));
-                    currentPatchTransmitted = inData->at(12);
-                }
-                else if( inData->at(10)==0x30 && inData->at(11)==0x11)
-                {
-                    //patch dump end message. Lenght(?)==0
-                    qDebug("Patch %d Dump End Message", inData->at(12));
-                    timeOutTimer->stop();
-                    patchListView->scrollTo(patchListView->model()->index(currentPatchTransmitted, 0));
-                    currentPatchTransmitted = -1;
-                    requestPatch(inData->at(12)+1);
-                }
+                //patch dump end message. Lenght(?)==0
+                qDebug("Patch %d Dump End Message", inData->at(12));
+                timeOutTimer->stop();
+                patchListView->scrollTo(patchListView->model()->index(currentPatchTransmitted, 0));
+                currentPatchTransmitted = -1;
+                requestPatch(inData->at(12)+1);
             }
-            else if( inData->at(8)==0x00 &&  inData->at(9)!=0x00)
+        }
+        else if( inData->at(8)==0x00 &&  inData->at(9)!=0x00)
+        {
+            int length = inData->at(9);
+            qDebug("Patch Dump Message. Length=%d", length);
+            if(inData->at(10)==0x20)
             {
-                int length = inData->at(9);
-                qDebug("Patch Dump Message. Length=%d", length);
-                if(inData->at(10)==0x20)
-                {
-                    if(inData->at(11)==0x00 && inData->at(12)==0x00)
-                    { // Patch common data;
-                        if(currentPatchTransmitted >=0 && currentPatchTransmitted < numOfPatches && length == PatchCommonLength)
+                if(inData->at(11)==0x00 && inData->at(12)==0x00)
+                { // Patch common data;
+                    if(currentPatchTransmitted >=0 && currentPatchTransmitted < numOfPatches && length == PatchCommonLength)
+                    {
+                        patchDataList[currentPatchTransmitted] = inData->mid(13, PatchCommonLength);
+                        if( patchDataList[currentPatchTransmitted].size() != PatchCommonLength)
                         {
-                            patchDataList[currentPatchTransmitted] = inData->mid(13, PatchCommonLength);
-                            if( patchDataList[currentPatchTransmitted].size() != PatchCommonLength)
-                            {
-                                patchDataList[currentPatchTransmitted].clear();
-                                return false;
-                            }
+                            patchDataList[currentPatchTransmitted].clear();
+                            return;
                         }
                     }
-                    else if(inData->at(11)==0x01 && inData->at(12)==0x00)
-                    { // Patch effect data;
-                        if(currentPatchTransmitted >=0 && currentPatchTransmitted < numOfPatches && length == PatchEffectLength)
+                }
+                else if(inData->at(11)==0x01 && inData->at(12)==0x00)
+                { // Patch effect data;
+                    if(currentPatchTransmitted >=0 && currentPatchTransmitted < numOfPatches && length == PatchEffectLength)
+                    {
+                        patchDataList[currentPatchTransmitted].append( inData->mid(13, PatchEffectLength));
+                        if( patchDataList[currentPatchTransmitted].size() != PatchTotalLength)
                         {
-                            patchDataList[currentPatchTransmitted].append( inData->mid(13, PatchEffectLength));
-                            if( patchDataList[currentPatchTransmitted].size() != PatchLength)
-                            {
-                                patchDataList[currentPatchTransmitted].clear();
-                                return false;
-                            }
-                            patchListModel->patchUpdated(currentPatchTransmitted);
+                            patchDataList[currentPatchTransmitted].clear();
+                            return;
                         }
+                        patchListModel->patchUpdated(currentPatchTransmitted);
                     }
                 }
             }
         }
-        ev->accept();
-        return true;
     }
 
-    return QMainWindow::event(ev);
 }
 
 void MainWindow::requestAll()
@@ -250,7 +226,7 @@ void MainWindow::requestPatch(int patchIndex)
     reqArr->append(QByteArray(reinterpret_cast<const char*>(&dumpRequestHeader[0]),std::extent<decltype(dumpRequestHeader)>::value));
     reqArr->append(char(patchIndex));
     reqArr->append(0xF7);
-    qApp->postEvent(midiSender, midiev);
+    emit sendMidiEvent( midiev);
     timeOutTimer->start();
 }
 
@@ -378,9 +354,54 @@ void MainWindow::midiOutTimeOut()
         return;
     }
     MidiEvent *ev = midiOutQueue.dequeue();
-    qApp->postEvent( midiSender, ev);
+    emit sendMidiEvent( ev);
     if(isInTransmissionState)
         progressWidget->setValue( 100 - (midiOutQueue.size() / 4));
+}
+
+void MainWindow::parameterChanged(int offset, int length)
+{
+    qDebug("parameterChanged(%d,%d)", offset, length);
+
+    if( offset == PatchName) // Name needs to be sent as single chars
+    {
+        length = 1;
+    }
+
+    MidiEvent *midiev = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));
+    QByteArray *reqArr = midiev->sysExData();
+    reqArr->append(QByteArray(reinterpret_cast<const char*>(&sysExParameterSendHeader[0]), parameterSendHeaderLength));
+    reqArr->append(0x20);
+    if(offset < PatchCommonLength)
+    {
+        reqArr->append(static_cast<char>(0x00));
+        reqArr->append(offset);
+    }
+    else
+    {
+        reqArr->append(0x01);
+        reqArr->append(offset - PatchCommonLength);
+    }
+    ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>(centralWidget());
+    for(int i= 0; i< length; i++)
+    {
+        reqArr->append( *(editWidget->DataArray()->constData()+offset+i));
+    }
+    reqArr->append(0xF7);
+    emit sendMidiEvent( midiev);
+
+    if( offset == PatchName) // Name needs to be sent as single chars
+    {
+        for(int i= PatchName + 1; i < PatchNameLast; i++)
+        {
+            parameterChanged( i, 1);
+        }
+    }
+    if( ! dirtyPatchesIndexSet.contains(currentPatchEdited ))
+    {
+        dirtyPatchesIndexSet.insert(currentPatchEdited);
+        patchListModel->patchUpdated(currentPatchEdited);
+    }
 }
 
 void MainWindow::putGuiToTransmissionState(bool isTransmitting, bool sending)
@@ -429,77 +450,25 @@ void MainWindow::patchListDoubleClicked(const QModelIndex &idx)
     midiOutTimer->start();
     ArrayDataEditWidget *widget = static_cast<ArrayDataEditWidget *>(centralWidget());
     widget->setDataArray(& patchDataList[idx.row()]);
-}
-
-snd_seq_t * MainWindow::midiSystemInit()
-{
-    snd_seq_t *handle;
-
-    int err;
-    err = snd_seq_open(&handle, "default", SND_SEQ_OPEN_DUPLEX, 0);
-
-    snd_seq_set_client_name(handle, "MagicstompFrenzy");
-
-    inport = snd_seq_create_simple_port(handle, "MagicstompFrenzy IN", SND_SEQ_PORT_CAP_WRITE|SND_SEQ_PORT_CAP_SUBS_WRITE, SND_SEQ_PORT_TYPE_MIDI_GENERIC | SND_SEQ_PORT_TYPE_APPLICATION);
-    outport = snd_seq_create_simple_port(handle, "MagicstompFrenzy OUT", SND_SEQ_PORT_CAP_READ|SND_SEQ_PORT_CAP_SUBS_READ, SND_SEQ_PORT_TYPE_MIDI_GENERIC );
-
-    // Subscribe to the announce port.
-    snd_seq_port_subscribe_t* subs;
-    snd_seq_port_subscribe_alloca(&subs);
-    snd_seq_addr_t announce_sender;
-    snd_seq_addr_t announce_dest;
-    announce_sender.client = SND_SEQ_CLIENT_SYSTEM;
-    announce_sender.port = SND_SEQ_PORT_SYSTEM_ANNOUNCE;
-    announce_dest.client = snd_seq_client_id(handle);
-    announce_dest.port = inport;
-    snd_seq_port_subscribe_set_sender(subs, &announce_sender);
-    snd_seq_port_subscribe_set_dest(subs, &announce_dest);
-    err = snd_seq_subscribe_port(handle, subs);
-    if (err != 0)
-    {
-        puts ("snd_seq_subscribe_port on the announce port fails: ");
-    }
-    return handle;
+    currentPatchEdited = idx.row();
 }
 
 void MainWindow::portsInComboChanged(int rowIdx)
 {
     // TODO:It should be possible to subcribe ( connect ) to multiple ports.
 
+    emit readableMidiPortSelected(portsInCombo->currentData( MidiPortModel::ClientIdRole).toInt(),
+                                  portsInCombo->currentData( MidiPortModel::PortIdRole).toInt());
+
     Q_UNUSED(rowIdx)
 
-    snd_seq_addr_t sender, dest;
-    snd_seq_port_subscribe_t* subs;
-
-    snd_seq_port_subscribe_alloca(&subs);
-
-    dest.client = snd_seq_client_id(handle);
-    dest.port = inport;
-
-    sender.client = portsInCombo->currentData( MidiPortModel::ClientIdRole).toInt();
-    sender.port = portsInCombo->currentData( MidiPortModel::PortIdRole).toInt();
-
-    snd_seq_port_subscribe_set_sender(subs, &sender);
-    snd_seq_port_subscribe_set_dest(subs, &dest);
-    snd_seq_subscribe_port(handle, subs);
 }
 void MainWindow::portsOutComboChanged(int rowIdx)
 {
     Q_UNUSED(rowIdx)
 
-    snd_seq_addr_t sender, dest;
-    snd_seq_port_subscribe_t* subs;
-
-    snd_seq_port_subscribe_alloca(&subs);
-
-    sender.client = snd_seq_client_id(handle);
-    sender.port = outport;
-    dest.client = portsOutCombo->currentData( MidiPortModel::ClientIdRole).toInt();
-    dest.port = portsOutCombo->currentData( MidiPortModel::PortIdRole).toInt();
-
-    snd_seq_port_subscribe_set_sender(subs, &sender);
-    snd_seq_port_subscribe_set_dest(subs, &dest);
-    snd_seq_subscribe_port(handle, subs);
+    emit writableMidiPortSelected(portsOutCombo->currentData( MidiPortModel::ClientIdRole).toInt(),
+                                  portsOutCombo->currentData( MidiPortModel::PortIdRole).toInt());
 }
 
 char MainWindow::calcChecksum(const char *data, int dataLength)
