@@ -11,6 +11,9 @@ public:
     {
         CompressorThreshold = 0x04, // 2 bytes
         ChorusFlangerDelay = 0x06, // 2 bytes
+        DelayFeedback = 0x08, // 2 bytes
+
+        ReverbIniDelay = 0x0A, // 2 bytes
 
         AmpType = 0x16,
         SpeakerSimulator = 0x17,
@@ -39,6 +42,21 @@ public:
         ChorusLevel = 0x41,
         ModFeedback = 0x41, //!!! Yes, that's right
         FlangePhaserLevel = 0x42,
+
+        DelayTapL = 0x4A,
+        DelayTapR = 0x4B,
+        DelayFeedbackGain = 0x4C,
+        DelayHeigh = 0x4D,
+        DelayLevel = 0x4E,
+
+        DelayHPF = 0x52,
+        DelayLPF = 0x53,
+
+        ReverbTime = 0x55,
+        ReverbHigh = 0x56,
+        ReverbDiffusion = 0x57,
+        ReverbDensity = 0x58,
+        ReverbLevel = 0x59
     };
 
     enum AmpMultiSubtype

@@ -40,7 +40,9 @@ SOURCES += main.cpp\
     effecteditwidgets/noisegatewidget.cpp \
     effecteditwidgets/ampwidget.cpp \
     effecteditwidgets/compressorwidget.cpp \
-    effecteditwidgets/ampmultimodulationwidget.cpp
+    effecteditwidgets/ampmultimodulationwidget.cpp \
+    effecteditwidgets/ampmultidelaywidget.cpp \
+    effecteditwidgets/ampmultireverbwidget.cpp
 
 HEADERS  += mainwindow.h \
     midiportmodel.h \
@@ -60,7 +62,9 @@ HEADERS  += mainwindow.h \
     effecteditwidgets/noisegatewidget.h \
     effecteditwidgets/ampwidget.h \
     effecteditwidgets/compressorwidget.h \
-    effecteditwidgets/ampmultimodulationwidget.h
+    effecteditwidgets/ampmultimodulationwidget.h \
+    effecteditwidgets/ampmultidelaywidget.h \
+    effecteditwidgets/ampmultireverbwidget.h
 
 
 LIBS += -lasound

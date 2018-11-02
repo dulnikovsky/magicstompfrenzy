@@ -3,6 +3,8 @@
 #include "noisegatewidget.h"
 #include "compressorwidget.h"
 #include "ampmultimodulationwidget.h"
+#include "ampmultidelaywidget.h"
+#include "ampmultireverbwidget.h"
 
 #include <QGridLayout>
 
@@ -12,8 +14,8 @@ AmpMultiWidget::AmpMultiWidget(AmpMultiSubtype subtype, QWidget *parent) :
 
     QGridLayout *mainlyt = new QGridLayout();
 
-    mainlyt->addWidget( new AmpWidget(), 0, 0, 1, 2);
-    mainlyt->addWidget( new NoiseGateWidget(), 1, 0);
+    mainlyt->addWidget( new AmpWidget(), 0, 0);
+    mainlyt->addWidget( new NoiseGateWidget(), 0, 1);
 
     if( subtype != SimulatorOnly)
     {
@@ -26,7 +28,7 @@ AmpMultiWidget::AmpMultiWidget(AmpMultiSubtype subtype, QWidget *parent) :
                                 AmpMultiWidget::CompressorKnee,
                                 AmpMultiWidget::CompressorGain
                                 ),
-                            1, 1);
+                            1, 0);
 
         QWidget *modWidget;
         if( subtype==AmpChorus || subtype==DistortionChorus)
@@ -40,7 +42,11 @@ AmpMultiWidget::AmpMultiWidget(AmpMultiSubtype subtype, QWidget *parent) :
         else
             modWidget = new QWidget(); // should never get here ;-). But avoid crash anyway
 
-        mainlyt->addWidget( modWidget , 2, 0);
+        mainlyt->addWidget( modWidget , 1, 1);
+
+        mainlyt->addWidget( new AmpMultiDelayWidget(), 2, 0);
+
+        mainlyt->addWidget( new AmpMultiReverbWidget(), 2, 1);
     }
     setLayout(mainlyt);
 }
