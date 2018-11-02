@@ -112,6 +112,9 @@ MainWindow::MainWindow(MidiPortModel *readableportsmodel, MidiPortModel *writabl
     arr = tmpsettings.value("Patch1data").toByteArray();
     if(arr.size() == PatchTotalLength)
         patchDataList[1] = arr;
+    arr = tmpsettings.value("Patch2data").toByteArray();
+    if(arr.size() == PatchTotalLength)
+        patchDataList[2] = arr;
     patchListView->update();
 #endif
 }
@@ -122,6 +125,7 @@ MainWindow::~MainWindow()
     QSettings tmpsettings("/tmp/magicstompfrenzy.ini", QSettings::NativeFormat);
     tmpsettings.setValue( "Patch0data", patchDataList.at(0));
     tmpsettings.setValue( "Patch1data", patchDataList.at(1));
+    tmpsettings.setValue( "Patch2data", patchDataList.at(2));
 #endif
 }
 

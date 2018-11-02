@@ -249,7 +249,7 @@ QVariant ArrayDataEditWidget::invokeConvertMethod(const QString &method, const Q
         Q_ASSERT(argList.size()==2);
 
         quint64 val = sevenToEight(*data, offset, length);
-        return scaleAndAdd(argList.at(0).toDouble(), argList.at(1).toInt(), val);
+        return scaleAndAdd(argList.at(0).toDouble(), argList.at(1).toDouble(), val);
     }
     if(methodName==QStringLiteral("invertedBool"))
     {
@@ -273,7 +273,7 @@ bool ArrayDataEditWidget::invokeConvertMethodBackwards(const QString &method, co
         Q_ASSERT(argList.size()==2);
 
         double valReal = value.toDouble();
-        valReal = addAndScale( -argList.at(1).toInt(), 1.0 / argList.at(0).toDouble(), valReal);
+        valReal = addAndScale( -(argList.at(1).toDouble()), 1.0 / argList.at(0).toDouble(), valReal);
         eightToSeven(valReal , *data, offset, length );
         return true;
     }
@@ -306,12 +306,12 @@ bool ArrayDataEditWidget::parseConvertMethodString(const QString &sourceStr, QSt
     return true;
 }
 
-double ArrayDataEditWidget::scaleAndAdd( double scalingFactor, int augend, double srcValue)
+double ArrayDataEditWidget::scaleAndAdd( double scalingFactor, double augend, double srcValue)
 {
     return (scalingFactor*srcValue)+augend;
 }
 
-double ArrayDataEditWidget::addAndScale( int augend, double scalingFactor, double srcValue)
+double ArrayDataEditWidget::addAndScale( double augend, double scalingFactor, double srcValue)
 {
     return scalingFactor*(srcValue+augend);
 }

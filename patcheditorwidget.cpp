@@ -9,6 +9,7 @@
 #include <QVariant>
 
 #include "effecteditwidgets/ampmultiwidget.h"
+#include "effecteditwidgets/multibanddelaywidget.h"
 
 PatchEditorWidget::PatchEditorWidget( QWidget *parent)
     : ArrayDataEditWidget( parent),effectEditWidget(nullptr)
@@ -35,9 +36,14 @@ void PatchEditorWidget::setDataArray(QByteArray *arr)
         delete effectEditWidget;
     }
 
-    switch (arr->at(PatchType+1))
+    EffectTypeId patchType = (EffectTypeId)arr->at(PatchType+1);
+    switch(patchType)
     {
 
+    case EightBandParallelDelay:
+    case EightBandSeriesDelay:
+        mainLayout->addWidget( effectEditWidget = new MultibandDelayWidget(patchType), 8);
+        break;
     case Compressor:
         mainLayout->addWidget( effectEditWidget =
                 new CompressorWidget(

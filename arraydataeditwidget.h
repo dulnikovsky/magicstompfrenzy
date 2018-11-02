@@ -43,8 +43,8 @@ private:
 
     bool invokeConvertMethodBackwards(const QString &method, const QVariant &value, QByteArray *data, int offset, int length);
 
-    static double scaleAndAdd( double scalingFactor, int augend, double srcValue);
-    static double addAndScale( int augend, double scalingFactor, double srcValue);
+    static double scaleAndAdd( double scalingFactor, double augend, double srcValue);
+    static double addAndScale( double augend, double scalingFactor, double srcValue);
 };
 
 #endif // ARRAYDATAEDITWIDGET_H

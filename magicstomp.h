@@ -17,7 +17,7 @@ enum MagistompPatchDesc
     PatchTotalLength = PatchCommonLength + PatchEffectLength
 };
 
-enum EffectTypeIds
+enum EffectTypeId
 {
     AcousticMulti = 0x00,
     EightBandParallelDelay = 0x01,
