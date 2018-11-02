@@ -7,6 +7,7 @@
 #include "../arraydataeditwidget.h"
 
 class QDoubleSpinBox;
+class QSpinBox;
 
 class EffectEditBaseWidget : public QGroupBox
 {
@@ -15,7 +16,8 @@ public:
     explicit EffectEditBaseWidget(QWidget *parent = nullptr);
 
 
-static QDoubleSpinBox* createStandardDblSpinBox(int offset);
+static QDoubleSpinBox* createStandard10DblSpinBox(int offset);
+static QSpinBox* createStandardRawSpinBox(int offset, int minimum, int maximum, int length = 1);
 
 };
 

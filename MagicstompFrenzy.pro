@@ -36,7 +36,11 @@ SOURCES += main.cpp\
     patcheditorwidget.cpp \
     midiapplication.cpp \
     effecteditwidgets/ampmultiwidget.cpp \
-    effecteditwidgets/effecteditbasewidget.cpp
+    effecteditwidgets/effecteditbasewidget.cpp \
+    effecteditwidgets/noisegatewidget.cpp \
+    effecteditwidgets/ampwidget.cpp \
+    effecteditwidgets/compressorwidget.cpp \
+    effecteditwidgets/ampmultimodulationwidget.cpp
 
 HEADERS  += mainwindow.h \
     midiportmodel.h \
@@ -52,7 +56,11 @@ HEADERS  += mainwindow.h \
     magicstomp.h \
     effecteditwidgets/ampmultiwidget.h \
     effecteditwidgets/effecteditbasewidget.h \
-    magicstomptext.h
+    magicstomptext.h \
+    effecteditwidgets/noisegatewidget.h \
+    effecteditwidgets/ampwidget.h \
+    effecteditwidgets/compressorwidget.h \
+    effecteditwidgets/ampmultimodulationwidget.h
 
 
 LIBS += -lasound

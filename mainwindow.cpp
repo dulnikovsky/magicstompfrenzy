@@ -21,6 +21,7 @@
 #include <QMessageBox>
 #include <QProgressDialog>
 #include <QSettings>
+#include <QDebug>
 
 static const int sysExBulkHeaderLength = 8;
 static const unsigned char sysExBulkHeader[sysExBulkHeaderLength] = { 0xF0, 0x43, 0x7D, 0x30, 0x55, 0x42, 0x39, 0x39 };
@@ -362,7 +363,7 @@ void MainWindow::midiOutTimeOut()
 
 void MainWindow::parameterChanged(int offset, int length)
 {
-    qDebug("parameterChanged(%d,%d)", offset, length);
+    qDebug("parameterChanged(offset=%d,len=%d)", offset, length);
 
     if( offset == PatchName) // Name needs to be sent as single chars
     {
@@ -396,6 +397,8 @@ void MainWindow::parameterChanged(int offset, int length)
     }
     reqArr->append(0xF7);
     emit sendMidiEvent( midiev);
+
+    qDebug() << reqArr->toHex(',');
 
     if( offset == PatchName) // Name needs to be sent as single chars
     {

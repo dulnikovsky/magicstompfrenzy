@@ -33,7 +33,7 @@ PatchCommonEditorWidget::PatchCommonEditorWidget(QWidget *parent)
     nameLineEdit->setProperty( ArrayDataEditWidget::dataLenghtProperty, PatchNameLength);
     mainLayout->addWidget(nameLineEdit, 1, 1);
 
-    mainLayout->addWidget(new QLabel(tr("Knob 1:")), 0, 2);
+    mainLayout->addWidget(new QLabel(tr("Knob 1(?):")), 0, 2);
     QSpinBox *constrolSpinBox = new QSpinBox();
     constrolSpinBox->setRange(0, 127);
     constrolSpinBox->setSingleStep(1);
@@ -41,7 +41,7 @@ PatchCommonEditorWidget::PatchCommonEditorWidget(QWidget *parent)
     constrolSpinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 2);
     mainLayout->addWidget(constrolSpinBox, 1, 2);
 
-    mainLayout->addWidget(new QLabel(tr("Knob 2:")), 0, 3);
+    mainLayout->addWidget(new QLabel(tr("Knob 2(?):")), 0, 3);
     constrolSpinBox = new QSpinBox();
     constrolSpinBox->setRange(0, 127);
     constrolSpinBox->setSingleStep(1);
@@ -49,7 +49,7 @@ PatchCommonEditorWidget::PatchCommonEditorWidget(QWidget *parent)
     constrolSpinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 2);
     mainLayout->addWidget(constrolSpinBox, 1, 3);
 
-    mainLayout->addWidget(new QLabel(tr("Knob 3:")), 0, 4);
+    mainLayout->addWidget(new QLabel(tr("Knob 3(?):")), 0, 4);
     constrolSpinBox = new QSpinBox();
     constrolSpinBox->setRange(0, 127);
     constrolSpinBox->setSingleStep(1);

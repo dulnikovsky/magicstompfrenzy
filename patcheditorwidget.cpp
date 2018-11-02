@@ -1,5 +1,6 @@
 #include "patcheditorwidget.h"
 #include "patchcommoneditorwidget.h"
+#include "effecteditwidgets/compressorwidget.h"
 
 #include "magicstomp.h"
 
@@ -34,13 +35,34 @@ void PatchEditorWidget::setDataArray(QByteArray *arr)
         delete effectEditWidget;
     }
 
-    switch (arr->at(PatchType+1)) {
+    switch (arr->at(PatchType+1))
+    {
+
+    case Compressor:
+        mainLayout->addWidget( effectEditWidget =
+                new CompressorWidget(
+                        CompressorWidget::Threshold,
+                        CompressorWidget::Ratio,
+                        CompressorWidget::Attack,
+                        CompressorWidget::Release,
+                        CompressorWidget::Knee,
+                        CompressorWidget::Gain )
+                , 8);
+        break;
     case AmpSimulator:
+        mainLayout->addWidget( effectEditWidget = new AmpMultiWidget(AmpMultiWidget::SimulatorOnly), 8);
+        break;
     case AmpMultiChorus:
+        mainLayout->addWidget( effectEditWidget = new AmpMultiWidget(AmpMultiWidget::AmpChorus), 8);
+        break;
     case AmpMultiFlange:
+        mainLayout->addWidget( effectEditWidget = new AmpMultiWidget(AmpMultiWidget::AmpFlange), 8);
+        break;
     case AmpMultiPhaser:
+        mainLayout->addWidget( effectEditWidget = new AmpMultiWidget(AmpMultiWidget::AmpPhaser), 8);
+        break;
     case AmpMultiTremolo:
-        mainLayout->addWidget( effectEditWidget = new AmpMultiWidget(), 8);
+        mainLayout->addWidget( effectEditWidget = new AmpMultiWidget(AmpMultiWidget::AmpTremolo), 8);
         break;
     default:
         mainLayout->addWidget(effectEditWidget = new QWidget());

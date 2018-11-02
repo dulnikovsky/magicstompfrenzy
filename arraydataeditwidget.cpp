@@ -274,7 +274,7 @@ bool ArrayDataEditWidget::invokeConvertMethodBackwards(const QString &method, co
 
         double valReal = value.toDouble();
         valReal = addAndScale( -argList.at(1).toInt(), 1.0 / argList.at(0).toDouble(), valReal);
-        eightToSeven(valReal+0.5, *data, offset, length );
+        eightToSeven(valReal , *data, offset, length );
         return true;
     }
     if(methodName==QStringLiteral("invertedBool"))

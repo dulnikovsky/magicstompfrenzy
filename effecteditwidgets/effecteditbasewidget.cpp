@@ -1,6 +1,7 @@
 #include "effecteditbasewidget.h"
 
 #include <QDoubleSpinBox>
+#include <QSpinBox>
 
 EffectEditBaseWidget::EffectEditBaseWidget(QWidget *parent)
     : QGroupBox(parent)
@@ -9,7 +10,7 @@ EffectEditBaseWidget::EffectEditBaseWidget(QWidget *parent)
 }
 
 
-QDoubleSpinBox * EffectEditBaseWidget::createStandardDblSpinBox(int offset)
+QDoubleSpinBox * EffectEditBaseWidget::createStandard10DblSpinBox(int offset)
 {
     QDoubleSpinBox *dspinBox = new QDoubleSpinBox();
     dspinBox->setMinimum(0.0);
@@ -20,4 +21,14 @@ QDoubleSpinBox * EffectEditBaseWidget::createStandardDblSpinBox(int offset)
     dspinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
     dspinBox->setProperty( ArrayDataEditWidget::convertMethodProperty, QStringLiteral("scaleAndAdd(0.1, 0)"));
     return dspinBox;
+}
+
+QSpinBox * EffectEditBaseWidget::createStandardRawSpinBox(int offset, int minimum, int maximum, int length)
+{
+    QSpinBox *spinBox = new QSpinBox();
+    spinBox->setMinimum(minimum);
+    spinBox->setMaximum(maximum);
+    spinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, offset);
+    spinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, length);
+    return spinBox;
 }
