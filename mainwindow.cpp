@@ -22,6 +22,8 @@
 #include <QProgressDialog>
 #include <QSettings>
 #include <QDir>
+#include <QStandardPaths>
+#include <QItemSelectionModel>
 #include <QDebug>
 
 static const int sysExBulkHeaderLength = 8;
@@ -32,12 +34,12 @@ static const int parameterSendHeaderLength = 6;
 static const unsigned char sysExParameterSendHeader[parameterSendHeaderLength] = { 0xF0, 0x43, 0x7D, 0x40, 0x55, 0x42 };
 
 MainWindow::MainWindow(MidiPortModel *readableportsmodel, MidiPortModel *writableportsmodel, QWidget *parent)
-    : QMainWindow(parent), currentPatchTransmitted(-1), currentPatchEdited(-1),
+    : QMainWindow(parent), currentPatchTransmitted(-1), currentPatchEdited(-1), patchToCopy(-1),
       cancelOperation(false), isInTransmissionState(false)
 {
     for(int i=0; i<numOfPatches; i++)
         patchDataList.append( QByteArray());
-    patchListModel = new PatchListModel( patchDataList, dirtyPatchesIndexSet, this);
+    patchListModel = new PatchListModel( patchDataList, dirtyPatches, this);
 
     timeOutTimer = new QTimer(this);
     timeOutTimer->setInterval(1000);
@@ -81,11 +83,26 @@ MainWindow::MainWindow(MidiPortModel *readableportsmodel, MidiPortModel *writabl
     patchListView->setSelectionBehavior(QAbstractItemView::SelectRows);
     patchListView->setModel(patchListModel);
     connect(patchListView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(patchListDoubleClicked(QModelIndex)));
+    connect(patchListView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
+            this, SLOT(patchListSelectionChanged(QItemSelection,QItemSelection)));
     patchListLayout->addWidget(patchListView);
     patchListGroupbox->setLayout(patchListLayout);
 
     patchListLayout->addLayout(patchButtonsLayout);
     patchListLayout->addWidget(patchListView);
+
+    QHBoxLayout *listEditButtonsLayout = new QHBoxLayout();
+    listEditButtonsLayout->addWidget(swapButton = new QPushButton(tr("Swap")));
+    connect(swapButton, SIGNAL(pressed()), this, SLOT(swapButtonPressed()));
+    swapButton->setEnabled(false);
+    listEditButtonsLayout->addWidget(copyButton = new QPushButton(tr("Copy")));
+    copyButton->setEnabled(false);
+    listEditButtonsLayout->addWidget(pasteButton = new QPushButton(tr("Paste")));
+    pasteButton->setEnabled(false);
+    listEditButtonsLayout->addWidget(resetButton = new QPushButton(tr("Reset")));
+    resetButton->setEnabled(false);
+
+    patchListLayout->addLayout( listEditButtonsLayout);
 
     QVBoxLayout *mainLeftlayout = new QVBoxLayout();
     mainLeftlayout->addWidget( settingsGroupbox);
@@ -104,30 +121,25 @@ MainWindow::MainWindow(MidiPortModel *readableportsmodel, MidiPortModel *writabl
     connect(editor, SIGNAL(parameterChanged(int,int)), this, SLOT(parameterChanged(int,int)));
     setCentralWidget(editor);
 
-#ifdef QT_DEBUG
-    QSettings tmpsettings("/tmp/magicstompfrenzy.ini", QSettings::IniFormat);
-    QByteArray arr;
-    arr = tmpsettings.value("Patch0data").toByteArray();
-    if(arr.size() == PatchTotalLength)
-        patchDataList[0] = arr;
-    arr = tmpsettings.value("Patch1data").toByteArray();
-    if(arr.size() == PatchTotalLength)
-        patchDataList[1] = arr;
-    arr = tmpsettings.value("Patch2data").toByteArray();
-    if(arr.size() == PatchTotalLength)
-        patchDataList[2] = arr;
-    patchListView->update();
-#endif
+    QSettings cacheSettings(QStandardPaths::writableLocation(QStandardPaths::CacheLocation)+QStringLiteral("/patchcache.ini"), QSettings::IniFormat);
+    for(int i=0; i<numOfPatches;i++)
+    {
+        QByteArray arr;
+        arr = cacheSettings.value("Patchdata"+QString::number(i+1).rightJustified(2, '0')).toByteArray();
+        if(arr.size() == PatchTotalLength && arr.at(PatchType+1)<EffectTypeNUMBER)
+            patchDataList[i] = arr;
+    }
 }
 
-MainWindow::~MainWindow()
+void MainWindow::closeEvent(QCloseEvent *event)
 {
-#ifdef QT_DEBUG
-    QSettings tmpsettings("/tmp/magicstompfrenzy.ini", QSettings::IniFormat);
-    tmpsettings.setValue( "Patch0data", patchDataList.at(0));
-    tmpsettings.setValue( "Patch1data", patchDataList.at(1));
-    tmpsettings.setValue( "Patch2data", patchDataList.at(2));
-#endif
+    QSettings cacheSettings(QStandardPaths::writableLocation(QStandardPaths::CacheLocation)+QStringLiteral("/patchcache.ini"), QSettings::IniFormat);
+    for(int i=0; i<numOfPatches;i++)
+    {
+        if(patchDataList.at(i).size() == PatchTotalLength)
+        cacheSettings.setValue("Patchdata"+QString::number(i+1).rightJustified(2, '0'), patchDataList.at(i));
+    }
+    QMainWindow::closeEvent(event);
 }
 
 void MainWindow::midiEvent(MidiEvent *ev)
@@ -360,6 +372,14 @@ void MainWindow::midiOutTimeOut()
     if( midiOutQueue.isEmpty())
     {
         midiOutTimer->stop();
+
+        if(isInTransmissionState && !cancelOperation)
+        {
+            QSetIterator<int> iter(dirtyPatches);
+            while (iter.hasNext())
+                patchListModel->patchUpdated(iter.next());
+            dirtyPatches.clear();
+        }
         if(isInTransmissionState)
             putGuiToTransmissionState(false, false);
         return;
@@ -434,11 +454,9 @@ void MainWindow::parameterChanged(int offset, int length)
             QMessageBox::critical(this, tr("Error"), tr("Error loading effect init data. Check if effects.ini is present and if is correct"));
         }
     }
-    if( ! dirtyPatchesIndexSet.contains(currentPatchEdited ))
-    {
-        dirtyPatchesIndexSet.insert(currentPatchEdited);
-        patchListModel->patchUpdated(currentPatchEdited);
-    }
+    dirtyPatches.insert(currentPatchEdited);
+    patchListModel->patchUpdated(currentPatchEdited);
+
 }
 
 void MainWindow::putGuiToTransmissionState(bool isTransmitting, bool sending)
@@ -488,6 +506,68 @@ void MainWindow::patchListDoubleClicked(const QModelIndex &idx)
     ArrayDataEditWidget *widget = static_cast<ArrayDataEditWidget *>(centralWidget());
     widget->setDataArray(& patchDataList[idx.row()]);
     currentPatchEdited = idx.row();
+}
+
+void MainWindow::patchListSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
+{
+    QModelIndexList selectedRows = patchListView->selectionModel()->selectedRows();
+    if( selectedRows.size() == 1)
+    {
+        copyButton->setEnabled(true);
+        if( patchToCopy != -1)
+            pasteButton->setEnabled(true);
+
+//        int row = selectedRows.at(0).row();
+//        if(backupPatchesMap.contains(row) && backupPatchesMap[row] != patchDataList.at(row) )
+//            resetButton->setEnabled(true);
+//        else
+//            resetButton->setEnabled(false);
+    }
+    else
+    {
+        copyButton->setEnabled(false);
+        pasteButton->setEnabled(false);
+        resetButton->setEnabled(false);
+    }
+    if( selectedRows.size() == 2)
+    {
+        swapButton->setEnabled(true);
+    }
+    else
+    {
+        swapButton->setEnabled(false);
+    }
+}
+
+void MainWindow::swapButtonPressed()
+{
+    QModelIndexList selectedRows = patchListView->selectionModel()->selectedRows();
+    if(selectedRows.size() != 2)
+        return;
+
+    int rowA = selectedRows.at(0).row();
+    int rowB = selectedRows.at(1).row();
+
+    QByteArray tmpArr = patchDataList.at(rowA);
+    patchDataList[rowA] = patchDataList.at(rowB);
+    patchDataList[rowB] = tmpArr;
+
+    if(rowA == currentPatchEdited)
+    {
+        currentPatchEdited = rowB;
+        ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>(centralWidget());
+        editWidget->setDataArray(& patchDataList[currentPatchEdited]);
+    }
+    else if(rowB == currentPatchEdited)
+    {
+        currentPatchEdited = rowA;
+        ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>(centralWidget());
+        editWidget->setDataArray(& patchDataList[currentPatchEdited]);
+    }
+    dirtyPatches.insert(rowA);
+    dirtyPatches.insert(rowB);
+    patchListModel->patchUpdated(rowA);
+    patchListModel->patchUpdated(rowB);
 }
 
 void MainWindow::portsInComboChanged(int rowIdx)

@@ -7,7 +7,7 @@ class PatchListModel : public QAbstractItemModel
 {
     Q_OBJECT
 public:
-    PatchListModel( const QList<QByteArray> &patchDataList, const QSet<int> &dirtyPatchesSet, QObject *parent = Q_NULLPTR);
+    PatchListModel( const QList<QByteArray> &patchDataList, const QSet<int> &dirtyPatches, QObject *parent = Q_NULLPTR);
 
     QVariant data(const QModelIndex &index, int role) const override;
 
@@ -23,7 +23,7 @@ public:
 
 private:
     const QList<QByteArray> &patchDataRef;
-    const QSet<int> &dirtyPatchesSet;
+    const QSet<int> &dirtyPatches;
 };
 
 #endif // MIDIPORTMODEL_H
