@@ -9,7 +9,7 @@ class DelayBandWidget : public EffectEditBaseWidget
 {
     Q_OBJECT
 public:
-    explicit DelayBandWidget( int offset, QWidget *parent = nullptr);
+    explicit DelayBandWidget( int offset, bool showLabels = true, QWidget *parent = nullptr);
 };
 
 #endif // DELAYBANDWIDGET_H

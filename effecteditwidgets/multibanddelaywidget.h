@@ -19,6 +19,10 @@ public:
         DelayTime7 = 0x0C,
         DelayTime8 = 0x0E,
 
+        EffectLevel = 0x10, //Two bytes
+        DirectLevel = 0x12, //Two bytes
+        DirectPan = 0x14, //Two bytes
+        WaveForm = 0x16,
         LowCutFilter1 = 0x1E
     };
     static const int BandLenght = 11;

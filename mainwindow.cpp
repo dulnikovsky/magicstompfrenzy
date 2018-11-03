@@ -21,6 +21,7 @@
 #include <QMessageBox>
 #include <QProgressDialog>
 #include <QSettings>
+#include <QDir>
 #include <QDebug>
 
 static const int sysExBulkHeaderLength = 8;
@@ -104,7 +105,7 @@ MainWindow::MainWindow(MidiPortModel *readableportsmodel, MidiPortModel *writabl
     setCentralWidget(editor);
 
 #ifdef QT_DEBUG
-    QSettings tmpsettings("/tmp/magicstompfrenzy.ini", QSettings::NativeFormat);
+    QSettings tmpsettings("/tmp/magicstompfrenzy.ini", QSettings::IniFormat);
     QByteArray arr;
     arr = tmpsettings.value("Patch0data").toByteArray();
     if(arr.size() == PatchTotalLength)
@@ -122,7 +123,7 @@ MainWindow::MainWindow(MidiPortModel *readableportsmodel, MidiPortModel *writabl
 MainWindow::~MainWindow()
 {
 #ifdef QT_DEBUG
-    QSettings tmpsettings("/tmp/magicstompfrenzy.ini", QSettings::NativeFormat);
+    QSettings tmpsettings("/tmp/magicstompfrenzy.ini", QSettings::IniFormat);
     tmpsettings.setValue( "Patch0data", patchDataList.at(0));
     tmpsettings.setValue( "Patch1data", patchDataList.at(1));
     tmpsettings.setValue( "Patch2data", patchDataList.at(2));
@@ -303,6 +304,8 @@ void MainWindow::sendPatch( int patchIdx, bool sendToTmpArea )
     reqArr->append(0xF7);
     midiOutQueue.enqueue( midiev);
 
+    qDebug() << "send Patch Common :" << reqArr->toHex(',');
+
     midiev = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));
     reqArr = midiev->sysExData();
     reqArr->append(QByteArray(reinterpret_cast<const char*>(&sysExBulkHeader[0]), sysExBulkHeaderLength));
@@ -315,6 +318,8 @@ void MainWindow::sendPatch( int patchIdx, bool sendToTmpArea )
     reqArr->append( calcChecksum( reqArr->constBegin()+ sysExBulkHeaderLength, reqArr->length()-sysExBulkHeaderLength));
     reqArr->append(0xF7);
     midiOutQueue.enqueue( midiev);
+
+    qDebug() << "send Patch Effect :" << reqArr->toHex(',');
 
     midiev = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));
     reqArr = midiev->sysExData();
@@ -369,14 +374,13 @@ void MainWindow::parameterChanged(int offset, int length)
 {
     qDebug("parameterChanged(offset=%d,len=%d)", offset, length);
 
+    ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>(centralWidget());
+    if(editWidget == nullptr)
+        return;
+
     if( offset == PatchName) // Name needs to be sent as single chars
     {
         length = 1;
-        patchListModel->patchUpdated(currentPatchEdited);
-    }
-
-    if( offset == PatchType)
-    {
         patchListModel->patchUpdated(currentPatchEdited);
     }
 
@@ -394,21 +398,40 @@ void MainWindow::parameterChanged(int offset, int length)
         reqArr->append(0x01);
         reqArr->append(offset - PatchCommonLength);
     }
-    ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>(centralWidget());
+
     for(int i= 0; i< length; i++)
     {
         reqArr->append( *(editWidget->DataArray()->constData()+offset+i));
     }
     reqArr->append(0xF7);
-    emit sendMidiEvent( midiev);
-
     qDebug() << reqArr->toHex(',');
+    emit sendMidiEvent( midiev);
 
     if( offset == PatchName) // Name needs to be sent as single chars
     {
         for(int i= PatchName + 1; i < PatchNameLast; i++)
         {
             parameterChanged( i, 1);
+        }
+    }
+
+    if( offset == PatchType)
+    {
+        QSettings effectiniSettings(QDir::currentPath()+"/effects.ini", QSettings::IniFormat);
+        QByteArray initArr;
+        int patchId = static_cast<EffectTypeId>( *(editWidget->DataArray()->constData()+PatchType+1));
+        QString key = "Type" + (QString::number(patchId, 16).rightJustified(2, '0').toUpper());
+        initArr = effectiniSettings.value( key).toByteArray();
+        if(initArr.size() == PatchTotalLength && initArr.at(1) == patchId)
+        {
+            QByteArray oldPatchName = patchDataList[currentPatchEdited].mid(PatchName, PatchNameLength);
+            patchDataList[currentPatchEdited] = initArr;
+            patchDataList[currentPatchEdited].replace(PatchName, PatchNameLength, oldPatchName);
+            editWidget->setDataArray(& patchDataList[currentPatchEdited]);
+        }
+        else
+        {
+            QMessageBox::critical(this, tr("Error"), tr("Error loading effect init data. Check if effects.ini is present and if is correct"));
         }
     }
     if( ! dirtyPatchesIndexSet.contains(currentPatchEdited ))
