@@ -75,6 +75,14 @@ MultibandDelayWidget::MultibandDelayWidget(EffectTypeId effectid, QWidget *paren
             gridlyt->addWidget( new DelayBandWidget( LowCutFilter1 + BandLenght*i, 0.2, 2920.0, i%4), i+1, 1);
         }
     }
+    else if(effectid == EightMultiTapModDelay )
+    {
+        for(int i=0; i<8; i++)
+        {
+            gridlyt->addWidget( new QLabel(tr("Tap ")+ QString::number(i%8+1)), i+1, 0);
+            gridlyt->addWidget( new DelayBandWidget( LowCutFilter1 + BandLenght*i, 0.2, 5890.0, i%8), i+1, 1);
+        }
+    }
     else if(effectid == TwoBandLong4ShortModDelay )
     {
         gridlyt->addWidget( new QLabel( tr("Long Band 1:Tap 1")), 1, 0);
