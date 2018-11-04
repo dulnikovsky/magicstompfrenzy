@@ -1,8 +1,10 @@
 #include "midiinthread.h"
 
 #include "midievent.h"
-#include <alsa/asoundlib.h>
 
+#ifdef Q_OS_LINUX
+#include <alsa/asoundlib.h>
+#endif
 #include <QApplication>
 #include <QDebug>
 
@@ -15,6 +17,7 @@ MidiInThread::MidiInThread(snd_seq_t *handle, QObject *parent)
 
 void MidiInThread::run()
 {
+#ifdef Q_OS_LINUX
     snd_seq_event_t *ev;
     MidiEvent *midisysexevent=nullptr;
     while (snd_seq_event_input(handle, &ev) >= 0)
@@ -57,4 +60,5 @@ void MidiInThread::run()
 
         snd_seq_free_event(ev);
     }
+#endif
 }

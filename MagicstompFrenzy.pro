@@ -74,7 +74,16 @@ HEADERS  += mainwindow.h \
     patchcopydialog.h \
     patchlistcombomodel.h
 
+linux {
 LIBS += -lasound
+}
+
+macx {
+
+LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit -framework CoreFoundation -framework CoreMIDI
+
+#ICON = rvplayer3.icns
+}
 
 copydata.commands = $(COPY_DIR) $$PWD/effects.ini $$OUT_PWD
 first.depends = $(first) copydata

@@ -2,7 +2,9 @@
 
 #include "midievent.h"
 
+#ifdef Q_OS_LINUX
 #include <alsa/asoundlib.h>
+#endif
 
 #include <QApplication>
 #include <QThread>
@@ -10,14 +12,9 @@
 
 #include <QCoreApplication>
 
-MidiSender::MidiSender(snd_seq_t *handle, int outport, QObject *parent)
-        :QObject(parent), handle(handle), outport(outport)
-{
-
-}
-
 bool MidiSender::event(QEvent *e)
 {
+#ifdef Q_OS_LINUX
     MidiEvent *me = dynamic_cast<MidiEvent *>(e);
     if(me && me->type()==static_cast<QEvent::Type>(MidiEvent::SysEx))
     {
@@ -46,6 +43,6 @@ bool MidiSender::event(QEvent *e)
         }
         me->accept();
     }
-
+#endif
     return QObject::event(e);
 }

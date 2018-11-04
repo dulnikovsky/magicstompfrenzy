@@ -3,14 +3,18 @@
 
 #include <QObject>
 
+#ifdef Q_OS_LINUX
 typedef struct _snd_seq snd_seq_t;
+#endif
 
 class MidiSender : public QObject
 {
     Q_OBJECT
 public:
-    explicit MidiSender(snd_seq_t *handle, int outport, QObject *parent = nullptr);
-
+#ifdef Q_OS_LINUX
+    explicit MidiSender(snd_seq_t *handle, int outport, QObject *parent = nullptr) : QObject(parent), handle(handle), outport(outport) {}
+#endif
+    explicit MidiSender( int outport, QObject *parent = nullptr) :QObject(parent), outport(outport) {}
     bool event(QEvent *);
 
 signals:
@@ -18,7 +22,9 @@ signals:
 public slots:
 
 private:
+#ifdef Q_OS_LINUX
     snd_seq_t *handle;
+#endif
     int outport;
 
 };

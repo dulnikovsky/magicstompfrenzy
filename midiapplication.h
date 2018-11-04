@@ -5,7 +5,16 @@
 
 #ifdef Q_OS_LINUX
 typedef struct _snd_seq snd_seq_t;
+typedef snd_seq_t* MidiClentHandle;
 #endif
+
+#ifdef Q_OS_MACOS
+typedef unsigned int UInt32;
+typedef UInt32 MIDIObjectRef;
+typedef MIDIObjectRef MIDIObjectRef;
+typedef MIDIObjectRef MidiClentHandle;
+#endif
+
 
 class MidiInThread;
 class MidiSender;
@@ -43,12 +52,13 @@ private:
     MidiPortModel *readablePortsModel;
     MidiPortModel *writablePortsModel;
 
-#ifdef Q_OS_LINUX
-    snd_seq_t *handle;
-    snd_seq_t * midiSystemInit();
-#endif
-    int inport;
-    int outport;
+    MidiClentHandle handle;
+
+    MidiClentHandle midiSystemInit();
+
+    unsigned int inPort;
+    unsigned int outPort;
+    unsigned int outDest;
 };
 
 #endif // MIDIAPPLICATION_H

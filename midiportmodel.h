@@ -15,8 +15,12 @@ public:
     enum UserRoles{ ClientIdRole = Qt::UserRole, PortIdRole};
     enum Direction{ ReadablePorts, WritablePorts };
 
-    MidiPortModel(snd_seq_t *handle, Direction direction = ReadablePorts, QObject *parent = Q_NULLPTR);
-
+#ifdef Q_OS_LINUX
+    MidiPortModel(snd_seq_t *handle, Direction direction = ReadablePorts, QObject *parent = Q_NULLPTR) : QAbstractItemModel(parent), direction(d) {}
+#endif
+#ifdef Q_OS_MACOS
+    MidiPortModel( Direction d = ReadablePorts, QObject *parent = Q_NULLPTR) : QAbstractItemModel(parent), direction(d) {}
+#endif
     QVariant data(const QModelIndex &index, int role) const override;
 
     int rowCount(const QModelIndex &parent) const override;
@@ -34,11 +38,16 @@ private:
 #endif
     Direction direction;
 
+#ifdef Q_OS_LINUX
     typedef struct
     {
         int clientId;
         int portId;
     }ClientPortId;
+#endif
+#ifdef Q_OS_MAC
+    typedef unsigned int ClientPortId;
+#endif
 
     QList<QPair<ClientPortId, QString>> portList;
 };
