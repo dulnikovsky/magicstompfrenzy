@@ -44,7 +44,9 @@ SOURCES += main.cpp\
     effecteditwidgets/ampmultidelaywidget.cpp \
     effecteditwidgets/ampmultireverbwidget.cpp \
     effecteditwidgets/delaybandwidget.cpp \
-    effecteditwidgets/multibanddelaywidget.cpp
+    effecteditwidgets/multibanddelaywidget.cpp \
+    patchcopydialog.cpp \
+    patchlistcombomodel.cpp
 
 HEADERS  += mainwindow.h \
     midiportmodel.h \
@@ -68,7 +70,9 @@ HEADERS  += mainwindow.h \
     effecteditwidgets/ampmultidelaywidget.h \
     effecteditwidgets/ampmultireverbwidget.h \
     effecteditwidgets/delaybandwidget.h \
-    effecteditwidgets/multibanddelaywidget.h
+    effecteditwidgets/multibanddelaywidget.h \
+    patchcopydialog.h \
+    patchlistcombomodel.h
 
 LIBS += -lasound
 

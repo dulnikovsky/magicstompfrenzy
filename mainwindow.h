@@ -55,6 +55,7 @@ private slots:
     void putGuiToTransmissionState( bool isTransmitting, bool sending);
 
     void swapButtonPressed();
+    void copyButtonPressed();
 private:
     int currentPatchTransmitted;
     int currentPatchEdited;
@@ -81,8 +82,6 @@ private:
 
     QPushButton *swapButton;
     QPushButton *copyButton;
-    QPushButton *pasteButton;
-    QPushButton *resetButton;
 
     QVBoxLayout *patchListLayout;
 

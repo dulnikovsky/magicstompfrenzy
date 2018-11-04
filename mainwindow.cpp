@@ -4,6 +4,7 @@
 #include "midievent.h"
 #include "patcheditorwidget.h"
 #include "progresswidget.h"
+#include "patchcopydialog.h"
 
 #include "magicstomp.h"
 
@@ -97,10 +98,7 @@ MainWindow::MainWindow(MidiPortModel *readableportsmodel, MidiPortModel *writabl
     swapButton->setEnabled(false);
     listEditButtonsLayout->addWidget(copyButton = new QPushButton(tr("Copy")));
     copyButton->setEnabled(false);
-    listEditButtonsLayout->addWidget(pasteButton = new QPushButton(tr("Paste")));
-    pasteButton->setEnabled(false);
-    listEditButtonsLayout->addWidget(resetButton = new QPushButton(tr("Reset")));
-    resetButton->setEnabled(false);
+    connect(copyButton, SIGNAL(pressed()), this, SLOT(copyButtonPressed()));
 
     patchListLayout->addLayout( listEditButtonsLayout);
 
@@ -282,7 +280,6 @@ void MainWindow::sendAll()
     reqArr->append( calcChecksum( reqArr->constBegin()+ sysExBulkHeaderLength, reqArr->length()-sysExBulkHeaderLength));
     reqArr->append(0xF7);
     midiOutQueue.enqueue( midiev);
-
     midiOutTimer->start();
 }
 
@@ -347,6 +344,7 @@ void MainWindow::sendPatch( int patchIdx, bool sendToTmpArea )
     reqArr->append( calcChecksum( reqArr->constBegin()+ sysExBulkHeaderLength, reqArr->length()-sysExBulkHeaderLength));
     reqArr->append(0xF7);
     midiOutQueue.enqueue( midiev);
+    midiOutTimer->start();
 }
 
 void MainWindow::timeout()
@@ -510,24 +508,19 @@ void MainWindow::patchListDoubleClicked(const QModelIndex &idx)
 
 void MainWindow::patchListSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
+    Q_UNUSED(selected)
+    Q_UNUSED(deselected)
+
     QModelIndexList selectedRows = patchListView->selectionModel()->selectedRows();
     if( selectedRows.size() == 1)
     {
         copyButton->setEnabled(true);
-        if( patchToCopy != -1)
-            pasteButton->setEnabled(true);
-
-//        int row = selectedRows.at(0).row();
-//        if(backupPatchesMap.contains(row) && backupPatchesMap[row] != patchDataList.at(row) )
-//            resetButton->setEnabled(true);
-//        else
-//            resetButton->setEnabled(false);
+        patchToCopy =selectedRows.at(0).row();
     }
     else
     {
         copyButton->setEnabled(false);
-        pasteButton->setEnabled(false);
-        resetButton->setEnabled(false);
+        patchToCopy = -1;
     }
     if( selectedRows.size() == 2)
     {
@@ -568,6 +561,23 @@ void MainWindow::swapButtonPressed()
     dirtyPatches.insert(rowB);
     patchListModel->patchUpdated(rowA);
     patchListModel->patchUpdated(rowB);
+}
+
+void MainWindow::copyButtonPressed()
+{
+    PatchCopyDialog copydialog( patchListModel, patchToCopy, this);
+    if( copydialog.exec() == QDialog::Accepted)
+    {
+        int targetRow = copydialog.targetPatchIndex();
+        patchDataList[targetRow] = patchDataList.at(patchToCopy);
+        patchListModel->patchUpdated(targetRow);
+        if(targetRow == currentPatchEdited)
+        {
+            ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>(centralWidget());
+            editWidget->setDataArray(& patchDataList[targetRow]);
+            sendPatch(targetRow);
+        }
+    }
 }
 
 void MainWindow::portsInComboChanged(int rowIdx)
