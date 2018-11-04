@@ -5,7 +5,7 @@
 
 #ifdef Q_OS_LINUX
 typedef struct _snd_seq snd_seq_t;
-typedef snd_seq_t* MidiClentHandle;
+typedef snd_seq_t* MidiClientHandle;
 #endif
 
 #ifdef Q_OS_MACOS
@@ -52,9 +52,9 @@ private:
     MidiPortModel *readablePortsModel;
     MidiPortModel *writablePortsModel;
 
-    MidiClentHandle handle;
+    MidiClientHandle handle;
 
-    MidiClentHandle midiSystemInit();
+    MidiClientHandle midiSystemInit();
 
     unsigned int inPort;
     unsigned int outPort;

@@ -16,7 +16,7 @@ public:
     enum Direction{ ReadablePorts, WritablePorts };
 
 #ifdef Q_OS_LINUX
-    MidiPortModel(snd_seq_t *handle, Direction direction = ReadablePorts, QObject *parent = Q_NULLPTR) : QAbstractItemModel(parent), direction(d) {}
+    MidiPortModel(snd_seq_t *handle, Direction d = ReadablePorts, QObject *parent = Q_NULLPTR) : QAbstractItemModel(parent), handle(handle), direction(d) {}
 #endif
 #ifdef Q_OS_MACOS
     MidiPortModel( Direction d = ReadablePorts, QObject *parent = Q_NULLPTR) : QAbstractItemModel(parent), direction(d) {}

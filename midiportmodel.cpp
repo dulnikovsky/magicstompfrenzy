@@ -24,7 +24,9 @@ QVariant MidiPortModel::data(const QModelIndex &index, int role) const
 #ifdef Q_OS_LINUX
         return portList.at(index.row()).first.portId;
 #endif
+#ifdef Q_OS_MACOS
         return portList.at(index.row()).first;
+#endif
     }
     return QVariant();
 }
