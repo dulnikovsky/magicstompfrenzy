@@ -7,7 +7,7 @@
 #include <QComboBox>
 #include <QSpinBox>
 
-DelayBandWidget::DelayBandWidget(int offset,bool showLabels, QWidget *parent) :
+DelayBandWidget::DelayBandWidget(int offset, double minTime, double maxTime, bool tapOnly, bool showLabels, QWidget *parent) :
     EffectEditBaseWidget(parent)
 {
     this->setProperty( ArrayDataEditWidget::dataOffsetProperty, offset);
@@ -15,26 +15,34 @@ DelayBandWidget::DelayBandWidget(int offset,bool showLabels, QWidget *parent) :
     int col = 0;
 
     QDoubleSpinBox *dspinBox;
+    QLabel *label;
     QGridLayout *mainlyt = new QGridLayout();
 
-    if(showLabels) mainlyt->addWidget(new QLabel(tr("Time")), 0, col);
-    dspinBox = MultibandDelayWidget::createTimeSpinBox(
-                ((offset - MultibandDelayWidget::LowCutFilter1)/MultibandDelayWidget::BandLenght)*2 - offset, 0.0, 696.0);
+    if(showLabels) mainlyt->addWidget( label = new QLabel(tr("Time")), 0, col);
+    label->setEnabled( ! tapOnly);
+    dspinBox = createTimeSpinBox(((offset - MultibandDelayWidget::LowCutFilter1)/MultibandDelayWidget::BandLenght)*2 - offset, minTime, maxTime);
     mainlyt->addWidget(dspinBox, 1, col++);
+    dspinBox->setEnabled( ! tapOnly);
 
-    if(showLabels) mainlyt->addWidget(new QLabel(tr("Low Cut Filter")), 0, col);
+    if(showLabels) mainlyt->addWidget( label = new QLabel(tr("Low Cut Filter")), 0, col);
+    label->setEnabled( ! tapOnly);
     dspinBox = createStandard10DblSpinBox(0);
     mainlyt->addWidget(dspinBox, 1, col++);
+    dspinBox->setEnabled( ! tapOnly);
 
-    if(showLabels) mainlyt->addWidget(new QLabel(tr("High Cut Filter")), 0, col);
+    if(showLabels) mainlyt->addWidget( label = new QLabel(tr("High Cut Filter")), 0, col);
+    label->setEnabled( ! tapOnly);
     dspinBox = createStandard10DblSpinBox(1);
     mainlyt->addWidget(dspinBox, 1, col++);
+    dspinBox->setEnabled( ! tapOnly);
 
-    if(showLabels) mainlyt->addWidget(new QLabel(tr("Feedback")), 0, col);
+    if(showLabels) mainlyt->addWidget( label = new QLabel(tr("Feedback")), 0, col);
+    label->setEnabled( ! tapOnly);
     dspinBox = createStandard10DblSpinBox(2);
     mainlyt->addWidget(dspinBox, 1, col++);
+    dspinBox->setEnabled( ! tapOnly);
 
-    if(showLabels) mainlyt->addWidget(new QLabel(tr("Wave")), 0, col);
+    if(showLabels) mainlyt->addWidget( new QLabel(tr("Wave")), 0, col);
     QComboBox *comboBox = new QComboBox();
     comboBox->setCurrentIndex(-1);
     comboBox->setProperty( ArrayDataEditWidget::valuePropertyName, QStringLiteral("currentIndex"));
@@ -88,4 +96,23 @@ DelayBandWidget::DelayBandWidget(int offset,bool showLabels, QWidget *parent) :
     mainlyt->addWidget(spinBox, 1, col++);
 
     setLayout(mainlyt);
+}
+
+QDoubleSpinBox * DelayBandWidget::createTimeSpinBox(int offset, double minTime, double maxTime)
+{
+    QDoubleSpinBox *dspinBox = new QDoubleSpinBox();
+    dspinBox->setSuffix(QStringLiteral(" ms"));
+    dspinBox->setMinimum(minTime);
+    dspinBox->setMaximum(maxTime);
+    dspinBox->setSingleStep(0.1);
+    dspinBox->setDecimals(1);
+    dspinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, offset);
+    dspinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 2);
+    if(maxTime > 5000.0)
+        dspinBox->setProperty( ArrayDataEditWidget::convertMethodProperty, QStringLiteral("scaleAndAdd(0.5, 0.5)"));
+    else if(maxTime > 2000.0)
+        dspinBox->setProperty( ArrayDataEditWidget::convertMethodProperty, QStringLiteral("scaleAndAdd(0.2, 0.2)"));
+    else
+        dspinBox->setProperty( ArrayDataEditWidget::convertMethodProperty, QStringLiteral("scaleAndAdd(0.1, 0.1)"));
+    return dspinBox;
 }

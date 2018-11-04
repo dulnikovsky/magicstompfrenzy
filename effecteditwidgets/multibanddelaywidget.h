@@ -28,8 +28,6 @@ public:
     static const int BandLenght = 11;
 
     explicit MultibandDelayWidget( EffectTypeId id, QWidget *parent = nullptr);
-
-    static QDoubleSpinBox * createTimeSpinBox(int offset, double minTime, double maxTime);
 };
 
 #endif // NOISEGATEWIDGET_H

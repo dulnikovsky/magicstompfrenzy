@@ -42,6 +42,11 @@ void PatchEditorWidget::setDataArray(QByteArray *arr)
 
     case EightBandParallelDelay:
     case EightBandSeriesDelay:
+    case FourBand2TapModDelay:
+    case TwoBand4TapModDelay:
+    case EightMultiTapModDelay:
+    case TwoBandLong4ShortModDelay:
+    case ShortMediumLongModDelay:
         mainLayout->addWidget( effectEditWidget = new MultibandDelayWidget(patchType), 8);
         break;
     case Compressor:

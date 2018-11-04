@@ -577,6 +577,7 @@ void MainWindow::copyButtonPressed()
             editWidget->setDataArray(& patchDataList[targetRow]);
             sendPatch(targetRow);
         }
+        dirtyPatches.insert(targetRow);
     }
 }
 

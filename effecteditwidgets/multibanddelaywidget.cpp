@@ -6,7 +6,7 @@
 #include <QLabel>
 #include <QSpinBox>
 
-MultibandDelayWidget::MultibandDelayWidget(EffectTypeId id, QWidget *parent) :
+MultibandDelayWidget::MultibandDelayWidget(EffectTypeId effectid, QWidget *parent) :
     EffectEditBaseWidget(parent)
 {
     QDoubleSpinBox *dspinBox;
@@ -51,10 +51,67 @@ MultibandDelayWidget::MultibandDelayWidget(EffectTypeId id, QWidget *parent) :
     QGridLayout *gridlyt = new QGridLayout();
     gridlyt->addLayout(headerRowLayout, 0, 1, 1, 6);
 
-    for(int i=0; i<8; i++)
+    if(effectid == EightBandParallelDelay || effectid == EightBandSeriesDelay)
     {
-        gridlyt->addWidget( new QLabel(tr("Band ")+ QString::number(i+1)), i+1, 0);
-        gridlyt->addWidget( new DelayBandWidget( LowCutFilter1 + BandLenght*i), i+1, 1);
+        for(int i=0; i<8; i++)
+        {
+            gridlyt->addWidget( new QLabel(tr("Band ")+ QString::number(i+1)), i+1, 0);
+            gridlyt->addWidget( new DelayBandWidget( LowCutFilter1 + BandLenght*i, 0.1, 696.0, false), i+1, 1);
+        }
+    }
+    else if(effectid == FourBand2TapModDelay )
+    {
+        for(int i=0; i<8; i++)
+        {
+            gridlyt->addWidget( new QLabel(tr("Band ")+ QString::number(i/2+1) + tr(":Tap ")+ QString::number(i%2+1)), i+1, 0);
+            gridlyt->addWidget( new DelayBandWidget( LowCutFilter1 + BandLenght*i, 0.1, 1430.0, i%2), i+1, 1);
+        }
+    }
+    else if(effectid == TwoBand4TapModDelay )
+    {
+        for(int i=0; i<8; i++)
+        {
+            gridlyt->addWidget( new QLabel(tr("Band ")+ QString::number(i/4+1) + tr(":Tap ")+ QString::number(i%4+1)), i+1, 0);
+            gridlyt->addWidget( new DelayBandWidget( LowCutFilter1 + BandLenght*i, 0.2, 2920.0, i%4), i+1, 1);
+        }
+    }
+    else if(effectid == TwoBandLong4ShortModDelay )
+    {
+        gridlyt->addWidget( new QLabel( tr("Long Band 1:Tap 1")), 1, 0);
+        gridlyt->addWidget( new DelayBandWidget( LowCutFilter1 + BandLenght*0, 0.1, 1430.0, false), 1, 1);
+
+        gridlyt->addWidget( new QLabel( tr("Long Band 1:Tap 2")), 2, 0);
+        gridlyt->addWidget( new DelayBandWidget( LowCutFilter1 + BandLenght*1, 0.1, 1430.0, true), 2, 1);
+
+        gridlyt->addWidget( new QLabel( tr("Long Band 2:Tap 1")), 3, 0);
+        gridlyt->addWidget( new DelayBandWidget( LowCutFilter1 + BandLenght*2, 0.1, 1430.0, false), 3, 1);
+
+        gridlyt->addWidget( new QLabel( tr("Long Band 2:Tap 2")), 4, 0);
+        gridlyt->addWidget( new DelayBandWidget( LowCutFilter1 + BandLenght*3, 0.1, 1430.0, true), 4, 1);
+        for(int i=4; i<8; i++)
+        {
+            gridlyt->addWidget( new QLabel( tr("Short Band 2:Tap 1")+ QString::number(i+1)), i+1, 0);
+            gridlyt->addWidget( new DelayBandWidget( LowCutFilter1 + BandLenght*i, 0.1, 696.0, false), i+1, 1);
+        }
+    }
+    else if(effectid == ShortMediumLongModDelay )
+    {
+        gridlyt->addWidget( new QLabel( tr("Short Band 1:Tap 1")), 1, 0);
+        gridlyt->addWidget( new DelayBandWidget( LowCutFilter1 + BandLenght*0, 0.1, 696.0, false), 1, 1);
+
+        gridlyt->addWidget( new QLabel( tr("Med. Band 2:Tap 1")), 2, 0);
+        gridlyt->addWidget( new DelayBandWidget( LowCutFilter1 + BandLenght*1, 0.2, 2180.0, false), 2, 1);
+
+        gridlyt->addWidget( new QLabel( tr("Med. Band 2:Tap 2")), 3, 0);
+        gridlyt->addWidget( new DelayBandWidget( LowCutFilter1 + BandLenght*2, 0.2, 2180.0, true), 3, 1);
+
+        gridlyt->addWidget( new QLabel( tr("Med. Band 2:Tap 3")), 4, 0);
+        gridlyt->addWidget( new DelayBandWidget( LowCutFilter1 + BandLenght*3, 0.2, 2180.0, true), 4, 1);
+        for(int i=4; i<8; i++)
+        {
+            gridlyt->addWidget( new QLabel(tr("Long Band ")+ QString::number(i/4+1) + tr(":Tap ")+ QString::number(i%4+1)), i+1, 0);
+            gridlyt->addWidget( new DelayBandWidget( LowCutFilter1 + BandLenght*i, 0.1, 2920.0, false), i+1, 1);
+        }
     }
 
     QVBoxLayout *mainLayout = new QVBoxLayout();
@@ -63,16 +120,4 @@ MultibandDelayWidget::MultibandDelayWidget(EffectTypeId id, QWidget *parent) :
     setLayout(mainLayout);
 }
 
-QDoubleSpinBox * MultibandDelayWidget::createTimeSpinBox(int offset, double minTime, double maxTime)
-{
-    QDoubleSpinBox *dspinBox = new QDoubleSpinBox();
-    dspinBox->setSuffix(QStringLiteral(" ms"));
-    dspinBox->setMinimum(minTime);
-    dspinBox->setMaximum(maxTime);
-    dspinBox->setSingleStep(0.1);
-    dspinBox->setDecimals(1);
-    dspinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, offset);
-    dspinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 2);
-    dspinBox->setProperty( ArrayDataEditWidget::convertMethodProperty, QStringLiteral("scaleAndAdd(0.1, 0.1)"));
-    return dspinBox;
-}
+
