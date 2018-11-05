@@ -36,6 +36,7 @@ typedef MidiPortIdAlsa MidiClientPortId;
 
 #ifdef Q_OS_MACOS
 typedef quint32 MidiClientHandle;
+typedef quint32 MidiClientPortId;
 #endif
 
 

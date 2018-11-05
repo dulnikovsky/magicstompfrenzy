@@ -24,7 +24,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(MidiPortModel *readableportsmodel, MidiPortModel *writableportsmodel, QWidget *parent = 0);
+    MainWindow( MidiPortModel *readableportsmodel, MidiPortModel *writableportsmodel, QWidget *parent = Q_NULLPTR);
 
 public slots:
     void midiEvent(MidiEvent *event);

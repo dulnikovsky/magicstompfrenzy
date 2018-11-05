@@ -12,32 +12,65 @@
 #include "midisender.h"
 #include "midiportmodel.h"
 
+#include <QtDebug>
+
 #ifdef Q_OS_MAC
 void MIDIEngineNotifyProc(const MIDINotification *message, void *refCon)
 {
     printf("MIDI Notify, messageId=%d,", message->messageID);
 }
 
-void MIDIEngineReadProc(const MIDIPacketList *pktlist, void *arg,void *connRefCon)
+static MidiEvent *midievent = nullptr;
+void MIDIEngineReadProc(const MIDIPacketList *pktlist, void *arg, void *connRefCon)
 {
-    /*std::map<MIDIEvent, MIDIEventCallback> *MIDIEventCallackMap = static_cast<std::map<MIDIEvent, MIDIEventCallback> *>(arg);
-    MIDIPacket *packet = (MIDIPacket *)pktlist->packet;
+    const MIDIPacket *packet = pktlist->packet;
     for (unsigned int i=0; i < pktlist->numPackets; i++)
     {
-        MIDIEvent mevent;
-        mevent.status=packet->data[0];
-        mevent.data1=packet->data[1];
-        mevent.data2=packet->data[2];
+        //quint32 port = ev->source.port;
+        //port |= static_cast<quint32>(ev->source.client) << 8;
+       // midisysexevent->setPort(port);
 
-        std::map<MIDIEvent, MIDIEventCallback>::iterator it;
+        if( midievent != nullptr)
+        {
+            QByteArray *data = midievent->sysExData();
+            data->append( reinterpret_cast< const char *>( & (packet->data[0])), static_cast<int>( packet->length) );
+            if( static_cast< unsigned char>( packet->data[packet->length-1]) != 0xF7 )
+            {
+                continue;
+            }
+        }
 
-        it=MIDIEventCallackMap->find(mevent);
+        if( packet->data[0] == 0xFE)
+            continue;
 
-        if(it != MIDIEventCallackMap->end())
-            (*it).second(mevent);
 
-        fprintf(stderr,"MIDI Read, Channel=%d, Command=%X, data1=%d, data2=%d\n", (mevent.status & 0x0F) +1 , mevent.status >> 4, mevent.data1, mevent.data2);
-    }*/
+        if( packet->data[0] == 0xF0 )
+        {
+            Q_ASSERT( midievent == nullptr);
+            midievent = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));
+            QByteArray *data = midievent->sysExData();
+            data->append( reinterpret_cast< const char *>( & (packet->data[0])), static_cast<int>( packet->length) );
+            if( static_cast< unsigned char>( packet->data[packet->length-1]) != 0xF7 )
+            {
+                continue;
+            }
+        }
+        else if(midievent == nullptr)
+        {
+            midievent = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::Common));
+        }
+        else
+        {
+             Q_ASSERT( midievent != nullptr);
+        }
+
+        if( midievent->type() == static_cast<QEvent::Type>(MidiEvent::SysEx))
+            qDebug() << midievent->sysExData()->toHex(',');
+        QApplication::postEvent( static_cast< QObject *>(arg), midievent);
+        midievent = nullptr;
+
+        //fprintf(stderr,"MIDI Read, Channel=%d, Command=%X, data1=%d, data2=%d\n", (mevent.status & 0x0F) +1 , mevent.status >> 4, mevent.data1, mevent.data2);
+    }
 }
 
 MIDISysexSendRequest sysexReq;
@@ -70,8 +103,8 @@ MidiApplication::MidiApplication(int &argc, char **argv)
     midiOutThread->start();
 #endif
 #ifdef Q_OS_MACOS
-    MIDIInputPortCreate(handle, CFSTR("In Port"), MIDIEngineReadProc, nullptr, &inPort);
-    MIDIOutputPortCreate(handle, CFSTR("Out Port"),  &outPort);
+    MIDIInputPortCreate(handle, CFSTR("In Port"), MIDIEngineReadProc, this, &thisInPort);
+    MIDIOutputPortCreate(handle, CFSTR("Out Port"),  &thisOutPort);
 #endif
 
     readablePortsModel = new MidiPortModel(handle, MidiPortModel::ReadablePorts, this);
@@ -81,7 +114,7 @@ MidiApplication::MidiApplication(int &argc, char **argv)
 
     connect(this, SIGNAL(aboutToQuit()), this, SLOT(isQuitting()));
 
-#if defined(QT_DEBUG) || defined(Q_OS_LINUX)
+#if defined(QT_DEBUG) && defined(Q_OS_LINUX)
     if(argc > 2)
     {
         bool okclient, okport;
@@ -164,7 +197,7 @@ bool MidiApplication::connectToReadablePort( MidiClientPortId mcpId)
     return snd_seq_subscribe_port(handle, subs);
 #endif
 #ifdef Q_OS_MACOS
-    return MIDIPortConnectSource(inPort, portId, nullptr);
+    return MIDIPortConnectSource(thisInPort, mcpId, nullptr);
 #endif
 }
 
@@ -185,7 +218,7 @@ bool MidiApplication::connectToWritablePort( MidiClientPortId mcpId)
     return snd_seq_subscribe_port(handle, subs);
 #endif
 #ifdef Q_OS_MACOS
-    outDest = portId;
+    outDest = mcpId;
     return true;
     //return MIDIPortConnectSource(outPort, portId, nullptr);
 #endif
@@ -219,7 +252,7 @@ void MidiApplication::isQuitting()
     snd_seq_close(handle);
 #endif
 #ifdef Q_OS_MACOS
-    MIDIPortDispose(inPort);
-    MIDIPortDispose(outPort);
+    MIDIPortDispose(thisInPort);
+    MIDIPortDispose(thisOutPort);
 #endif
 }

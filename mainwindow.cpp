@@ -590,7 +590,7 @@ void MainWindow::portsInComboChanged(int rowIdx)
 void MainWindow::portsOutComboChanged(int rowIdx)
 {
     Q_UNUSED(rowIdx)
-    emit readableMidiPortSelected( qvariant_cast<MidiClientPortId>(portsOutCombo->currentData( MidiPortModel::ClientPortIdRole)));
+    emit writableMidiPortSelected( qvariant_cast<MidiClientPortId>(portsOutCombo->currentData( MidiPortModel::ClientPortIdRole)));
 }
 
 char MainWindow::calcChecksum(const char *data, int dataLength)

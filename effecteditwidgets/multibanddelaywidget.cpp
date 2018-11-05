@@ -49,6 +49,8 @@ MultibandDelayWidget::MultibandDelayWidget(EffectTypeId effectid, QWidget *paren
     headerRowLayout->setColumnStretch(4,8);
 
     QGridLayout *gridlyt = new QGridLayout();
+    gridlyt->setSpacing(0);
+    gridlyt->setContentsMargins(4,4,4,4);
     gridlyt->addLayout(headerRowLayout, 0, 1, 1, 6);
 
     if(effectid == EightBandParallelDelay || effectid == EightBandSeriesDelay)

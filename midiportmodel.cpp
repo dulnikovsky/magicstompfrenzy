@@ -64,6 +64,7 @@ void MidiPortModel::scan()
     }
 #endif
 #ifdef Q_OS_MAC
+    char charArr[255];
     if( direction == ReadablePorts)
     {
         unsigned long sourceCount = MIDIGetNumberOfSources();
@@ -72,12 +73,20 @@ void MidiPortModel::scan()
         for (unsigned int i = 0; i < sourceCount; ++i)
         {
             MIDIEndpointRef src = MIDIGetSource(i);
-            CFStringRef endpointName = nullptr;
-            MIDIObjectGetStringProperty(src, kMIDIPropertyModel, &endpointName);
-            char endpointNameC[255];
-            CFStringGetCString(endpointName, endpointNameC, 255, kCFStringEncodingUTF8);
-            portList.append(QPair<ClientPortId, QString>( src, endpointNameC));
-            qDebug(" source %d: %s %d\n", i, endpointNameC, src);
+            CFStringRef modelName = nullptr;
+            MIDIObjectGetStringProperty(src, kMIDIPropertyModel, &modelName);
+            CFStringGetCString(modelName, charArr, 255, kCFStringEncodingUTF8);
+
+            QString fullName(charArr);
+
+            CFStringRef name = nullptr;
+            MIDIObjectGetStringProperty(src, kMIDIPropertyName, &name);
+            CFStringGetCString(name, charArr, 255, kCFStringEncodingUTF8);
+
+            fullName.append(" " + QString(charArr));
+
+            portList.append(QPair<ClientPortId, QString>( src, fullName));
+            qDebug(" source %d: %s %d\n", i, charArr, src);
         }
     }
     else
@@ -87,12 +96,21 @@ void MidiPortModel::scan()
         for (unsigned int i = 0; i < destCount; ++i)
         {
             MIDIEndpointRef dest = MIDIGetDestination(i);
-            CFStringRef endpointName = nullptr;
-            MIDIObjectGetStringProperty(dest, kMIDIPropertyModel, &endpointName);
-            char endpointNameC[255];
-            CFStringGetCString(endpointName, endpointNameC, 255, kCFStringEncodingUTF8);
-            portList.append(QPair<ClientPortId, QString>( dest, endpointNameC));
-            qDebug(" destination %d: %s %d\n", i, endpointNameC, dest);
+            CFStringRef modelName = nullptr;
+            MIDIObjectGetStringProperty(dest, kMIDIPropertyModel, &modelName);
+
+            CFStringGetCString(modelName, charArr, 255, kCFStringEncodingUTF8);
+
+            QString fullName(charArr);
+
+            CFStringRef name = nullptr;
+            MIDIObjectGetStringProperty(dest, kMIDIPropertyName, &name);
+            CFStringGetCString(name, charArr, 255, kCFStringEncodingUTF8);
+
+            fullName.append(" " + QString(charArr));
+
+            portList.append(QPair<ClientPortId, QString>( dest, fullName));
+            qDebug(" destination %d: %s %d\n", i, charArr, dest);
         }
     }
 #endif
@@ -110,3 +128,4 @@ QModelIndex MidiPortModel::parent(const QModelIndex &child) const
     Q_UNUSED(child)
     return QModelIndex();
 }
+;
