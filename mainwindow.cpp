@@ -232,6 +232,7 @@ void MainWindow::requestPatch(int patchIndex)
     if(patchIndex >= numOfPatches || cancelOperation)
     {
         putGuiToTransmissionState(false, false);
+        patchListView->scrollTo(patchListView->model()->index( 0, 0));
         cancelOperation = false;
         return;
     }

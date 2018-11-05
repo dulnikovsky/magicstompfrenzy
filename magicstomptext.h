@@ -115,4 +115,19 @@ const QStringList GuitarCabTypeNameList =
     QStringLiteral("2x10"),
 };
 
+const QStringList BassPreampTypeNameList =
+{
+    QStringLiteral("Flat"),
+    QStringLiteral("Tube"),
+    QStringLiteral("Solid"),
+    QStringLiteral("R&B"),
+    QStringLiteral("Vintage"),
+    QStringLiteral("Modern"),
+    QStringLiteral("Classic"),
+    QStringLiteral("Heavy"),
+    QStringLiteral("Drive"),
+    QStringLiteral("Dist"),
+    QStringLiteral("Fuzz"),
+};
+
 #endif

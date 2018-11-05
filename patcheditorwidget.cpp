@@ -1,6 +1,5 @@
 #include "patcheditorwidget.h"
 #include "patchcommoneditorwidget.h"
-#include "effecteditwidgets/compressorwidget.h"
 
 #include "magicstomp.h"
 
@@ -10,6 +9,8 @@
 
 #include "effecteditwidgets/ampmultiwidget.h"
 #include "effecteditwidgets/multibanddelaywidget.h"
+#include "effecteditwidgets/compressorwidget.h"
+#include "effecteditwidgets/basspreamp.h"
 
 PatchEditorWidget::PatchEditorWidget( QWidget *parent)
     : ArrayDataEditWidget( parent),effectEditWidget(nullptr)
@@ -74,6 +75,9 @@ void PatchEditorWidget::setDataArray(QByteArray *arr)
         break;
     case AmpMultiTremolo:
         mainLayout->addWidget( effectEditWidget = new AmpMultiWidget(AmpMultiWidget::AmpTremolo), 8);
+        break;
+    case BassPreamp:
+        mainLayout->addWidget( effectEditWidget = new BassPreampWidget(), 8);
         break;
     default:
         mainLayout->addWidget(effectEditWidget = new QWidget());
