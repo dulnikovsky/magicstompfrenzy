@@ -14,8 +14,8 @@ int main(int argc, char *argv[])
     QObject::connect( &a, SIGNAL(midiEventReceived(MidiEvent *)), &w, SLOT(midiEvent(MidiEvent*)));
     QObject::connect( &w, SIGNAL(sendMidiEvent(MidiEvent*)), &a, SLOT(sendMidiEvent(MidiEvent*)));
 
-    QObject::connect( &w, SIGNAL(readableMidiPortSelected(int,int)), &a, SLOT(connectToReadablePort( int ,int )));
-    QObject::connect( &w, SIGNAL(writableMidiPortSelected(int,int)), &a, SLOT(connectToWritablePort( int ,int )));
+    QObject::connect( &w, SIGNAL(readableMidiPortSelected(MidiClientPortId)), &a, SLOT(connectToReadablePort( MidiClientPortId)));
+    QObject::connect( &w, SIGNAL(writableMidiPortSelected(MidiClientPortId)), &a, SLOT(connectToWritablePort( MidiClientPortId)));
 
     w.show();
 

@@ -13,20 +13,11 @@ QVariant MidiPortModel::data(const QModelIndex &index, int role) const
     {
         return portList.at(index.row()).second;
     }
-#ifdef Q_OS_LINUX
-    else if(role == ClientIdRole)
+    else if(role == ClientPortIdRole)
     {
-        return portList.at(index.row()).first.clientId;
-    }
-#endif
-    else if(role == PortIdRole)
-    {
-#ifdef Q_OS_LINUX
-        return portList.at(index.row()).first.portId;
-#endif
-#ifdef Q_OS_MACOS
-        return portList.at(index.row()).first;
-#endif
+        QVariant valVariant;
+        valVariant.setValue(portList.at(index.row()).first);
+        return valVariant;
     }
     return QVariant();
 }
@@ -65,11 +56,8 @@ void MidiPortModel::scan()
             if( ((cap & (SND_SEQ_PORT_CAP_READ|SND_SEQ_PORT_CAP_SUBS_READ)) && direction==ReadablePorts) ||
                     ((cap & (SND_SEQ_PORT_CAP_WRITE|SND_SEQ_PORT_CAP_SUBS_WRITE)) && direction==WritablePorts) )
             {
-                ClientPortId cpid;
-                cpid.clientId = clientId;
-                cpid.portId = snd_seq_port_info_get_port(pinfo);
-                portList.append(QPair<ClientPortId, QString>( cpid, snd_seq_port_info_get_name(pinfo)));
-                qDebug("\tPort  %3d '%-16s'", cpid.portId, snd_seq_port_info_get_name(pinfo));
+                MidiClientPortId mcpId( clientId, snd_seq_port_info_get_port(pinfo));
+                portList.append(QPair<MidiClientPortId, QString>( mcpId, snd_seq_port_info_get_name(pinfo)));
             }
             count++;
         }

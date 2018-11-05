@@ -583,20 +583,14 @@ void MainWindow::copyButtonPressed()
 
 void MainWindow::portsInComboChanged(int rowIdx)
 {
-    // TODO:It should be possible to subcribe ( connect ) to multiple ports.
-
-    emit readableMidiPortSelected(portsInCombo->currentData( MidiPortModel::ClientIdRole).toInt(),
-                                  portsInCombo->currentData( MidiPortModel::PortIdRole).toInt());
-
     Q_UNUSED(rowIdx)
-
+    // TODO:It should be possible to subcribe ( connect ) to multiple ports.
+    emit readableMidiPortSelected( qvariant_cast<MidiClientPortId>(portsInCombo->currentData( MidiPortModel::ClientPortIdRole)));
 }
 void MainWindow::portsOutComboChanged(int rowIdx)
 {
     Q_UNUSED(rowIdx)
-
-    emit writableMidiPortSelected(portsOutCombo->currentData( MidiPortModel::ClientIdRole).toInt(),
-                                  portsOutCombo->currentData( MidiPortModel::PortIdRole).toInt());
+    emit readableMidiPortSelected( qvariant_cast<MidiClientPortId>(portsOutCombo->currentData( MidiPortModel::ClientPortIdRole)));
 }
 
 char MainWindow::calcChecksum(const char *data, int dataLength)

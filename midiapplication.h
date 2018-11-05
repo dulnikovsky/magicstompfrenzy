@@ -6,6 +6,32 @@
 #ifdef Q_OS_LINUX
 typedef struct _snd_seq snd_seq_t;
 typedef snd_seq_t* MidiClientHandle;
+
+class MidiPortIdAlsa
+{
+public:
+    MidiPortIdAlsa() {}
+    MidiPortIdAlsa(const MidiPortIdAlsa &other)
+    {
+        client = other.client;
+        port = other.port;
+    }
+    ~MidiPortIdAlsa() {}
+
+    MidiPortIdAlsa(int clientId, int portId)
+        : client(clientId), port(portId) {}
+
+    int clientId() const  { return client; }
+    int portId() const { return port; }
+
+private:
+    int client;
+    int port;
+    QString name;
+};
+Q_DECLARE_METATYPE(MidiPortIdAlsa)
+typedef MidiPortIdAlsa MidiClientPortId;
+
 #endif
 
 #ifdef Q_OS_MACOS
@@ -33,8 +59,8 @@ signals:
     void midiEventReceived(MidiEvent *);
 
 public slots:
-    bool connectToReadablePort( int clientId, int portId);
-    bool connectToWritablePort( int clientId, int portId);
+    bool connectToReadablePort( MidiClientPortId mcpId );
+    bool connectToWritablePort( MidiClientPortId mcpId);
 
     void sendMidiEvent(MidiEvent *ev);
 
@@ -53,8 +79,8 @@ private:
 
     void midiSystemInit();
 
-    unsigned int inPort;
-    unsigned int outPort;
+    unsigned int thisInPort;
+    unsigned int thisOutPort;
     unsigned int outDest;
 };
 

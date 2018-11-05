@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include <QQueue>
 #include <QSet>
-//#include <QMap>
+#include "midiapplication.h"
 
 class MidiPortModel;
 class QComboBox;
@@ -33,8 +33,8 @@ protected:
     void closeEvent(QCloseEvent *event) override;
 
 signals:
-    void readableMidiPortSelected( int clientId, int portId);
-    void writableMidiPortSelected( int clientId, int portId);
+    void readableMidiPortSelected( MidiClientPortId id);
+    void writableMidiPortSelected( MidiClientPortId id);
     void sendMidiEvent(MidiEvent *);
 
 private slots:

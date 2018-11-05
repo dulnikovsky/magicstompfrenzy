@@ -10,7 +10,7 @@ class MidiPortModel : public QAbstractItemModel
     Q_OBJECT
 public:
 
-    enum UserRoles{ ClientIdRole = Qt::UserRole, PortIdRole};
+    enum UserRoles{ ClientPortIdRole = Qt::UserRole};
     enum Direction{ ReadablePorts, WritablePorts };
 
     MidiPortModel(MidiClientHandle handle, Direction d = ReadablePorts, QObject *parent = Q_NULLPTR) :
@@ -29,21 +29,11 @@ public slots:
 
 private:
     MidiClientHandle handle;
-
     Direction direction;
-
-#ifdef Q_OS_LINUX
-    typedef struct
-    {
-        int clientId;
-        int portId;
-    }ClientPortId;
-#endif
 #ifdef Q_OS_MAC
     typedef unsigned int ClientPortId;
 #endif
-
-    QList<QPair<ClientPortId, QString>> portList;
+    QList<QPair<MidiClientPortId, QString>> portList;
 };
 
 #endif // MIDIPORTMODEL_H

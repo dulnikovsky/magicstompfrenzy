@@ -63,14 +63,13 @@ MidiApplication::MidiApplication(int &argc, char **argv)
     midiInThread = new MidiInThread(handle, this);
     midiInThread->start();
 
-    midiSender = new MidiSender(handle, outPort);
+    midiSender = new MidiSender(handle, thisOutPort);
 
     midiOutThread = new QThread(this);
     midiSender->moveToThread(midiOutThread);
     midiOutThread->start();
 #endif
 #ifdef Q_OS_MACOS
-
     MIDIInputPortCreate(handle, CFSTR("In Port"), MIDIEngineReadProc, nullptr, &inPort);
     MIDIOutputPortCreate(handle, CFSTR("Out Port"),  &outPort);
 #endif
@@ -82,14 +81,14 @@ MidiApplication::MidiApplication(int &argc, char **argv)
 
     connect(this, SIGNAL(aboutToQuit()), this, SLOT(isQuitting()));
 
-#ifdef QT_DEBUG
+#if defined(QT_DEBUG) || defined(Q_OS_LINUX)
     if(argc > 2)
     {
         bool okclient, okport;
         int client = QString(argv[1]).toInt( &okclient);
         int port = QString(argv[2]).toInt( &okport);
         if( okclient && okport  )
-            connectToReadablePort( client, port);
+            connectToReadablePort( MidiClientPortId (client, port));
     }
     if(argc > 4)
     {
@@ -97,7 +96,7 @@ MidiApplication::MidiApplication(int &argc, char **argv)
         int client = QString(argv[3]).toInt( &okclient);
         int port = QString(argv[4]).toInt( &okport);
         if( okclient && okport  )
-            connectToWritablePort(client, port);
+            connectToWritablePort(MidiClientPortId (client, port));
     }
 #endif
 }
@@ -121,8 +120,10 @@ void  MidiApplication::midiSystemInit()
 
     snd_seq_set_client_name(handle, "MagicstompFrenzy");
 
-    inPort = snd_seq_create_simple_port(handle, "MagicstompFrenzy IN", SND_SEQ_PORT_CAP_WRITE|SND_SEQ_PORT_CAP_SUBS_WRITE, SND_SEQ_PORT_TYPE_MIDI_GENERIC | SND_SEQ_PORT_TYPE_APPLICATION);
-    outPort = snd_seq_create_simple_port(handle, "MagicstompFrenzy OUT", SND_SEQ_PORT_CAP_READ|SND_SEQ_PORT_CAP_SUBS_READ, SND_SEQ_PORT_TYPE_MIDI_GENERIC );
+    thisInPort = snd_seq_create_simple_port(handle, "MagicstompFrenzy IN",
+                                            SND_SEQ_PORT_CAP_WRITE|SND_SEQ_PORT_CAP_SUBS_WRITE, SND_SEQ_PORT_TYPE_MIDI_GENERIC | SND_SEQ_PORT_TYPE_APPLICATION);
+    thisOutPort = snd_seq_create_simple_port(handle, "MagicstompFrenzy OUT",
+                                             SND_SEQ_PORT_CAP_READ|SND_SEQ_PORT_CAP_SUBS_READ, SND_SEQ_PORT_TYPE_MIDI_GENERIC );
 
     // Subscribe to the announce port.
     snd_seq_port_subscribe_t* subs;
@@ -132,7 +133,7 @@ void  MidiApplication::midiSystemInit()
     announce_sender.client = SND_SEQ_CLIENT_SYSTEM;
     announce_sender.port = SND_SEQ_PORT_SYSTEM_ANNOUNCE;
     announce_dest.client = snd_seq_client_id(handle);
-    announce_dest.port = inPort;
+    announce_dest.port = thisInPort;
     snd_seq_port_subscribe_set_sender(subs, &announce_sender);
     snd_seq_port_subscribe_set_dest(subs, &announce_dest);
     err = snd_seq_subscribe_port(handle, subs);
@@ -146,7 +147,7 @@ void  MidiApplication::midiSystemInit()
 #endif
 }
 
-bool MidiApplication::connectToReadablePort( int clientId, int portId)
+bool MidiApplication::connectToReadablePort( MidiClientPortId mcpId)
 {
 #ifdef Q_OS_LINUX
     snd_seq_addr_t sender, dest;
@@ -154,9 +155,9 @@ bool MidiApplication::connectToReadablePort( int clientId, int portId)
     snd_seq_port_subscribe_alloca(&subs);
 
     dest.client = snd_seq_client_id(handle);
-    dest.port = inPort;
-    sender.client = clientId;
-    sender.port = portId;
+    dest.port = thisInPort;
+    sender.client = mcpId.clientId();
+    sender.port = mcpId.portId();
 
     snd_seq_port_subscribe_set_sender(subs, &sender);
     snd_seq_port_subscribe_set_dest(subs, &dest);
@@ -167,7 +168,7 @@ bool MidiApplication::connectToReadablePort( int clientId, int portId)
 #endif
 }
 
-bool MidiApplication::connectToWritablePort( int clientId, int portId)
+bool MidiApplication::connectToWritablePort( MidiClientPortId mcpId)
 {
 #ifdef Q_OS_LINUX
     snd_seq_addr_t sender, dest;
@@ -175,9 +176,9 @@ bool MidiApplication::connectToWritablePort( int clientId, int portId)
     snd_seq_port_subscribe_alloca(&subs);
 
     sender.client = snd_seq_client_id(handle);
-    sender.port = outPort;
-    dest.client = clientId;
-    dest.port = portId;
+    sender.port = thisOutPort;
+    dest.client = mcpId.clientId();
+    dest.port = mcpId.portId();
 
     snd_seq_port_subscribe_set_sender(subs, &sender);
     snd_seq_port_subscribe_set_dest(subs, &dest);
