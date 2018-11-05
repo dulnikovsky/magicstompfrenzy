@@ -44,5 +44,5 @@ bool MidiSender::event(QEvent *e)
         me->accept();
     }
 #endif
-    return QObject::event(e);
+    return true;
 }

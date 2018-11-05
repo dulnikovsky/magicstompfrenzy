@@ -12,7 +12,7 @@ typedef snd_seq_t* MidiClientHandle;
 typedef unsigned int UInt32;
 typedef UInt32 MIDIObjectRef;
 typedef MIDIObjectRef MIDIObjectRef;
-typedef MIDIObjectRef MidiClentHandle;
+typedef MIDIObjectRef MidiClientHandle;
 #endif
 
 
@@ -54,7 +54,7 @@ private:
 
     MidiClientHandle handle;
 
-    MidiClientHandle midiSystemInit();
+    void midiSystemInit();
 
     unsigned int inPort;
     unsigned int outPort;

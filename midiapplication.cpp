@@ -57,7 +57,7 @@ MidiApplication::MidiApplication(int &argc, char **argv)
     midiEventType = QEvent::registerEventType(MidiEvent::SysEx);
     Q_ASSERT(midiEventType==MidiEvent::SysEx);
 
-    handle = midiSystemInit();
+    midiSystemInit();
 
 #ifdef Q_OS_LINUX
     midiInThread = new MidiInThread(handle, this);
@@ -117,10 +117,9 @@ bool MidiApplication::event(QEvent *e)
     return QApplication::event(e);
 }
 
-MidiClientHandle MidiApplication::midiSystemInit()
+void  MidiApplication::midiSystemInit()
 {
 #ifdef Q_OS_LINUX
-    snd_seq_t *handle;
 
     int err;
     err = snd_seq_open(&handle, "default", SND_SEQ_OPEN_DUPLEX, 0);
@@ -146,7 +145,6 @@ MidiClientHandle MidiApplication::midiSystemInit()
     {
         puts ("snd_seq_subscribe_port on the announce port fails: ");
     }
-    return handle;
 #endif
 #ifdef Q_OS_MACOS
     MIDIClientRef client;

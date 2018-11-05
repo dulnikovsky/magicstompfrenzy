@@ -3,9 +3,7 @@
 
 #include <QAbstractItemModel>
 
-#ifdef Q_OS_LINUX
-typedef struct _snd_seq snd_seq_t;
-#endif
+#include "midiapplication.h"
 
 class MidiPortModel : public QAbstractItemModel
 {
@@ -15,12 +13,9 @@ public:
     enum UserRoles{ ClientIdRole = Qt::UserRole, PortIdRole};
     enum Direction{ ReadablePorts, WritablePorts };
 
-#ifdef Q_OS_LINUX
-    MidiPortModel(snd_seq_t *handle, Direction d = ReadablePorts, QObject *parent = Q_NULLPTR) : QAbstractItemModel(parent), handle(handle), direction(d) {}
-#endif
-#ifdef Q_OS_MACOS
-    MidiPortModel( Direction d = ReadablePorts, QObject *parent = Q_NULLPTR) : QAbstractItemModel(parent), direction(d) {}
-#endif
+    MidiPortModel(MidiClientHandle handle, Direction d = ReadablePorts, QObject *parent = Q_NULLPTR) :
+        QAbstractItemModel(parent), handle(handle), direction(d) {}
+
     QVariant data(const QModelIndex &index, int role) const override;
 
     int rowCount(const QModelIndex &parent) const override;
@@ -33,9 +28,8 @@ public slots:
     void scan();
 
 private:
-#ifdef Q_OS_LINUX
-    snd_seq_t *handle;
-#endif
+    MidiClientHandle handle;
+
     Direction direction;
 
 #ifdef Q_OS_LINUX
