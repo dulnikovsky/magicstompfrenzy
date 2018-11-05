@@ -68,22 +68,17 @@ MidiApplication::MidiApplication(int &argc, char **argv)
     midiOutThread = new QThread(this);
     midiSender->moveToThread(midiOutThread);
     midiOutThread->start();
-
-    readablePortsModel = new MidiPortModel(handle, MidiPortModel::ReadablePorts, this);
-    readablePortsModel->scan();
-    writablePortsModel = new MidiPortModel(handle, MidiPortModel::WritablePorts, this);
-    writablePortsModel->scan();
 #endif
 #ifdef Q_OS_MACOS
 
     MIDIInputPortCreate(handle, CFSTR("In Port"), MIDIEngineReadProc, nullptr, &inPort);
     MIDIOutputPortCreate(handle, CFSTR("Out Port"),  &outPort);
-
-    readablePortsModel = new MidiPortModel( MidiPortModel::ReadablePorts, this);
-    readablePortsModel->scan();
-    writablePortsModel = new MidiPortModel( MidiPortModel::WritablePorts, this);
-    writablePortsModel->scan();
 #endif
+
+    readablePortsModel = new MidiPortModel(handle, MidiPortModel::ReadablePorts, this);
+    readablePortsModel->scan();
+    writablePortsModel = new MidiPortModel(handle, MidiPortModel::WritablePorts, this);
+    writablePortsModel->scan();
 
     connect(this, SIGNAL(aboutToQuit()), this, SLOT(isQuitting()));
 
@@ -147,9 +142,7 @@ void  MidiApplication::midiSystemInit()
     }
 #endif
 #ifdef Q_OS_MACOS
-    MIDIClientRef client;
-    MIDIClientCreate(CFSTR("MagicstompFrenzy"), MIDIEngineNotifyProc, 0, &client);
-    return  client;
+    MIDIClientCreate(CFSTR("MagicstompFrenzy"), MIDIEngineNotifyProc, 0, &handle);
 #endif
 }
 

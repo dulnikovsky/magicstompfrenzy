@@ -9,10 +9,7 @@ typedef snd_seq_t* MidiClientHandle;
 #endif
 
 #ifdef Q_OS_MACOS
-typedef unsigned int UInt32;
-typedef UInt32 MIDIObjectRef;
-typedef MIDIObjectRef MIDIObjectRef;
-typedef MIDIObjectRef MidiClientHandle;
+typedef quint32 MidiClientHandle;
 #endif
 
 
