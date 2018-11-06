@@ -8,6 +8,7 @@ int main(int argc, char *argv[])
     a.setOrganizationName("Robert Vetter");
     a.setOrganizationDomain("www.robertvetter.com");
     a.setApplicationVersion("0.90");
+    a.setWindowIcon(QIcon(":magicstomp.png"));
 
     MainWindow w( a.ReadablePortsModel(), a.WritablePortsModel());
 
