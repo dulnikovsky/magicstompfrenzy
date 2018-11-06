@@ -47,7 +47,9 @@ SOURCES += main.cpp\
     effecteditwidgets/multibanddelaywidget.cpp \
     patchcopydialog.cpp \
     patchlistcombomodel.cpp \
-    effecteditwidgets/basspreamp.cpp
+    effecteditwidgets/basspreamp.cpp \
+    midiportidalsa.cpp \
+    preferencesdialog.cpp
 
 HEADERS  += mainwindow.h \
     midiportmodel.h \
@@ -74,7 +76,9 @@ HEADERS  += mainwindow.h \
     effecteditwidgets/multibanddelaywidget.h \
     patchcopydialog.h \
     patchlistcombomodel.h \
-    effecteditwidgets/basspreamp.h
+    effecteditwidgets/basspreamp.h \
+    midiportidalsa.h \
+    preferencesdialog.h
 
 linux {
 LIBS += -lasound

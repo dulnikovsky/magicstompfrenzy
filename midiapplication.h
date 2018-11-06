@@ -2,33 +2,14 @@
 #define MIDIAPPLICATION_H
 
 #include <QApplication>
+#include <QSet>
 
 #ifdef Q_OS_LINUX
 typedef struct _snd_seq snd_seq_t;
 typedef snd_seq_t* MidiClientHandle;
 
-class MidiPortIdAlsa
-{
-public:
-    MidiPortIdAlsa() {}
-    MidiPortIdAlsa(const MidiPortIdAlsa &other)
-    {
-        client = other.client;
-        port = other.port;
-    }
-    ~MidiPortIdAlsa() {}
+#include "midiportidalsa.h"
 
-    MidiPortIdAlsa(int clientId, int portId)
-        : client(clientId), port(portId) {}
-
-    int clientId() const  { return client; }
-    int portId() const { return port; }
-
-private:
-    int client;
-    int port;
-    QString name;
-};
 Q_DECLARE_METATYPE(MidiPortIdAlsa)
 typedef MidiPortIdAlsa MidiClientPortId;
 
@@ -60,8 +41,8 @@ signals:
     void midiEventReceived(MidiEvent *);
 
 public slots:
-    bool connectToReadablePort( MidiClientPortId mcpId );
-    bool connectToWritablePort( MidiClientPortId mcpId);
+    bool changeReadableMidiPortStatus( MidiClientPortId mcpId, bool connect );
+    bool changeWritebleeMidiPortStatus( MidiClientPortId mcpId, bool connect );
 
     void sendMidiEvent(MidiEvent *ev);
 
@@ -82,7 +63,8 @@ private:
 
     unsigned int thisInPort;
     unsigned int thisOutPort;
-    unsigned int outDest;
+    QSet<MidiClientPortId> incomingConnectionSet;
+    QSet<MidiClientPortId> outgoingConnectionSet;
 };
 
 #endif // MIDIAPPLICATION_H

@@ -5,11 +5,12 @@
 #include "patcheditorwidget.h"
 #include "progresswidget.h"
 #include "patchcopydialog.h"
+#include "preferencesdialog.h"
 
 #include "magicstomp.h"
 
 #include <QGroupBox>
-#include <QComboBox>
+#include <QListView>
 #include <QTableView>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -25,6 +26,7 @@
 #include <QDir>
 #include <QStandardPaths>
 #include <QItemSelectionModel>
+#include <QAction>
 #include <QDebug>
 
 static const int sysExBulkHeaderLength = 8;
@@ -34,9 +36,10 @@ static const unsigned char dumpRequestHeader[] = { 0xF0, 0x43, 0x7D, 0x50, 0x55,
 static const int parameterSendHeaderLength = 6;
 static const unsigned char sysExParameterSendHeader[parameterSendHeaderLength] = { 0xF0, 0x43, 0x7D, 0x40, 0x55, 0x42 };
 
-MainWindow::MainWindow(MidiPortModel *readableportsmodel, MidiPortModel *writableportsmodel, QWidget *parent)
+MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod, QWidget *parent)
     : QMainWindow(parent), currentPatchTransmitted(-1), currentPatchEdited(-1), patchToCopy(-1),
-      cancelOperation(false), isInTransmissionState(false)
+      cancelOperation(false), isInTransmissionState(false),
+      readablePortsModel(readPortsMod), writablePortsModel(writePortsMod)
 {
     for(int i=0; i<numOfPatches; i++)
         patchDataList.append( QByteArray());
@@ -51,22 +54,13 @@ MainWindow::MainWindow(MidiPortModel *readableportsmodel, MidiPortModel *writabl
     midiOutTimer->setInterval(70);
     connect(midiOutTimer, SIGNAL(timeout()), this, SLOT(midiOutTimeOut()));
 
-    portsInCombo = new QComboBox();
-    portsInCombo->setModel(readableportsmodel);
-    connect(portsInCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(portsInComboChanged(int)));
-    portsOutCombo = new QComboBox();
-    portsOutCombo->setModel(writableportsmodel);
-    connect(portsOutCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(portsOutComboChanged(int)));
-    //QSpinBox *deviceIdSpinbox = new QSpinBox();
-    //deviceIdSpinbox->setMinimum(1);
-    //deviceIdSpinbox->setMaximum(16);
+    showPreferencesAction = new QAction(tr("&Preferences"), this);
+    //showPreferencesAction->setShortcuts(QKeySequence::);
+    //showPreferencesAction->setStatusTip(tr("Create a new file"));
+    connect(showPreferencesAction, &QAction::triggered, this, &MainWindow::showPreferences);
 
-    QGroupBox *settingsGroupbox = new QGroupBox( tr("Settings"));
-    QFormLayout *settingsLayout = new QFormLayout();
-    settingsLayout->addRow( new QLabel(tr("Midi In Port:")), portsInCombo);
-    settingsLayout->addRow( new QLabel(tr("Midi Out Port:")), portsOutCombo);
-    //settingsLayout->addRow( new QLabel(tr("Device ID:")), deviceIdSpinbox);
-    settingsGroupbox->setLayout(settingsLayout);
+    QPushButton *preferencesButton = new QPushButton( tr("Preferences"));
+    connect( preferencesButton, SIGNAL(pressed()), showPreferencesAction, SLOT(trigger()));
 
     QGroupBox *patchListGroupbox = new QGroupBox( tr("Patch List"));
 
@@ -103,7 +97,7 @@ MainWindow::MainWindow(MidiPortModel *readableportsmodel, MidiPortModel *writabl
     patchListLayout->addLayout( listEditButtonsLayout);
 
     QVBoxLayout *mainLeftlayout = new QVBoxLayout();
-    mainLeftlayout->addWidget( settingsGroupbox);
+    mainLeftlayout->addWidget( preferencesButton);
     mainLeftlayout->addWidget( patchListGroupbox);
 
     QWidget *dockWidgetDummy = new QWidget();
@@ -313,9 +307,9 @@ void MainWindow::sendPatch( int patchIdx, bool sendToTmpArea )
     reqArr->append( calcChecksum( reqArr->constBegin()+ sysExBulkHeaderLength, reqArr->length()-sysExBulkHeaderLength));
     reqArr->append(0xF7);
     midiOutQueue.enqueue( midiev);
-
+#if QT_VERSION >= 0x059000
     qDebug() << "send Patch Common :" << reqArr->toHex(',');
-
+#endif
     midiev = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));
     reqArr = midiev->sysExData();
     reqArr->append(QByteArray(reinterpret_cast<const char*>(&sysExBulkHeader[0]), sysExBulkHeaderLength));
@@ -328,9 +322,9 @@ void MainWindow::sendPatch( int patchIdx, bool sendToTmpArea )
     reqArr->append( calcChecksum( reqArr->constBegin()+ sysExBulkHeaderLength, reqArr->length()-sysExBulkHeaderLength));
     reqArr->append(0xF7);
     midiOutQueue.enqueue( midiev);
-
+#if QT_VERSION >= 0x059000
     qDebug() << "send Patch Effect :" << reqArr->toHex(',');
-
+#endif
     midiev = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));
     reqArr = midiev->sysExData();
     reqArr->append(QByteArray(reinterpret_cast<const char*>(&sysExBulkHeader[0]), sysExBulkHeaderLength));
@@ -423,7 +417,9 @@ void MainWindow::parameterChanged(int offset, int length)
         reqArr->append( *(editWidget->DataArray()->constData()+offset+i));
     }
     reqArr->append(0xF7);
+#if QT_VERSION >= 0x059000
     qDebug() << reqArr->toHex(',');
+#endif
     emit sendMidiEvent( midiev);
 
     if( offset == PatchName) // Name needs to be sent as single chars
@@ -582,16 +578,16 @@ void MainWindow::copyButtonPressed()
     }
 }
 
-void MainWindow::portsInComboChanged(int rowIdx)
+void MainWindow::showPreferences()
 {
-    Q_UNUSED(rowIdx)
-    // TODO:It should be possible to subcribe ( connect ) to multiple ports.
-    emit readableMidiPortSelected( qvariant_cast<MidiClientPortId>(portsInCombo->currentData( MidiPortModel::ClientPortIdRole)));
-}
-void MainWindow::portsOutComboChanged(int rowIdx)
-{
-    Q_UNUSED(rowIdx)
-    emit writableMidiPortSelected( qvariant_cast<MidiClientPortId>(portsOutCombo->currentData( MidiPortModel::ClientPortIdRole)));
+    MidiApplication *thisMidiApp = static_cast<MidiApplication *>(qApp);
+
+    PreferencesDialog prefDialog(readablePortsModel, writablePortsModel, this);
+    connect( &prefDialog, SIGNAL(midiInPortStatusChanged( MidiClientPortId, bool)), thisMidiApp, SLOT(changeReadableMidiPortStatus(MidiClientPortId,bool)) );
+    connect( &prefDialog, SIGNAL(midiOutPortStatusChanged( MidiClientPortId, bool)), thisMidiApp, SLOT(changeWritebleeMidiPortStatus(MidiClientPortId,bool)) );
+    prefDialog.exec();
+
+    prefDialog.disconnect(thisMidiApp);
 }
 
 char MainWindow::calcChecksum(const char *data, int dataLength)

@@ -7,13 +7,12 @@
 #include "midiapplication.h"
 
 class MidiPortModel;
-class QComboBox;
-
 class PatchListModel;
 class QTableView;
 class QPushButton;
 class QVBoxLayout;
 class ProgressWidget;
+class QListView;
 
 class MidiEvent;
 
@@ -38,8 +37,6 @@ signals:
     void sendMidiEvent(MidiEvent *);
 
 private slots:
-    void portsInComboChanged(int index);
-    void portsOutComboChanged(int index);
     void requestAll();
     void sendAll();
     void requestPatch(int patchIndex);
@@ -56,12 +53,18 @@ private slots:
 
     void swapButtonPressed();
     void copyButtonPressed();
+
+    void showPreferences();
+
 private:
     int currentPatchTransmitted;
     int currentPatchEdited;
     int patchToCopy;
     bool cancelOperation;
     bool isInTransmissionState;
+
+    MidiPortModel *readablePortsModel;
+    MidiPortModel *writablePortsModel;
 
     PatchListModel *patchListModel;
 
@@ -73,8 +76,6 @@ private:
     //QMap<int, QByteArray> backupPatchesMap;
     QSet<int> dirtyPatches;
 
-    QComboBox *portsInCombo;
-    QComboBox *portsOutCombo;
     QTableView *patchListView;
     QPushButton *requestButton;
     QPushButton *sendButton;
@@ -84,6 +85,8 @@ private:
     QPushButton *copyButton;
 
     QVBoxLayout *patchListLayout;
+
+    QAction *showPreferencesAction;
 
     static char calcChecksum(const char *data, int dataLength);
 };

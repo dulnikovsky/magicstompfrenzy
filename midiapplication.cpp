@@ -107,9 +107,9 @@ MidiApplication::MidiApplication(int &argc, char **argv)
     MIDIOutputPortCreate(handle, CFSTR("Out Port"),  &thisOutPort);
 #endif
 
-    readablePortsModel = new MidiPortModel(handle, MidiPortModel::ReadablePorts, this);
+    readablePortsModel = new MidiPortModel(handle, incomingConnectionSet, MidiPortModel::ReadablePorts, this);
     readablePortsModel->scan();
-    writablePortsModel = new MidiPortModel(handle, MidiPortModel::WritablePorts, this);
+    writablePortsModel = new MidiPortModel(handle, outgoingConnectionSet, MidiPortModel::WritablePorts, this);
     writablePortsModel->scan();
 
     connect(this, SIGNAL(aboutToQuit()), this, SLOT(isQuitting()));
@@ -121,7 +121,7 @@ MidiApplication::MidiApplication(int &argc, char **argv)
         int client = QString(argv[1]).toInt( &okclient);
         int port = QString(argv[2]).toInt( &okport);
         if( okclient && okport  )
-            connectToReadablePort( MidiClientPortId (client, port));
+            changeReadableMidiPortStatus( MidiClientPortId (client, port), true);
     }
     if(argc > 4)
     {
@@ -129,7 +129,7 @@ MidiApplication::MidiApplication(int &argc, char **argv)
         int client = QString(argv[3]).toInt( &okclient);
         int port = QString(argv[4]).toInt( &okport);
         if( okclient && okport  )
-            connectToWritablePort(MidiClientPortId (client, port));
+            changeWritebleeMidiPortStatus(MidiClientPortId (client, port), true);
     }
 #endif
 }
@@ -180,29 +180,52 @@ void  MidiApplication::midiSystemInit()
 #endif
 }
 
-bool MidiApplication::connectToReadablePort( MidiClientPortId mcpId)
+bool MidiApplication::changeReadableMidiPortStatus( MidiClientPortId mcpId, bool connect)
 {
+    if( (connect && incomingConnectionSet.contains(mcpId)) ||
+            (! connect && ! incomingConnectionSet.contains( mcpId)))
+        return true;
+
 #ifdef Q_OS_LINUX
-    snd_seq_addr_t sender, dest;
-    snd_seq_port_subscribe_t* subs;
-    snd_seq_port_subscribe_alloca(&subs);
+        snd_seq_addr_t sender, dest;
+        snd_seq_port_subscribe_t* subs;
+        snd_seq_port_subscribe_alloca(&subs);
+        dest.client = snd_seq_client_id(handle);
+        dest.port = thisInPort;
+        sender.client = mcpId.clientId();
+        sender.port = mcpId.portId();
+        snd_seq_port_subscribe_set_sender(subs, &sender);
+        snd_seq_port_subscribe_set_dest(subs, &dest);
+#endif
 
-    dest.client = snd_seq_client_id(handle);
-    dest.port = thisInPort;
-    sender.client = mcpId.clientId();
-    sender.port = mcpId.portId();
-
-    snd_seq_port_subscribe_set_sender(subs, &sender);
-    snd_seq_port_subscribe_set_dest(subs, &dest);
-    return snd_seq_subscribe_port(handle, subs);
+    if(connect)
+    {
+        incomingConnectionSet.insert(mcpId);
+#ifdef Q_OS_LINUX
+        return snd_seq_subscribe_port(handle, subs);
 #endif
 #ifdef Q_OS_MACOS
-    return MIDIPortConnectSource(thisInPort, mcpId, nullptr);
+        return MIDIPortConnectSource(thisInPort, mcpId, nullptr);
 #endif
+    }
+    else
+    {
+        incomingConnectionSet.remove(mcpId);
+#ifdef Q_OS_LINUX
+        return snd_seq_unsubscribe_port(handle, subs);
+#endif
+#ifdef Q_OS_MACOS
+
+#endif
+    }
 }
 
-bool MidiApplication::connectToWritablePort( MidiClientPortId mcpId)
+bool MidiApplication::changeWritebleeMidiPortStatus( MidiClientPortId mcpId, bool connect)
 {
+    if( (connect && outgoingConnectionSet.contains(mcpId)) ||
+            (! connect && ! outgoingConnectionSet.contains( mcpId)))
+        return true;
+
 #ifdef Q_OS_LINUX
     snd_seq_addr_t sender, dest;
     snd_seq_port_subscribe_t* subs;
@@ -215,13 +238,30 @@ bool MidiApplication::connectToWritablePort( MidiClientPortId mcpId)
 
     snd_seq_port_subscribe_set_sender(subs, &sender);
     snd_seq_port_subscribe_set_dest(subs, &dest);
-    return snd_seq_subscribe_port(handle, subs);
+#endif
+
+    if(connect)
+    {
+        outgoingConnectionSet.insert(mcpId);
+#ifdef Q_OS_LINUX
+        return snd_seq_subscribe_port(handle, subs);
 #endif
 #ifdef Q_OS_MACOS
     outDest = mcpId;
     return true;
     //return MIDIPortConnectSource(outPort, portId, nullptr);
 #endif
+    }
+    else
+    {
+        outgoingConnectionSet.remove(mcpId);
+#ifdef Q_OS_LINUX
+        return snd_seq_unsubscribe_port(handle, subs);
+#endif
+#ifdef Q_OS_MACOS
+
+#endif
+    }
 }
 void MidiApplication::sendMidiEvent(MidiEvent *ev)
 {

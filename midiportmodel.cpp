@@ -16,8 +16,12 @@ QVariant MidiPortModel::data(const QModelIndex &index, int role) const
     else if(role == ClientPortIdRole)
     {
         QVariant valVariant;
-        valVariant.setValue(portList.at(index.row()).first);
+        valVariant.setValue( portList.at(index.row()).first);
         return valVariant;
+    }
+    else if( role == isConnectedRole)
+    {
+        return connectedSet.contains(portList.at(index.row()).first);
     }
     return QVariant();
 }
