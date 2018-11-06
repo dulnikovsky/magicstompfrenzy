@@ -8,17 +8,13 @@ class MidiEvent : public QEvent
     Q_GADGET
 public:
 
-    enum MidiEventQtType { Common=QEvent::User, SysEx };
+    enum MidiEventQtType { Common = QEvent::User, SysEx };
 
     enum MidiEventType { NoteOff=0x08, NoteOn, PolyphonicKeyPressure, ControlChange, ProgramChange, ChannelPressure, PitchBend, SystemCommon };
 
     explicit MidiEvent(Type type) : QEvent(type),dataUnion{nullptr}, port(0) {}
 
-    ~MidiEvent()
-    {
-        if(type()==(int)SysEx && dataUnion.dataArray!=nullptr)
-            delete dataUnion.dataArray;
-    }
+    ~MidiEvent();
 
     bool isValid() const
     {

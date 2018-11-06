@@ -17,12 +17,14 @@
 #ifdef Q_OS_MAC
 void MIDIEngineNotifyProc(const MIDINotification *message, void *refCon)
 {
-    printf("MIDI Notify, messageId=%d,", message->messageID);
+    qDebug("MIDI Notify, messageId=%d,", message->messageID);
 }
 
 static MidiEvent *midievent = nullptr;
 void MIDIEngineReadProc(const MIDIPacketList *pktlist, void *arg, void *connRefCon)
 {
+    Q_UNUSED(connRefCon)
+
     const MIDIPacket *packet = pktlist->packet;
     for (unsigned int i=0; i < pktlist->numPackets; i++)
     {
@@ -73,10 +75,10 @@ void MIDIEngineReadProc(const MIDIPacketList *pktlist, void *arg, void *connRefC
     }
 }
 
-MIDISysexSendRequest sysexReq;
+static MIDISysexSendRequest sysexReq;
 void sysexCompletionProc(MIDISysexSendRequest *req)
 {
-
+    Q_UNUSED(req)
 }
 
 #endif
@@ -215,7 +217,7 @@ bool MidiApplication::changeReadableMidiPortStatus( MidiClientPortId mcpId, bool
         return snd_seq_unsubscribe_port(handle, subs);
 #endif
 #ifdef Q_OS_MACOS
-
+        return MIDIPortDisconnectSource( thisInPort, mcpId);
 #endif
     }
 }
@@ -247,9 +249,7 @@ bool MidiApplication::changeWritebleeMidiPortStatus( MidiClientPortId mcpId, boo
         return snd_seq_subscribe_port(handle, subs);
 #endif
 #ifdef Q_OS_MACOS
-    outDest = mcpId;
-    return true;
-    //return MIDIPortConnectSource(outPort, portId, nullptr);
+        return MIDIPortConnectSource(thisOutPort, mcpId, nullptr);
 #endif
     }
     else
@@ -259,7 +259,7 @@ bool MidiApplication::changeWritebleeMidiPortStatus( MidiClientPortId mcpId, boo
         return snd_seq_unsubscribe_port(handle, subs);
 #endif
 #ifdef Q_OS_MACOS
-
+        return MIDIPortDisconnectSource( thisInPort, mcpId);
 #endif
     }
 }
@@ -269,14 +269,22 @@ void MidiApplication::sendMidiEvent(MidiEvent *ev)
     postEvent( midiSender, ev);
 #endif
 #ifdef Q_OS_MACOS
-    sysexReq.bytesToSend = ev->sysExData()->size();
-    sysexReq.complete = false;
-    sysexReq.completionProc = sysexCompletionProc;
-    sysexReq.completionRefCon = nullptr;
-    sysexReq.data = reinterpret_cast<const Byte *>(ev->sysExData()->constData());
-    sysexReq.destination = outDest;
-    MIDISendSysex( & sysexReq);
-    MIDIFlushOutput( outDest);
+    if( ev->type() == static_cast< QEvent::Type>( MidiEvent::SysEx))
+    {
+        QSet<MidiClientPortId>::const_iterator iter = outgoingConnectionSet.constBegin();
+        while (iter != outgoingConnectionSet.constEnd())
+        {
+            sysexReq.bytesToSend = static_cast< unsigned int>(ev->sysExData()->size());
+            sysexReq.complete = false;
+            sysexReq.completionProc = sysexCompletionProc;
+            sysexReq.completionRefCon = nullptr;
+            sysexReq.data = reinterpret_cast<const Byte *>(ev->sysExData()->constData());
+            sysexReq.destination = *iter;
+            MIDISendSysex( & sysexReq);
+            MIDIFlushOutput( *iter);
+            ++iter;
+        }
+    }
 #endif
 }
 

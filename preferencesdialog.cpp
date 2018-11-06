@@ -15,6 +15,7 @@ PreferencesDialog::PreferencesDialog(MidiPortModel *portsInModel, MidiPortModel 
 
     hlyt->addWidget( new QLabel("Incoming MIDI Connections:"));
     portsInListView = new QListView();
+    portsInListView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     portsInListView->setModel(portsInModel);
     for( int r=0; r < portsInModel->rowCount(); r++)
     {
@@ -29,6 +30,7 @@ PreferencesDialog::PreferencesDialog(MidiPortModel *portsInModel, MidiPortModel 
 
     hlyt->addWidget( new QLabel("Outgoing MIDI Connections:"));
     portsOutListView = new QListView();
+    portsOutListView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     portsOutListView->setModel(portsOutModel);
     for( int r=0; r < portsOutModel->rowCount(); r++)
     {
