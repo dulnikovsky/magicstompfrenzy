@@ -11,6 +11,8 @@
 #include "effecteditwidgets/multibanddelaywidget.h"
 #include "effecteditwidgets/compressorwidget.h"
 #include "effecteditwidgets/basspreamp.h"
+#include "effecteditwidgets/hqpitchwidget.h"
+#include "effecteditwidgets/dualpitchwidget.h"
 
 PatchEditorWidget::PatchEditorWidget( QWidget *parent)
     : ArrayDataEditWidget( parent),effectEditWidget(nullptr)
@@ -75,6 +77,12 @@ void PatchEditorWidget::setDataArray(QByteArray *arr)
         break;
     case AmpMultiTremolo:
         mainLayout->addWidget( effectEditWidget = new AmpMultiWidget(AmpMultiWidget::AmpTremolo), 8);
+        break;
+    case HQPitch:
+        mainLayout->addWidget( effectEditWidget = new HQPitchWidget(), 8);
+        break;
+    case DualPitch:
+        mainLayout->addWidget( effectEditWidget = new DualPitchWidget(), 8);
         break;
     case BassPreamp:
         mainLayout->addWidget( effectEditWidget = new BassPreampWidget(), 8);

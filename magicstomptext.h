@@ -91,7 +91,7 @@ const QStringList GuitarAmpTypeNameList =
     QStringLiteral("Crunch 2"),
     QStringLiteral("Clean 1"),
     QStringLiteral("Clean 2"),
-    QStringLiteral("Solid"),
+    QStringLiteral("Solid")
 };
 
 const QStringList GuitarCabTypeNameList =
@@ -112,7 +112,7 @@ const QStringList GuitarCabTypeNameList =
     QStringLiteral("YAMAHA 1x12"),
     QStringLiteral("Hybrid 1x12"),
     QStringLiteral("4x10"),
-    QStringLiteral("2x10"),
+    QStringLiteral("2x10")
 };
 
 const QStringList BassPreampTypeNameList =
@@ -127,7 +127,40 @@ const QStringList BassPreampTypeNameList =
     QStringLiteral("Heavy"),
     QStringLiteral("Drive"),
     QStringLiteral("Dist"),
-    QStringLiteral("Fuzz"),
+    QStringLiteral("Fuzz")
+};
+
+const QStringList BassPreampCompressorRatioNameList =
+{
+    QStringLiteral("1.1"),
+    QStringLiteral("1.1.1"),
+    QStringLiteral("1.3.1"),
+    QStringLiteral("1.5.1"),
+    QStringLiteral("1.7.1"),
+    QStringLiteral("2.1"),
+    QStringLiteral("2.5.1"),
+    QStringLiteral("3.1"),
+    QStringLiteral("3.5.1"),
+    QStringLiteral("4.1"),
+    QStringLiteral("5.1"),
+    QStringLiteral("6.1"),
+    QStringLiteral("8.1"),
+    QStringLiteral("10.1"),
+    QStringLiteral("20.1"),
+    QStringLiteral("00.1")
+};
+
+const QStringList BassPreampSpeakerSimNameList =
+{
+    QStringLiteral("Off"),
+    QStringLiteral("R On"),
+    QStringLiteral("LR On")
+};
+
+const QStringList OffOnStringList =
+{
+    QStringLiteral("Off"),
+    QStringLiteral("On")
 };
 
 #endif

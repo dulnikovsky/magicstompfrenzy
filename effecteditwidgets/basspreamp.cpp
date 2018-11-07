@@ -118,6 +118,99 @@ BassPreampWidget::BassPreampWidget( QWidget *parent) :
     dspinBox = createStdGainSpinBox(ParametricEQGain);
     mainlyt->addWidget(dspinBox, 7, 2);
 
+    mainlyt->addWidget(new QLabel(tr("Gate")), 6, 3);
+    spinBox = new QSpinBox();
+    spinBox->setMinimum(-54);
+    spinBox->setMaximum(0);
+    //spinBox->setSpecialValueText("Off");
+    spinBox->setSuffix(QStringLiteral(" dB"));
+    spinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, Gate);
+    spinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    spinBox->setProperty( ArrayDataEditWidget::convertMethodProperty, QStringLiteral("scaleAndAdd(1, -54)"));
+    mainlyt->addWidget(spinBox, 7, 3);
+
+    mainlyt->addWidget(new QLabel(tr("Speaker Simulation")), 6, 4);
+    QComboBox *spkSimComboBox = new QComboBox();
+    spkSimComboBox->addItems( BassPreampSpeakerSimNameList);
+    spkSimComboBox->setCurrentIndex(-1);
+    spkSimComboBox->setProperty( ArrayDataEditWidget::valuePropertyName, QStringLiteral("currentIndex"));
+    spkSimComboBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, SpeakerSimulatorSwitch);
+    spkSimComboBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    mainlyt->addWidget( spkSimComboBox, 7, 4);
+
+    mainlyt->addWidget(new QLabel(tr("Limiter")), 6, 5);
+    QComboBox *limiterComboBox = new QComboBox();
+    limiterComboBox->addItems( OffOnStringList);
+    limiterComboBox->setCurrentIndex(-1);
+    limiterComboBox->setProperty( ArrayDataEditWidget::valuePropertyName, QStringLiteral("currentIndex"));
+    limiterComboBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, Limiter);
+    limiterComboBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    mainlyt->addWidget( limiterComboBox, 7, 5);
+
+    mainlyt->addWidget(new QLabel(tr("Comp. Ratio")), 8, 0);
+    QComboBox *compRatioComboBox = new QComboBox();
+    compRatioComboBox->addItems( BassPreampCompressorRatioNameList);
+    compRatioComboBox->setCurrentIndex(-1);
+    compRatioComboBox->setProperty( ArrayDataEditWidget::valuePropertyName, QStringLiteral("currentIndex"));
+    compRatioComboBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, Ratio);
+    compRatioComboBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    mainlyt->addWidget( compRatioComboBox, 9, 0);
+
+    mainlyt->addWidget(new QLabel(tr("Comp. Threshold")), 8, 1);
+    spinBox = new QSpinBox();
+    spinBox->setMinimum(-54);
+    spinBox->setMaximum(0);
+    spinBox->setSuffix(QStringLiteral(" dB"));
+    spinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, Threshold);
+    spinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    spinBox->setProperty( ArrayDataEditWidget::convertMethodProperty, QStringLiteral("scaleAndAdd(1, -54)"));
+    mainlyt->addWidget(spinBox, 9, 1);
+
+    mainlyt->addWidget(new QLabel(tr("Comp. Attack")), 8, 2);
+    spinBox = new QSpinBox();
+    spinBox->setMinimum(0);
+    spinBox->setMaximum(120);
+    spinBox->setSuffix(QStringLiteral(" ms"));
+    spinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, Attack);
+    spinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    mainlyt->addWidget(spinBox, 9, 2);
+
+    mainlyt->addWidget(new QLabel(tr("Comp. Release(?)")), 8, 3);
+//    extSpinBox = new ExpSpinBox();
+//    extSpinBox->setParameters(6.0, 11500.0);
+//    extSpinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, Release);
+//    extSpinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+
+      spinBox = new QSpinBox();
+      spinBox->setMinimum(0);
+      spinBox->setMaximum(0x7F);
+//    spinBox->setSuffix(QStringLiteral(" ms"));
+      spinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, Release);
+      spinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+//    spinBox->setProperty( ArrayDataEditWidget::convertMethodProperty, QStringLiteral("scaleAndAdd(6.0, 6.0)"));
+    mainlyt->addWidget(spinBox, 9, 3);
+
+    mainlyt->addWidget(new QLabel(tr("Comp. Gain")), 8, 4);
+    dspinBox = new QDoubleSpinBox();
+    dspinBox->setMinimum(0.0);
+    dspinBox->setMaximum(18.0);
+    dspinBox->setSingleStep(0.1);
+    dspinBox->setDecimals(1);
+    dspinBox->setSuffix(QStringLiteral(" dB"));
+    dspinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, CompressorGain);
+    dspinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    dspinBox->setProperty( ArrayDataEditWidget::convertMethodProperty, QStringLiteral("scaleAndAdd(0.1, 0)"));
+    mainlyt->addWidget(dspinBox, 9, 4);
+
+    mainlyt->addWidget(new QLabel(tr("Comp. Knee")), 8, 5);
+    spinBox = new QSpinBox();
+    spinBox->setMinimum(0);
+    spinBox->setMaximum(5);
+    spinBox->setSpecialValueText(QStringLiteral("Hard"));
+    spinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, Knee);
+    spinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    mainlyt->addWidget(spinBox, 9, 5);
+
     setLayout(mainlyt);
 }
 
@@ -128,6 +221,7 @@ QDoubleSpinBox* BassPreampWidget::createStdGainSpinBox(int offset)
     dspinBox->setMaximum(15.0);
     dspinBox->setSingleStep(0.25);
     dspinBox->setDecimals(2);
+    dspinBox->setSuffix(QStringLiteral(" dB"));
     dspinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, offset);
     dspinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
     dspinBox->setProperty( ArrayDataEditWidget::convertMethodProperty, QStringLiteral("scaleAndAdd(0.25, -15.0)"));

@@ -52,7 +52,9 @@ SOURCES += main.cpp\
     preferencesdialog.cpp \
     effecteditwidgets/freqspinbox.cpp \
     effecteditwidgets/bassfreqspinbox.cpp \
-    effecteditwidgets/expspinbox.cpp
+    effecteditwidgets/expspinbox.cpp \
+    effecteditwidgets/hqpitchwidget.cpp \
+    effecteditwidgets/dualpitchwidget.cpp
 
 HEADERS  += mainwindow.h \
     midiportmodel.h \
@@ -84,7 +86,9 @@ HEADERS  += mainwindow.h \
     preferencesdialog.h \
     effecteditwidgets/freqspinbox.h \
     effecteditwidgets/bassfreqspinbox.h \
-    effecteditwidgets/expspinbox.h
+    effecteditwidgets/expspinbox.h \
+    effecteditwidgets/hqpitchwidget.h \
+    effecteditwidgets/dualpitchwidget.h
 
 linux {
 LIBS += -lasound
