@@ -11,6 +11,7 @@ BassPreampWidget::BassPreampWidget( QWidget *parent) :
     EffectEditBaseWidget(parent)
 {
     QDoubleSpinBox *dspinBox;
+    FreqSpinBox *freqSpinBox;
     QSpinBox *spinBox;
     QGridLayout *mainlyt = new QGridLayout();
 
@@ -72,7 +73,7 @@ BassPreampWidget::BassPreampWidget( QWidget *parent) :
     mainlyt->addWidget(bfreqSpinBox, 5, 1);
 
     mainlyt->addWidget(new QLabel(tr("Low Mid Freq")), 4, 2);
-    FreqSpinBox *freqSpinBox = new FreqSpinBox();
+    freqSpinBox = new FreqSpinBox();
     freqSpinBox->setParameters(80.0, 1280.0);
     freqSpinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, LowMidFreq);
     freqSpinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
@@ -98,6 +99,24 @@ BassPreampWidget::BassPreampWidget( QWidget *parent) :
     freqSpinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, TrebleFreq);
     freqSpinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
     mainlyt->addWidget(freqSpinBox, 5, 5);
+
+    mainlyt->addWidget(new QLabel(tr("Parametric EQ Freq")), 6, 0);
+    freqSpinBox = new FreqSpinBox();
+    freqSpinBox->setParameters(20.0, 20000.0, 0, 0xFF);
+    freqSpinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, ParametricEQFreq);
+    freqSpinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 2);
+    mainlyt->addWidget(freqSpinBox, 7, 0);
+
+    mainlyt->addWidget(new QLabel(tr("Parametric EQ Q")), 6, 1);
+    ExpSpinBox *extSpinBox = new ExpSpinBox();
+    extSpinBox->setParameters(0.1, 20.0);
+    extSpinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, ParametricEQQ);
+    extSpinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    mainlyt->addWidget(extSpinBox, 7, 1);
+
+    mainlyt->addWidget(new QLabel(tr("Parametric EQ Gain")), 6, 2);
+    dspinBox = createStdGainSpinBox(ParametricEQGain);
+    mainlyt->addWidget(dspinBox, 7, 2);
 
     setLayout(mainlyt);
 }
