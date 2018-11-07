@@ -1,5 +1,6 @@
 #include "basspreamp.h"
 #include "magicstomptext.h"
+#include "bassfreqspinbox.h"
 #include <QLabel>
 #include <QGridLayout>
 #include <QDoubleSpinBox>
@@ -13,7 +14,7 @@ BassPreampWidget::BassPreampWidget( QWidget *parent) :
     QSpinBox *spinBox;
     QGridLayout *mainlyt = new QGridLayout();
 
-    mainlyt->addWidget(new QLabel(tr("Type")), 0, 0, 1, 2);
+    mainlyt->addWidget(new QLabel(tr("Preamp Type")), 0, 0, 1, 2);
     QComboBox *speakerComboBox = new QComboBox();
     speakerComboBox->addItems( BassPreampTypeNameList);
     speakerComboBox->setCurrentIndex(-1);
@@ -63,6 +64,40 @@ BassPreampWidget::BassPreampWidget( QWidget *parent) :
     mainlyt->addWidget(new QLabel(tr("Treble")), 2, 5);
     dspinBox = createStdGainSpinBox(Treble);
     mainlyt->addWidget(dspinBox, 3, 5);
+
+    mainlyt->addWidget(new QLabel(tr("Bass Freq")), 4, 1);
+    BassFreqSpinBox *bfreqSpinBox = new BassFreqSpinBox();
+    bfreqSpinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, BassFreq);
+    bfreqSpinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    mainlyt->addWidget(bfreqSpinBox, 5, 1);
+
+    mainlyt->addWidget(new QLabel(tr("Low Mid Freq")), 4, 2);
+    FreqSpinBox *freqSpinBox = new FreqSpinBox();
+    freqSpinBox->setParameters(80.0, 1280.0);
+    freqSpinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, LowMidFreq);
+    freqSpinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    mainlyt->addWidget(freqSpinBox, 5, 2);
+
+    mainlyt->addWidget(new QLabel(tr("Middle Freq")), 4, 3);
+    freqSpinBox = new FreqSpinBox();
+    freqSpinBox->setParameters(250.0, 4000.0);
+    freqSpinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, MiddleFreq);
+    freqSpinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    mainlyt->addWidget(freqSpinBox, 5, 3);
+
+    mainlyt->addWidget(new QLabel(tr("High Mid Freq")), 4, 4);
+    freqSpinBox = new FreqSpinBox();
+    freqSpinBox->setParameters(500.0, 8000.0);
+    freqSpinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, HighMidFreq);
+    freqSpinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    mainlyt->addWidget(freqSpinBox, 5, 4);
+
+    mainlyt->addWidget(new QLabel(tr("Treble Freq")), 4, 5);
+    freqSpinBox = new FreqSpinBox();
+    freqSpinBox->setParameters(1250.0, 20000.0);
+    freqSpinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, TrebleFreq);
+    freqSpinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    mainlyt->addWidget(freqSpinBox, 5, 5);
 
     setLayout(mainlyt);
 }

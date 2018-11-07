@@ -9,6 +9,7 @@
 #include <QComboBox>
 #include <QLineEdit>
 #include <QChildEvent>
+#include "effecteditwidgets/freqspinbox.h"
 
 ArrayDataEditWidget::ArrayDataEditWidget( QWidget *parent)
         : QWidget( parent), dataArray(nullptr)
@@ -231,6 +232,12 @@ void ArrayDataEditWidget::connectObjectToValueChangedSlot( QObject *object)
     if( lineedit != nullptr)
     {
         connect(lineedit, SIGNAL(textEdited(QString)), this, SLOT(valueChanged()));
+        return;
+    }
+    FreqSpinBox *fbox = dynamic_cast<FreqSpinBox *>(object);
+    if( fbox != nullptr)
+    {
+        connect(fbox, SIGNAL(rawValueChanged(int)), this, SLOT(valueChanged()));
         return;
     }
 }

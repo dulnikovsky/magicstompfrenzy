@@ -49,7 +49,9 @@ SOURCES += main.cpp\
     patchlistcombomodel.cpp \
     effecteditwidgets/basspreamp.cpp \
     midiportidalsa.cpp \
-    preferencesdialog.cpp
+    preferencesdialog.cpp \
+    effecteditwidgets/freqspinbox.cpp \
+    effecteditwidgets/bassfreqspinbox.cpp
 
 HEADERS  += mainwindow.h \
     midiportmodel.h \
@@ -78,7 +80,9 @@ HEADERS  += mainwindow.h \
     patchlistcombomodel.h \
     effecteditwidgets/basspreamp.h \
     midiportidalsa.h \
-    preferencesdialog.h
+    preferencesdialog.h \
+    effecteditwidgets/freqspinbox.h \
+    effecteditwidgets/bassfreqspinbox.h
 
 linux {
 LIBS += -lasound
