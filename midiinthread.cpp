@@ -20,6 +20,8 @@ void MidiInThread::run()
 #ifdef Q_OS_LINUX
     snd_seq_event_t *ev;
     MidiEvent *midisysexevent=nullptr;
+    // IMPORTANT snd_seq_event_input blocks even after snd_seq_close has been execuded.
+    // It will be  neccessary for this application to send an SND_SEQ_EVENT_CLIENT_EXIT to himself before terminating
     while (snd_seq_event_input(handle, &ev) >= 0)
     {
         if(ev->type==SND_SEQ_EVENT_SYSEX)
@@ -45,17 +47,34 @@ void MidiInThread::run()
                 midisysexevent=nullptr;
             }
         }
+        else if(ev->type==SND_SEQ_EVENT_PORT_SUBSCRIBED)
+        {
+            snd_seq_addr_t addr = ev->data.addr;
+            return;
+        }
+        else if(ev->type==SND_SEQ_EVENT_PORT_UNSUBSCRIBED)
+        {
+            snd_seq_addr_t addr = ev->data.addr;
+            return;
+        }
+        else if(ev->type==SND_SEQ_EVENT_CLIENT_START)
+        {
+            qDebug("Client Start");
+            snd_seq_addr_t addr = ev->data.addr;
+            return;
+        }
         else if(ev->type==SND_SEQ_EVENT_CLIENT_EXIT)
         {
+            snd_seq_addr_t addr = ev->data.addr;
             return;
         }
         else if(ev->type==SND_SEQ_EVENT_SENSING)
         {
             //qDebug("got sensing");
         }
-        else
+        //else
         {
-            qDebug("MIDI Event %x, %x, %x",ev->data.raw32.d[0], ev->data.raw32.d[1], ev->data.raw32.d[2]);
+            qDebug("MIDI Event. Type = %d",ev->type);
         }
 
         snd_seq_free_event(ev);

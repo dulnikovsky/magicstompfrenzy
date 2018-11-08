@@ -291,13 +291,13 @@ void MidiApplication::sendMidiEvent(MidiEvent *ev)
 void MidiApplication::isQuitting()
 {
 #ifdef Q_OS_LINUX
+    snd_seq_close(handle);
+
     midiInThread->terminate();
     midiInThread->wait();
 
     midiOutThread->quit();
     midiOutThread->wait();
-
-    snd_seq_close(handle);
 #endif
 #ifdef Q_OS_MACOS
     MIDIPortDispose(thisInPort);
