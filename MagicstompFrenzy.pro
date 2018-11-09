@@ -24,12 +24,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
+    mainwindow.cpp \
     midiportmodel.cpp \
     patchlistmodel.cpp \
-    midiinthread.cpp \
     midievent.cpp \
-    midisender.cpp \
     progresswidget.cpp \
     arraydataeditwidget.cpp \
     patchcommoneditorwidget.cpp \
@@ -48,7 +46,6 @@ SOURCES += main.cpp\
     patchcopydialog.cpp \
     patchlistcombomodel.cpp \
     effecteditwidgets/basspreamp.cpp \
-    midiportidalsa.cpp \
     preferencesdialog.cpp \
     effecteditwidgets/freqspinbox.cpp \
     effecteditwidgets/bassfreqspinbox.cpp \
@@ -59,9 +56,7 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
     midiportmodel.h \
     patchlistmodel.h \
-    midiinthread.h \
     midievent.h \
-    midisender.h \
     progresswidget.h \
     arraydataeditwidget.h \
     patchcommoneditorwidget.h \
@@ -82,7 +77,6 @@ HEADERS  += mainwindow.h \
     patchcopydialog.h \
     patchlistcombomodel.h \
     effecteditwidgets/basspreamp.h \
-    midiportidalsa.h \
     preferencesdialog.h \
     effecteditwidgets/freqspinbox.h \
     effecteditwidgets/bassfreqspinbox.h \
@@ -91,6 +85,15 @@ HEADERS  += mainwindow.h \
     effecteditwidgets/dualpitchwidget.h
 
 linux {
+
+HEADERS += midiinthread.h \
+    midisender.h \
+    midiportidalsa.h
+
+SOURCES += midiinthread.cpp \
+    midisender.cpp \
+    midiportidalsa.cpp
+
 LIBS += -lasound
 }
 
@@ -98,7 +101,7 @@ macx {
 
 LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit -framework CoreFoundation -framework CoreMIDI
 
-#ICON = rvplayer3.icns
+ICON = rvplayer3.icns
 }
 
 copydata.commands = $(COPY_DIR) $$PWD/effects.ini $$OUT_PWD

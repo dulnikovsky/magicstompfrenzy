@@ -128,10 +128,10 @@ bool MidiPortModel::connectPorts(MidiClientPortId srcId, MidiClientPortId destId
     snd_seq_port_subscribe_t* subs;
     snd_seq_port_subscribe_alloca(&subs);
 
-    sender.client = srcId.clientId();
-    sender.port = srcId.portId();
-    dest.client = destId.clientId();
-    dest.port = destId.portId();
+    sender.client = static_cast<unsigned char>(srcId.clientId());
+    sender.port = static_cast<unsigned char>(srcId.portId());
+    dest.client = static_cast<unsigned char>(destId.clientId());
+    dest.port = static_cast<unsigned char>(destId.portId());
 
     snd_seq_port_subscribe_set_sender(subs, &sender);
     snd_seq_port_subscribe_set_dest(subs, &dest);
