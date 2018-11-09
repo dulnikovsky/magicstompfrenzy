@@ -9,9 +9,7 @@ typedef struct _snd_seq snd_seq_t;
 typedef snd_seq_t* MidiClientHandle;
 
 #include "midiportidalsa.h"
-
 Q_DECLARE_METATYPE(MidiPortIdAlsa)
-typedef MidiPortIdAlsa MidiClientPortId;
 
 #endif
 
@@ -47,6 +45,9 @@ public slots:
     void sendMidiEvent(MidiEvent *ev);
 
 private slots:
+    void onPortConnectionStatusChanged(MidiClientPortId srcId, MidiClientPortId destId, bool isConnected);
+    void onPortClientPortStatusChanged(MidiClientPortId mpId, bool isExisting);
+
     void isQuitting();
 
 private:
@@ -61,10 +62,8 @@ private:
 
     void midiSystemInit();
 
-    unsigned int thisInPort;
-    unsigned int thisOutPort;
-    QSet<MidiClientPortId> incomingConnectionSet;
-    QSet<MidiClientPortId> outgoingConnectionSet;
+    MidiClientPortId thisInPort;
+    MidiClientPortId thisOutPort;
 };
 
 #endif // MIDIAPPLICATION_H

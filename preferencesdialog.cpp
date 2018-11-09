@@ -9,6 +9,12 @@
 PreferencesDialog::PreferencesDialog(MidiPortModel *portsInModel, MidiPortModel *portsOutModel, QWidget *parent)
     : QDialog(parent), portsInModel(portsInModel), portsOutModel(portsOutModel)
 {
+    connect( portsInModel, SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),
+             this, SLOT(portsInModelDataChanged(QModelIndex,QModelIndex,QVector<int>)));
+
+    connect( portsOutModel, SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),
+        this, SLOT(portsOutModelDataChanged(QModelIndex,QModelIndex,QVector<int>)));
+
     setWindowTitle(tr("Preferences"));
 
     QHBoxLayout *hlyt = new QHBoxLayout();
@@ -17,12 +23,12 @@ PreferencesDialog::PreferencesDialog(MidiPortModel *portsInModel, MidiPortModel 
     portsInListView = new QListView();
     portsInListView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     portsInListView->setModel(portsInModel);
-    for( int r=0; r < portsInModel->rowCount(); r++)
-    {
-        QModelIndex index = portsInModel->index(r,0);
-        if( portsInModel->data( index , MidiPortModel::isConnectedRole).toBool())
-            portsInListView->selectionModel()->select(index, QItemSelectionModel::Select);
-    }
+//    for( int r=0; r < portsInModel->rowCount(); r++)
+//    {
+//        QModelIndex index = portsInModel->index(r,0);
+//        if( portsInModel->data( index , MidiPortModel::isConnectedRole).toBool())
+//            portsInListView->selectionModel()->select(index, QItemSelectionModel::Select);
+//    }
     connect(portsInListView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
             this, SLOT(midiInselectionChanged(QItemSelection,QItemSelection)));
 
@@ -32,12 +38,12 @@ PreferencesDialog::PreferencesDialog(MidiPortModel *portsInModel, MidiPortModel 
     portsOutListView = new QListView();
     portsOutListView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     portsOutListView->setModel(portsOutModel);
-    for( int r=0; r < portsOutModel->rowCount(); r++)
-    {
-        QModelIndex index = portsOutModel->index(r,0);
-        if( portsOutModel->data( index , MidiPortModel::isConnectedRole).toBool())
-            portsOutListView->selectionModel()->select(index, QItemSelectionModel::Select);
-    }
+//    for( int r=0; r < portsOutModel->rowCount(); r++)
+//    {
+//        QModelIndex index = portsOutModel->index(r,0);
+//        if( portsOutModel->data( index , MidiPortModel::isConnectedRole).toBool())
+//            portsOutListView->selectionModel()->select(index, QItemSelectionModel::Select);
+//    }
     connect(portsOutListView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
             this, SLOT(midiOutselectionChanged(QItemSelection,QItemSelection)));
     hlyt->addWidget(portsOutListView);
@@ -49,6 +55,21 @@ PreferencesDialog::PreferencesDialog(MidiPortModel *portsInModel, MidiPortModel 
     hlyt->addWidget(buttonBox);
 
     setLayout(hlyt);
+}
+
+void PreferencesDialog::portsInModelDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles)
+{
+    if( topLeft.data( MidiPortModel::isConnectedRole).toBool())
+        portsInListView->selectionModel()->select(topLeft, QItemSelectionModel::Select);
+    else
+        portsInListView->selectionModel()->select(topLeft, QItemSelectionModel::Deselect);
+}
+void PreferencesDialog::portsOutModelDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles)
+{
+    if( topLeft.data( MidiPortModel::isConnectedRole).toBool())
+        portsOutListView->selectionModel()->select(topLeft, QItemSelectionModel::Select);
+    else
+        portsOutListView->selectionModel()->select(topLeft, QItemSelectionModel::Deselect);
 }
 
 void PreferencesDialog::midiInselectionChanged(const QItemSelection &selected, const QItemSelection &deselected)

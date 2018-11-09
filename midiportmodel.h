@@ -13,9 +13,8 @@ public:
     enum UserRoles{ ClientPortIdRole = Qt::UserRole, isConnectedRole};
     enum Direction{ ReadablePorts, WritablePorts };
 
-    MidiPortModel(MidiClientHandle handle, const QSet<MidiClientPortId> &connectedPortSet,
-                  Direction d = ReadablePorts, QObject *parent = Q_NULLPTR) :
-        QAbstractItemModel(parent), handle(handle), connectedSet(connectedPortSet), direction(d) {}
+    MidiPortModel(MidiClientHandle handle,  Direction d = ReadablePorts, QObject *parent = Q_NULLPTR) :
+        QAbstractItemModel(parent), handle(handle), direction(d) {}
 
     QVariant data(const QModelIndex &index, int role) const override;
 
@@ -27,15 +26,16 @@ public:
 
 public slots:
     void scan();
+    bool connectPorts(MidiClientPortId src, MidiClientPortId dest, bool connected);
 
 private:
     MidiClientHandle handle;
-    const QSet<MidiClientPortId> &connectedSet;
     Direction direction;
-#ifdef Q_OS_MAC
-    typedef unsigned int ClientPortId;
-#endif
+
     QList<QPair<MidiClientPortId, QString>> portList;
+    QSet<MidiClientPortId> connectionsSet;
+
+    void emitPortChanged(MidiClientPortId id);
 };
 
 #endif // MIDIPORTMODEL_H

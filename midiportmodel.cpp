@@ -21,7 +21,7 @@ QVariant MidiPortModel::data(const QModelIndex &index, int role) const
     }
     else if( role == isConnectedRole)
     {
-        return connectedSet.contains(portList.at(index.row()).first);
+        return connectionsSet.contains(portList.at(index.row()).first);
     }
     return QVariant();
 }
@@ -119,6 +119,84 @@ void MidiPortModel::scan()
     }
 #endif
     endResetModel();
+}
+
+bool MidiPortModel::connectPorts(MidiClientPortId srcId, MidiClientPortId destId, bool connected)
+{
+#ifdef Q_OS_LINUX
+    snd_seq_addr_t sender, dest;
+    snd_seq_port_subscribe_t* subs;
+    snd_seq_port_subscribe_alloca(&subs);
+
+    sender.client = srcId.clientId();
+    sender.port = srcId.portId();
+    dest.client = destId.clientId();
+    dest.port = destId.portId();
+
+    snd_seq_port_subscribe_set_sender(subs, &sender);
+    snd_seq_port_subscribe_set_dest(subs, &dest);
+#endif
+
+    if(connected)
+    {
+        if(direction == ReadablePorts)
+        {
+            if(connectionsSet.contains(srcId))
+                return true;
+            connectionsSet.insert(srcId);
+            emitPortChanged(srcId);
+        }
+        else
+        {
+            if(connectionsSet.contains(destId))
+                return true;
+            connectionsSet.insert(destId);
+            emitPortChanged(destId);
+        }
+#ifdef Q_OS_LINUX
+        return snd_seq_subscribe_port(handle, subs);
+#endif
+#ifdef Q_OS_MACOS
+        return MIDIPortConnectSource(thisOutPort, mcpId, nullptr);
+#endif
+    }
+    else
+    {
+        if(direction == ReadablePorts)
+        {
+            if(! connectionsSet.contains(srcId))
+                return true;
+            connectionsSet.remove(srcId);
+            emitPortChanged(srcId);
+        }
+        else
+        {
+            if(! connectionsSet.contains(destId))
+                return true;
+            connectionsSet.remove(destId);
+            emitPortChanged(destId);
+        }
+#ifdef Q_OS_LINUX
+        return snd_seq_unsubscribe_port(handle, subs);
+#endif
+#ifdef Q_OS_MACOS
+        return MIDIPortDisconnectSource( thisInPort, mcpId);
+#endif
+    }
+}
+
+void MidiPortModel::emitPortChanged(MidiClientPortId id)
+{
+    int row;
+    for(row=0; row<portList.size(); row++)
+    {
+        if( portList.at(row).first == id)
+            break;
+    }
+    if(row < portList.size())
+    {
+        emit dataChanged( index(row,0), index(row,0));
+    }
 }
 
 QModelIndex MidiPortModel::index(int row, int column, const QModelIndex &parent) const

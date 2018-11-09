@@ -20,7 +20,7 @@ bool MidiSender::event(QEvent *e)
     {
         snd_seq_event_t ev;
         snd_seq_ev_clear(&ev);
-        snd_seq_ev_set_source(&ev, outport);
+        snd_seq_ev_set_source(&ev, outport.portId());
         snd_seq_ev_set_subs(&ev);
         snd_seq_ev_set_direct(&ev);
 

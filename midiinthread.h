@@ -14,7 +14,8 @@ public:
     MidiInThread(snd_seq_t *handle, QObject *parent=0);
 
 signals:
-    void portStatusChanged(MidiPortIdAlsa);
+    void portConnectionStatusChanged(MidiClientPortId src, MidiClientPortId dest, bool isConnected);
+    void portClientPortStatusChanged(MidiClientPortId mpId, bool isExisting);
 protected:
     void run();
 private:

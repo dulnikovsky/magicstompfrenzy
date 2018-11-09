@@ -28,6 +28,8 @@ private:
     QString name;
 };
 
+typedef MidiPortIdAlsa MidiClientPortId;
+
 uint qHash(const MidiPortIdAlsa &id);
 
 bool operator ==(const MidiPortIdAlsa &a, const MidiPortIdAlsa &b);

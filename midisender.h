@@ -5,6 +5,7 @@
 
 #ifdef Q_OS_LINUX
 typedef struct _snd_seq snd_seq_t;
+#include "midiportidalsa.h"
 #endif
 
 class MidiSender : public QObject
@@ -12,9 +13,9 @@ class MidiSender : public QObject
     Q_OBJECT
 public:
 #ifdef Q_OS_LINUX
-    explicit MidiSender(snd_seq_t *handle, int outport, QObject *parent = nullptr) : QObject(parent), handle(handle), outport(outport) {}
+    explicit MidiSender(snd_seq_t *handle, MidiClientPortId outport, QObject *parent = nullptr) : QObject(parent), handle(handle), outport(outport) {}
 #endif
-    explicit MidiSender( int outport, QObject *parent = nullptr) :QObject(parent), outport(outport) {}
+    explicit MidiSender( MidiClientPortId outport, QObject *parent = nullptr) :QObject(parent), outport(outport) {}
     bool event(QEvent *);
 
 signals:
@@ -25,7 +26,7 @@ private:
 #ifdef Q_OS_LINUX
     snd_seq_t *handle;
 #endif
-    int outport;
+    MidiClientPortId outport;
 
 };
 

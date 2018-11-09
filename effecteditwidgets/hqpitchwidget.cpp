@@ -69,5 +69,7 @@ HQPitchWidget::HQPitchWidget(QWidget *parent) :
     spinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
     mainlyt->addWidget(spinBox, 1, 5);
 
+    mainlyt->setColumnStretch(6,8);
+    mainlyt->setRowStretch(2,8);
     setLayout(mainlyt);
 }

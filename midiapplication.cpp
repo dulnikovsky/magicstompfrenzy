@@ -92,10 +92,15 @@ MidiApplication::MidiApplication(int &argc, char **argv)
     midiEventType = QEvent::registerEventType(MidiEvent::SysEx);
     Q_ASSERT(midiEventType==MidiEvent::SysEx);
 
+    qRegisterMetaType<MidiClientPortId>("MidiClientPortId");
+
     midiSystemInit();
 
 #ifdef Q_OS_LINUX
     midiInThread = new MidiInThread(handle, this);
+    connect(midiInThread, SIGNAL(portClientPortStatusChanged(MidiClientPortId,bool)), this, SLOT(onPortClientPortStatusChanged(MidiClientPortId,bool)));
+    connect(midiInThread, SIGNAL(portConnectionStatusChanged(MidiClientPortId,MidiClientPortId,bool)),
+            this, SLOT(onPortConnectionStatusChanged(MidiClientPortId,MidiClientPortId,bool)));
     midiInThread->start();
 
     midiSender = new MidiSender(handle, thisOutPort);
@@ -109,9 +114,9 @@ MidiApplication::MidiApplication(int &argc, char **argv)
     MIDIOutputPortCreate(handle, CFSTR("Out Port"),  &thisOutPort);
 #endif
 
-    readablePortsModel = new MidiPortModel(handle, incomingConnectionSet, MidiPortModel::ReadablePorts, this);
+    readablePortsModel = new MidiPortModel(handle, MidiPortModel::ReadablePorts, this);
     readablePortsModel->scan();
-    writablePortsModel = new MidiPortModel(handle, outgoingConnectionSet, MidiPortModel::WritablePorts, this);
+    writablePortsModel = new MidiPortModel(handle, MidiPortModel::WritablePorts, this);
     writablePortsModel->scan();
 
     connect(this, SIGNAL(aboutToQuit()), this, SLOT(isQuitting()));
@@ -155,10 +160,13 @@ void  MidiApplication::midiSystemInit()
 
     snd_seq_set_client_name(handle, "MagicstompFrenzy");
 
-    thisInPort = snd_seq_create_simple_port(handle, "MagicstompFrenzy IN",
+    int inPort = snd_seq_create_simple_port(handle, "MagicstompFrenzy IN",
                                             SND_SEQ_PORT_CAP_WRITE|SND_SEQ_PORT_CAP_SUBS_WRITE, SND_SEQ_PORT_TYPE_MIDI_GENERIC | SND_SEQ_PORT_TYPE_APPLICATION);
-    thisOutPort = snd_seq_create_simple_port(handle, "MagicstompFrenzy OUT",
+    int outPort = snd_seq_create_simple_port(handle, "MagicstompFrenzy OUT",
                                              SND_SEQ_PORT_CAP_READ|SND_SEQ_PORT_CAP_SUBS_READ, SND_SEQ_PORT_TYPE_MIDI_GENERIC );
+
+    thisInPort = MidiClientPortId( snd_seq_client_id(handle), inPort);
+    thisOutPort = MidiClientPortId( snd_seq_client_id(handle), outPort);
 
     // Subscribe to the announce port.
     snd_seq_port_subscribe_t* subs;
@@ -168,7 +176,7 @@ void  MidiApplication::midiSystemInit()
     announce_sender.client = SND_SEQ_CLIENT_SYSTEM;
     announce_sender.port = SND_SEQ_PORT_SYSTEM_ANNOUNCE;
     announce_dest.client = snd_seq_client_id(handle);
-    announce_dest.port = thisInPort;
+    announce_dest.port = thisInPort.portId();
     snd_seq_port_subscribe_set_sender(subs, &announce_sender);
     snd_seq_port_subscribe_set_dest(subs, &announce_dest);
     err = snd_seq_subscribe_port(handle, subs);
@@ -184,84 +192,12 @@ void  MidiApplication::midiSystemInit()
 
 bool MidiApplication::changeReadableMidiPortStatus( MidiClientPortId mcpId, bool connect)
 {
-    if( (connect && incomingConnectionSet.contains(mcpId)) ||
-            (! connect && ! incomingConnectionSet.contains( mcpId)))
-        return true;
-
-#ifdef Q_OS_LINUX
-        snd_seq_addr_t sender, dest;
-        snd_seq_port_subscribe_t* subs;
-        snd_seq_port_subscribe_alloca(&subs);
-        dest.client = snd_seq_client_id(handle);
-        dest.port = thisInPort;
-        sender.client = mcpId.clientId();
-        sender.port = mcpId.portId();
-        snd_seq_port_subscribe_set_sender(subs, &sender);
-        snd_seq_port_subscribe_set_dest(subs, &dest);
-#endif
-
-    if(connect)
-    {
-        incomingConnectionSet.insert(mcpId);
-#ifdef Q_OS_LINUX
-        return snd_seq_subscribe_port(handle, subs);
-#endif
-#ifdef Q_OS_MACOS
-        return MIDIPortConnectSource(thisInPort, mcpId, nullptr);
-#endif
-    }
-    else
-    {
-        incomingConnectionSet.remove(mcpId);
-#ifdef Q_OS_LINUX
-        return snd_seq_unsubscribe_port(handle, subs);
-#endif
-#ifdef Q_OS_MACOS
-        return MIDIPortDisconnectSource( thisInPort, mcpId);
-#endif
-    }
+    readablePortsModel->connectPorts(mcpId, thisInPort, connect);
 }
 
 bool MidiApplication::changeWritebleeMidiPortStatus( MidiClientPortId mcpId, bool connect)
 {
-    if( (connect && outgoingConnectionSet.contains(mcpId)) ||
-            (! connect && ! outgoingConnectionSet.contains( mcpId)))
-        return true;
-
-#ifdef Q_OS_LINUX
-    snd_seq_addr_t sender, dest;
-    snd_seq_port_subscribe_t* subs;
-    snd_seq_port_subscribe_alloca(&subs);
-
-    sender.client = snd_seq_client_id(handle);
-    sender.port = thisOutPort;
-    dest.client = mcpId.clientId();
-    dest.port = mcpId.portId();
-
-    snd_seq_port_subscribe_set_sender(subs, &sender);
-    snd_seq_port_subscribe_set_dest(subs, &dest);
-#endif
-
-    if(connect)
-    {
-        outgoingConnectionSet.insert(mcpId);
-#ifdef Q_OS_LINUX
-        return snd_seq_subscribe_port(handle, subs);
-#endif
-#ifdef Q_OS_MACOS
-        return MIDIPortConnectSource(thisOutPort, mcpId, nullptr);
-#endif
-    }
-    else
-    {
-        outgoingConnectionSet.remove(mcpId);
-#ifdef Q_OS_LINUX
-        return snd_seq_unsubscribe_port(handle, subs);
-#endif
-#ifdef Q_OS_MACOS
-        return MIDIPortDisconnectSource( thisInPort, mcpId);
-#endif
-    }
+    writablePortsModel->connectPorts(thisOutPort, mcpId, connect);
 }
 void MidiApplication::sendMidiEvent(MidiEvent *ev)
 {
@@ -288,16 +224,29 @@ void MidiApplication::sendMidiEvent(MidiEvent *ev)
 #endif
 }
 
+void MidiApplication::onPortConnectionStatusChanged(MidiClientPortId srcId, MidiClientPortId destId, bool isConnected)
+{
+    if(destId == thisInPort)
+        readablePortsModel->connectPorts(srcId, destId, isConnected);
+    else if(srcId == thisOutPort)
+        writablePortsModel->connectPorts( srcId, destId, isConnected);
+}
+void MidiApplication::onPortClientPortStatusChanged(MidiClientPortId mpId, bool isExisting)
+{
+    readablePortsModel->scan();
+    writablePortsModel->scan();
+}
+
 void MidiApplication::isQuitting()
 {
 #ifdef Q_OS_LINUX
-    snd_seq_close(handle);
-
     midiInThread->terminate();
     midiInThread->wait();
 
     midiOutThread->quit();
     midiOutThread->wait();
+
+    snd_seq_close(handle);
 #endif
 #ifdef Q_OS_MACOS
     MIDIPortDispose(thisInPort);

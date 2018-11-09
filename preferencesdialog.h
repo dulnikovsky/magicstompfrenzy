@@ -21,6 +21,9 @@ private slots:
     void midiInselectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void midiOutselectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
+    void portsInModelDataChanged(const QModelIndex&topLeft, const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int>());
+    void portsOutModelDataChanged(const QModelIndex&topLeft, const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int>());
+
 private:
     MidiPortModel *portsInModel;
     MidiPortModel *portsOutModel;
