@@ -89,7 +89,7 @@ void MidiPortModel::scan()
 
             fullName.append(" " + QString(charArr));
 
-            portList.append(QPair<ClientPortId, QString>( src, fullName));
+            portList.append(QPair<MidiClientPortId, QString>( src, fullName));
             qDebug(" source %d: %s %d\n", i, charArr, src);
         }
     }
@@ -113,7 +113,7 @@ void MidiPortModel::scan()
 
             fullName.append(" " + QString(charArr));
 
-            portList.append(QPair<ClientPortId, QString>( dest, fullName));
+            portList.append(QPair<MidiClientPortId, QString>( dest, fullName));
             qDebug(" destination %d: %s %d\n", i, charArr, dest);
         }
     }
@@ -157,7 +157,7 @@ bool MidiPortModel::connectPorts(MidiClientPortId srcId, MidiClientPortId destId
         return snd_seq_subscribe_port(handle, subs);
 #endif
 #ifdef Q_OS_MACOS
-        return MIDIPortConnectSource(thisOutPort, mcpId, nullptr);
+        return MIDIPortConnectSource(destId, srcId, nullptr);
 #endif
     }
     else
@@ -180,7 +180,7 @@ bool MidiPortModel::connectPorts(MidiClientPortId srcId, MidiClientPortId destId
         return snd_seq_unsubscribe_port(handle, subs);
 #endif
 #ifdef Q_OS_MACOS
-        return MIDIPortDisconnectSource( thisInPort, mcpId);
+        return MIDIPortDisconnectSource( srcId, destId);
 #endif
     }
 }

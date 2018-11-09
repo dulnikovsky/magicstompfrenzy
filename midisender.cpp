@@ -4,7 +4,7 @@
 
 #ifdef Q_OS_LINUX
 #include <alsa/asoundlib.h>
-#endif
+
 
 #include <QApplication>
 #include <QThread>
@@ -14,7 +14,7 @@
 
 bool MidiSender::event(QEvent *e)
 {
-#ifdef Q_OS_LINUX
+
     MidiEvent *me = dynamic_cast<MidiEvent *>(e);
     if(me && me->type()==static_cast<QEvent::Type>(MidiEvent::SysEx))
     {
@@ -43,6 +43,7 @@ bool MidiSender::event(QEvent *e)
         }
         me->accept();
     }
-#endif
+
     return true;
 }
+#endif

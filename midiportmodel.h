@@ -16,6 +16,8 @@ public:
     MidiPortModel(MidiClientHandle handle,  Direction d = ReadablePorts, QObject *parent = Q_NULLPTR) :
         QAbstractItemModel(parent), handle(handle), direction(d) {}
 
+    const QSet<MidiClientPortId> &ConnectionsSet() const { return connectionsSet; }
+
     QVariant data(const QModelIndex &index, int role) const override;
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;

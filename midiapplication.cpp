@@ -8,8 +8,10 @@
 #endif
 
 #include "midievent.h"
+#ifdef Q_OS_LINUX
 #include "midiinthread.h"
 #include "midisender.h"
+#endif
 #include "midiportmodel.h"
 
 #include <QtDebug>
@@ -192,12 +194,12 @@ void  MidiApplication::midiSystemInit()
 
 bool MidiApplication::changeReadableMidiPortStatus( MidiClientPortId mcpId, bool connect)
 {
-    readablePortsModel->connectPorts(mcpId, thisInPort, connect);
+    return readablePortsModel->connectPorts(mcpId, thisInPort, connect);
 }
 
 bool MidiApplication::changeWritebleeMidiPortStatus( MidiClientPortId mcpId, bool connect)
 {
-    writablePortsModel->connectPorts(thisOutPort, mcpId, connect);
+    return writablePortsModel->connectPorts(thisOutPort, mcpId, connect);
 }
 void MidiApplication::sendMidiEvent(MidiEvent *ev)
 {
@@ -207,8 +209,8 @@ void MidiApplication::sendMidiEvent(MidiEvent *ev)
 #ifdef Q_OS_MACOS
     if( ev->type() == static_cast< QEvent::Type>( MidiEvent::SysEx))
     {
-        QSet<MidiClientPortId>::const_iterator iter = outgoingConnectionSet.constBegin();
-        while (iter != outgoingConnectionSet.constEnd())
+        QSet<MidiClientPortId>::const_iterator iter = writablePortsModel->ConnectionsSet().constBegin();
+        while (iter != writablePortsModel->ConnectionsSet().constEnd())
         {
             sysexReq.bytesToSend = static_cast< unsigned int>(ev->sysExData()->size());
             sysexReq.complete = false;

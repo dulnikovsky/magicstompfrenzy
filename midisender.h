@@ -1,12 +1,13 @@
 #ifndef MIDISENDER_H
 #define MIDISENDER_H
 
+#ifdef Q_OS_LINUX
 #include <QObject>
 
-#ifdef Q_OS_LINUX
+
 typedef struct _snd_seq snd_seq_t;
 #include "midiportidalsa.h"
-#endif
+
 
 class MidiSender : public QObject
 {
@@ -29,5 +30,6 @@ private:
     MidiClientPortId outport;
 
 };
+#endif
 
 #endif // MIDISENDER_H
