@@ -44,10 +44,10 @@ public slots:
 
     void sendMidiEvent(MidiEvent *ev);
 
-private slots:
+
     void onPortConnectionStatusChanged(MidiClientPortId srcId, MidiClientPortId destId, bool isConnected);
     void onPortClientPortStatusChanged(MidiClientPortId mpId, bool isExisting);
-
+private slots:
     void isQuitting();
 
 private:

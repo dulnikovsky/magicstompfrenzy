@@ -19,6 +19,19 @@
 #ifdef Q_OS_MAC
 void MIDIEngineNotifyProc(const MIDINotification *message, void *refCon)
 {
+    MidiApplication *midiApp = static_cast< MidiApplication *>( refCon);
+    if( message->messageID == kMIDIMsgObjectAdded || message->messageID == kMIDIMsgObjectRemoved)
+    {
+        const MIDIObjectAddRemoveNotification *addRemoveNotify = reinterpret_cast< const MIDIObjectAddRemoveNotification*>(message);
+        if(addRemoveNotify->childType == kMIDIObjectType_Source)
+        {
+            midiApp->onPortClientPortStatusChanged( addRemoveNotify->child, message->messageID==kMIDIMsgObjectAdded?true:false);
+        }
+        else if(addRemoveNotify->childType == kMIDIObjectType_Destination)
+        {
+            midiApp->onPortClientPortStatusChanged( addRemoveNotify->child, message->messageID==kMIDIMsgObjectAdded?true:false);
+        }
+    }
     qDebug("MIDI Notify, messageId=%d,", message->messageID);
 }
 
@@ -68,8 +81,8 @@ void MIDIEngineReadProc(const MIDIPacketList *pktlist, void *arg, void *connRefC
              Q_ASSERT( midievent != nullptr);
         }
 
-        if( midievent->type() == static_cast<QEvent::Type>(MidiEvent::SysEx))
-            qDebug() << midievent->sysExData()->toHex(',');
+//        if( midievent->type() == static_cast<QEvent::Type>(MidiEvent::SysEx))
+//            qDebug() << midievent->sysExData()->toHex(',');
         QApplication::postEvent( static_cast< QObject *>(arg), midievent);
         midievent = nullptr;
 
@@ -188,7 +201,7 @@ void  MidiApplication::midiSystemInit()
     }
 #endif
 #ifdef Q_OS_MACOS
-    MIDIClientCreate(CFSTR("MagicstompFrenzy"), MIDIEngineNotifyProc, 0, &handle);
+    MIDIClientCreate(CFSTR("MagicstompFrenzy"), MIDIEngineNotifyProc, this, &handle);
 #endif
 }
 

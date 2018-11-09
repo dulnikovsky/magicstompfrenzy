@@ -101,7 +101,7 @@ macx {
 
 LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit -framework CoreFoundation -framework CoreMIDI
 
-ICON = rvplayer3.icns
+ICON = magicstomp.icns
 }
 
 copydata.commands = $(COPY_DIR) $$PWD/effects.ini $$OUT_PWD
