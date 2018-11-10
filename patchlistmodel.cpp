@@ -1,12 +1,11 @@
 #include "patchlistmodel.h"
 #include <QColor>
-#include <QSet>
 
 #include "magicstomp.h"
 #include "magicstomptext.h"
 
-PatchListModel::PatchListModel( const QList<QByteArray> &patchDataList, const QSet<int> &dirtyPatches, QObject *parent)
-    :QAbstractItemModel(parent), patchDataRef(patchDataList), dirtyPatches(dirtyPatches)
+PatchListModel::PatchListModel( const QList<QByteArray> &patchDataList, const QMap<int, QPair<QByteArray, bool>> &backupPatchData, QObject *parent)
+    :QAbstractItemModel(parent), patchDataRef(patchDataList), backupPatchDataMapRef(backupPatchData)
 {
 
 }
@@ -27,7 +26,7 @@ QVariant PatchListModel::data(const QModelIndex &index, int role) const
         else if(role==Qt::DecorationRole)
         {
             int row = index.row();
-            if(dirtyPatches.contains(row))
+            if(backupPatchDataMapRef.contains(row))
                 return QColor(Qt::yellow);
         }
     }

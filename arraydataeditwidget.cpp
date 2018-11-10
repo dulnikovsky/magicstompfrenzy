@@ -161,9 +161,9 @@ bool ArrayDataEditWidget::writeEditedParameter(QObject *editor)
 
         {
             QVariant newVal = editor->property(valPropNameArr);
-
             if(newVal.isValid())
             {
+               emit parameterAboutToBeChanged(intParamOffset, intParamLenght);
                QVariant convertMethod = editor->property(convertMethodProperty);
                if(convertMethod.isValid())
                {

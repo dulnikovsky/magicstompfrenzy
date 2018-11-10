@@ -36,12 +36,16 @@ signals:
     void writableMidiPortSelected( MidiClientPortId id);
     void sendMidiEvent(MidiEvent *);
 
+private:
+    enum PatchListType { User, GuitarPreset, BassPreset, AcousticPreset};
+
 private slots:
     void requestAll();
     void sendAll();
     void requestPatch(int patchIndex);
-    void sendPatch(int patchIndex, bool sendToTmpArea = true);
+    void sendPatch(int patchIndex, bool sendToTmpArea = true, PatchListType type =User);
 
+    void parameterToBeChanged(int offset, int length);
     void parameterChanged(int offset, int length);
 
     void timeout();
@@ -57,8 +61,10 @@ private slots:
     void showPreferences();
 
 private:
+    void loadPresetPatches(int index, const QString &filename);
+
     int currentPatchTransmitted;
-    int currentPatchEdited;
+    QPair<PatchListType, int> currentPatchEdited;
     int patchToCopy;
     bool cancelOperation;
     bool isInTransmissionState;
@@ -66,15 +72,18 @@ private:
     MidiPortModel *readablePortsModel;
     MidiPortModel *writablePortsModel;
 
-    PatchListModel *patchListModel;
+    //PatchListModel *patchListModel;
+    QList<PatchListModel *> patchListModelList;
+    PatchListModel *tmpPatchListModel;
 
     QTimer *timeOutTimer;
     QTimer *midiOutTimer;
     QQueue< MidiEvent *> midiOutQueue;
 
-    QList<QByteArray> patchDataList;
-    //QMap<int, QByteArray> backupPatchesMap;
-    QSet<int> dirtyPatches;
+    //QList<QByteArray> patchDataList;
+    QList<QList<QByteArray>> newPatchDataList;
+    QList<QByteArray> tmpPatchDataList;
+    QList<QMap<int, QPair<QByteArray, bool>>> backupPatchesMapList;
 
     QTableView *patchListView;
     QPushButton *requestButton;

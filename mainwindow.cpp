@@ -26,6 +26,7 @@
 #include <QDir>
 #include <QStandardPaths>
 #include <QItemSelectionModel>
+#include <QTabWidget>
 #include <QAction>
 #include <QDebug>
 
@@ -37,13 +38,35 @@ static const int parameterSendHeaderLength = 6;
 static const unsigned char sysExParameterSendHeader[parameterSendHeaderLength] = { 0xF0, 0x43, 0x7D, 0x40, 0x55, 0x42 };
 
 MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod, QWidget *parent)
-    : QMainWindow(parent), currentPatchTransmitted(-1), currentPatchEdited(-1), patchToCopy(-1),
+    : QMainWindow(parent), currentPatchTransmitted(-1), currentPatchEdited(QPair<PatchListType,int>(User,-1)), patchToCopy(-1),
       cancelOperation(false), isInTransmissionState(false),
       readablePortsModel(readPortsMod), writablePortsModel(writePortsMod)
 {
+    newPatchDataList.append(QList<QByteArray>());
     for(int i=0; i<numOfPatches; i++)
-        patchDataList.append( QByteArray());
-    patchListModel = new PatchListModel( patchDataList, dirtyPatches, this);
+    {
+        newPatchDataList[0].append( QByteArray());
+        tmpPatchDataList.append( QByteArray());
+    }
+
+    for(int i=0; i<=(AcousticPreset+1); i++)
+    {
+        backupPatchesMapList.append(QMap<int, QPair<QByteArray, bool>>());
+    }
+
+    tmpPatchListModel = new PatchListModel( tmpPatchDataList, backupPatchesMapList.last(), this);
+
+    newPatchDataList.append(QList<QByteArray>());
+    loadPresetPatches( GuitarPreset, QStringLiteral("guitarpresets.ini"));
+    newPatchDataList.append(QList<QByteArray>());
+    loadPresetPatches( BassPreset, QStringLiteral("basspresets.ini"));
+    newPatchDataList.append(QList<QByteArray>());
+    loadPresetPatches( AcousticPreset, QStringLiteral("acousticpresets.ini"));
+
+    patchListModelList.append(new PatchListModel( newPatchDataList.at(User), backupPatchesMapList.at(User), this));
+    patchListModelList.append(new PatchListModel( newPatchDataList.at(GuitarPreset), backupPatchesMapList.at(GuitarPreset), this));
+    patchListModelList.append(new PatchListModel( newPatchDataList.at(BassPreset), backupPatchesMapList.at(BassPreset), this));
+    patchListModelList.append(new PatchListModel( newPatchDataList.at(AcousticPreset), backupPatchesMapList.at(AcousticPreset), this));
 
     timeOutTimer = new QTimer(this);
     timeOutTimer->setInterval(1000);
@@ -74,17 +97,38 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     patchButtonsLayout->addWidget(sendButton);
 
     patchListLayout = new QVBoxLayout();
+
+    QTabWidget *patchTabWidget = new QTabWidget();
+
     patchListView = new QTableView();
     patchListView->setSelectionBehavior(QAbstractItemView::SelectRows);
-    patchListView->setModel(patchListModel);
+    patchListView->setModel(patchListModelList.at(User));
     connect(patchListView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(patchListDoubleClicked(QModelIndex)));
     connect(patchListView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
             this, SLOT(patchListSelectionChanged()));
-    patchListLayout->addWidget(patchListView);
-    patchListGroupbox->setLayout(patchListLayout);
+    patchTabWidget->addTab( patchListView, tr("User"));
 
+    QTableView *guitarPatchListView = new QTableView();
+    guitarPatchListView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    guitarPatchListView->setModel(patchListModelList.at(GuitarPreset));
+    connect(guitarPatchListView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(patchListDoubleClicked(QModelIndex)));
+    patchTabWidget->addTab( guitarPatchListView, tr("Guitar Presets"));
+
+    QTableView *bassPatchListView = new QTableView();
+    bassPatchListView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    bassPatchListView->setModel(patchListModelList.at(BassPreset));
+    connect(bassPatchListView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(patchListDoubleClicked(QModelIndex)));
+    patchTabWidget->addTab( bassPatchListView, tr("Bass Presets"));
+
+    QTableView *acousticPatchListView = new QTableView();
+    acousticPatchListView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    acousticPatchListView->setModel(patchListModelList.at(AcousticPreset));
+    connect(acousticPatchListView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(patchListDoubleClicked(QModelIndex)));
+    patchTabWidget->addTab( acousticPatchListView, tr("Acoustic Presets"));
+
+    patchListGroupbox->setLayout(patchListLayout);
     patchListLayout->addLayout(patchButtonsLayout);
-    patchListLayout->addWidget(patchListView);
+    patchListLayout->addWidget(patchTabWidget);
 
     QHBoxLayout *listEditButtonsLayout = new QHBoxLayout();
     listEditButtonsLayout->addWidget(swapButton = new QPushButton(tr("Swap")));
@@ -101,6 +145,7 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     mainLeftlayout->addWidget( patchListGroupbox);
 
     QWidget *dockWidgetDummy = new QWidget();
+    dockWidgetDummy->setMinimumSize(440, 600);
     dockWidgetDummy->setLayout(mainLeftlayout);
 
     QDockWidget *dockWidget = new QDockWidget();
@@ -108,8 +153,10 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     dockWidget->setObjectName( QStringLiteral("dockWidget"));
     dockWidget->setWidget(dockWidgetDummy);
     addDockWidget(Qt::LeftDockWidgetArea, dockWidget);
+    resizeDocks({dockWidget}, {600}, Qt::Horizontal); // workaroud for dock widget resize bug
 
     PatchEditorWidget *editor = new PatchEditorWidget();
+    connect(editor, SIGNAL(parameterAboutToBeChanged(int,int)), this, SLOT(parameterToBeChanged(int,int)));
     connect(editor, SIGNAL(parameterChanged(int,int)), this, SLOT(parameterChanged(int,int)));
     setCentralWidget(editor);
 
@@ -119,8 +166,12 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
         QByteArray arr;
         arr = cacheSettings.value("Patchdata"+QString::number(i+1).rightJustified(2, '0')).toByteArray();
         if(arr.size() == PatchTotalLength && arr.at(PatchType+1)<EffectTypeNUMBER)
-            patchDataList[i] = arr;
+            newPatchDataList[User][i] = arr;
     }
+    patchListView->resizeColumnsToContents();
+    guitarPatchListView->resizeColumnsToContents();
+    bassPatchListView->resizeColumnsToContents();
+    acousticPatchListView->resizeColumnsToContents();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -128,8 +179,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
     QSettings cacheSettings(QStandardPaths::writableLocation(QStandardPaths::CacheLocation)+QStringLiteral("/patchcache.ini"), QSettings::IniFormat);
     for(int i=0; i<numOfPatches;i++)
     {
-        if(patchDataList.at(i).size() == PatchTotalLength)
-        cacheSettings.setValue("Patchdata"+QString::number(i+1).rightJustified(2, '0'), patchDataList.at(i));
+        if(newPatchDataList.at(User).at(i).size() == PatchTotalLength)
+            cacheSettings.setValue("Patchdata"+QString::number(i+1).rightJustified(2, '0'), newPatchDataList.at(User).at(i));
     }
     QMainWindow::closeEvent(event);
 }
@@ -165,6 +216,11 @@ void MainWindow::midiEvent(MidiEvent *ev)
             {
                 qDebug("Patch %d Dump Start Message", inData->at(12));
                 currentPatchTransmitted = inData->at(12);
+                if(currentPatchTransmitted == 0)
+                {
+                    for(int i=0; i< numOfPatches; i++)
+                        tmpPatchDataList[i].clear();
+                }
             }
             else if( inData->at(10)==0x30 && inData->at(11)==0x11)
             {
@@ -186,10 +242,10 @@ void MainWindow::midiEvent(MidiEvent *ev)
                 { // Patch common data;
                     if(currentPatchTransmitted >=0 && currentPatchTransmitted < numOfPatches && length == PatchCommonLength)
                     {
-                        patchDataList[currentPatchTransmitted] = inData->mid(13, PatchCommonLength);
-                        if( patchDataList[currentPatchTransmitted].size() != PatchCommonLength)
+                        tmpPatchDataList[currentPatchTransmitted] = inData->mid(13, PatchCommonLength);
+                        if( tmpPatchDataList[currentPatchTransmitted].size() != PatchCommonLength)
                         {
-                            patchDataList[currentPatchTransmitted].clear();
+                            tmpPatchDataList[currentPatchTransmitted].clear();
                             return;
                         }
                     }
@@ -198,13 +254,13 @@ void MainWindow::midiEvent(MidiEvent *ev)
                 { // Patch effect data;
                     if(currentPatchTransmitted >=0 && currentPatchTransmitted < numOfPatches && length == PatchEffectLength)
                     {
-                        patchDataList[currentPatchTransmitted].append( inData->mid(13, PatchEffectLength));
-                        if( patchDataList[currentPatchTransmitted].size() != PatchTotalLength)
+                        tmpPatchDataList[currentPatchTransmitted].append( inData->mid(13, PatchEffectLength));
+                        if( tmpPatchDataList[currentPatchTransmitted].size() != PatchTotalLength)
                         {
-                            patchDataList[currentPatchTransmitted].clear();
+                            tmpPatchDataList[currentPatchTransmitted].clear();
                             return;
                         }
-                        patchListModel->patchUpdated(currentPatchTransmitted);
+                        tmpPatchListModel->patchUpdated(currentPatchTransmitted);
                     }
                 }
             }
@@ -215,6 +271,11 @@ void MainWindow::midiEvent(MidiEvent *ev)
 
 void MainWindow::requestAll()
 {
+    for(int i=0; i< numOfPatches; i++)
+        tmpPatchDataList[i].clear();
+
+    patchListView->setModel( tmpPatchListModel);
+
     putGuiToTransmissionState(true, false);
 
     currentPatchTransmitted = -1;
@@ -227,6 +288,17 @@ void MainWindow::requestPatch(int patchIndex)
     {
         putGuiToTransmissionState(false, false);
         patchListView->scrollTo(patchListView->model()->index( 0, 0));
+        if( ! cancelOperation)
+        {
+            newPatchDataList[User] = tmpPatchDataList;
+            QMessageBox::information(this, tr("MagicstimpFrenzy"), tr("Data requested successfully"));
+        }
+        else
+        {
+            QMessageBox::information(this, tr("MagicstimpFrenzy"), tr("Oparation was cancelled. Press a button of your Magicstomp."));
+        }
+        patchListView->setModel( patchListModelList.at(User));
+        patchListView->resizeColumnsToContents();
         cancelOperation = false;
         return;
     }
@@ -237,7 +309,7 @@ void MainWindow::requestPatch(int patchIndex)
 
     reqArr->append(QByteArray(reinterpret_cast<const char*>(&dumpRequestHeader[0]),std::extent<decltype(dumpRequestHeader)>::value));
     reqArr->append(char(patchIndex));
-    reqArr->append(0xF7);
+    reqArr->append(static_cast<char>(0xF7));
     emit sendMidiEvent( midiev);
     timeOutTimer->start();
 }
@@ -257,7 +329,7 @@ void MainWindow::sendAll()
     reqArr->append(static_cast<char>(0x00));
     reqArr->append(char(0));
     reqArr->append( calcChecksum( reqArr->constBegin()+ sysExBulkHeaderLength, reqArr->length()-sysExBulkHeaderLength));
-    reqArr->append(0xF7);
+    reqArr->append(static_cast<char>(0xF7));
     midiOutQueue.enqueue( midiev);
 
     for(int i=0; i<numOfPatches; i++)
@@ -273,12 +345,12 @@ void MainWindow::sendAll()
     reqArr->append(static_cast<char>(0x10));
     reqArr->append(char(0));
     reqArr->append( calcChecksum( reqArr->constBegin()+ sysExBulkHeaderLength, reqArr->length()-sysExBulkHeaderLength));
-    reqArr->append(0xF7);
+    reqArr->append(static_cast<char>(0xF7));
     midiOutQueue.enqueue( midiev);
     midiOutTimer->start();
 }
 
-void MainWindow::sendPatch( int patchIdx, bool sendToTmpArea )
+void MainWindow::sendPatch( int patchIdx, bool sendToTmpArea, PatchListType type )
 {
     MidiEvent *midiev = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));
     QByteArray *reqArr = midiev->sysExData();
@@ -292,7 +364,7 @@ void MainWindow::sendPatch( int patchIdx, bool sendToTmpArea )
         reqArr->append(static_cast<char>(0x01));
     reqArr->append(char(patchIdx));
     reqArr->append( calcChecksum( reqArr->constBegin()+ sysExBulkHeaderLength, reqArr->length()-sysExBulkHeaderLength));
-    reqArr->append(0xF7);
+    reqArr->append(static_cast<char>(0xF7));
     midiOutQueue.enqueue( midiev);
 
     midiev = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));
@@ -303,9 +375,9 @@ void MainWindow::sendPatch( int patchIdx, bool sendToTmpArea )
     reqArr->append(static_cast<char>(0x20));
     reqArr->append(static_cast<char>(0x00));
     reqArr->append(static_cast<char>(0x00));
-    reqArr->append(patchDataList[patchIdx].left(PatchCommonLength));
+    reqArr->append(newPatchDataList[type][patchIdx].left(PatchCommonLength));
     reqArr->append( calcChecksum( reqArr->constBegin()+ sysExBulkHeaderLength, reqArr->length()-sysExBulkHeaderLength));
-    reqArr->append(0xF7);
+    reqArr->append(static_cast<char>(0xF7));
     midiOutQueue.enqueue( midiev);
 #if QT_VERSION >= 0x059000
     qDebug() << "send Patch Common :" << reqArr->toHex(',');
@@ -318,9 +390,9 @@ void MainWindow::sendPatch( int patchIdx, bool sendToTmpArea )
     reqArr->append(static_cast<char>(0x20));
     reqArr->append(static_cast<char>(0x01));
     reqArr->append(static_cast<char>(0x00));
-    reqArr->append(patchDataList[patchIdx].mid(PatchCommonLength, PatchEffectLength));
+    reqArr->append(newPatchDataList[type][patchIdx].mid(PatchCommonLength, PatchEffectLength));
     reqArr->append( calcChecksum( reqArr->constBegin()+ sysExBulkHeaderLength, reqArr->length()-sysExBulkHeaderLength));
-    reqArr->append(0xF7);
+    reqArr->append(static_cast<char>(0xF7));
     midiOutQueue.enqueue( midiev);
 #if QT_VERSION >= 0x059000
     qDebug() << "send Patch Effect :" << reqArr->toHex(',');
@@ -337,7 +409,7 @@ void MainWindow::sendPatch( int patchIdx, bool sendToTmpArea )
         reqArr->append(static_cast<char>(0x11));
     reqArr->append(char(patchIdx));
     reqArr->append( calcChecksum( reqArr->constBegin()+ sysExBulkHeaderLength, reqArr->length()-sysExBulkHeaderLength));
-    reqArr->append(0xF7);
+    reqArr->append(static_cast<char>(0xF7));
     midiOutQueue.enqueue( midiev);
     midiOutTimer->start();
 }
@@ -349,6 +421,7 @@ void MainWindow::timeout()
     if(isInTransmissionState)
         putGuiToTransmissionState(false, false);
     cancelOperation = false;
+    patchListView->setModel( patchListModelList.at(User));
 }
 
 void MainWindow::midiOutTimeOut()
@@ -368,10 +441,10 @@ void MainWindow::midiOutTimeOut()
 
         if(isInTransmissionState && !cancelOperation)
         {
-            QSetIterator<int> iter(dirtyPatches);
+            /*QSetIterator<int> iter(dirtyPatches);
             while (iter.hasNext())
-                patchListModel->patchUpdated(iter.next());
-            dirtyPatches.clear();
+                patchListModelList[User]->patchUpdated(iter.next());
+            dirtyPatches.clear();*/
         }
         if(isInTransmissionState)
             putGuiToTransmissionState(false, false);
@@ -381,6 +454,18 @@ void MainWindow::midiOutTimeOut()
     emit sendMidiEvent( ev);
     if(isInTransmissionState)
         progressWidget->setValue( 100 - (midiOutQueue.size() / 4));
+}
+
+void MainWindow::parameterToBeChanged(int offset, int length)
+{
+    Q_UNUSED(offset)
+    Q_UNUSED(length)
+
+    if(! backupPatchesMapList.at(currentPatchEdited.first).contains(currentPatchEdited.second))
+    {
+        backupPatchesMapList[currentPatchEdited.first].insert(currentPatchEdited.second,
+                  QPair<QByteArray, bool>(newPatchDataList[currentPatchEdited.first][currentPatchEdited.second], true));
+    }
 }
 
 void MainWindow::parameterChanged(int offset, int length)
@@ -394,7 +479,7 @@ void MainWindow::parameterChanged(int offset, int length)
     if( offset == PatchName) // Name needs to be sent as single chars
     {
         length = 1;
-        patchListModel->patchUpdated(currentPatchEdited);
+        patchListModelList[currentPatchEdited.first]->patchUpdated(currentPatchEdited.second);
     }
 
     MidiEvent *midiev = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));
@@ -404,19 +489,19 @@ void MainWindow::parameterChanged(int offset, int length)
     if(offset < PatchCommonLength)
     {
         reqArr->append(static_cast<char>(0x00));
-        reqArr->append(offset);
+        reqArr->append(static_cast<char>(offset));
     }
     else
     {
         reqArr->append(0x01);
-        reqArr->append(offset - PatchCommonLength);
+        reqArr->append(static_cast<char>(offset - PatchCommonLength));
     }
 
     for(int i= 0; i< length; i++)
     {
         reqArr->append( *(editWidget->DataArray()->constData()+offset+i));
     }
-    reqArr->append(0xF7);
+    reqArr->append(static_cast<char>(0xF7));
 #if QT_VERSION >= 0x059000
     qDebug() << reqArr->toHex(',');
 #endif
@@ -439,18 +524,24 @@ void MainWindow::parameterChanged(int offset, int length)
         initArr = effectiniSettings.value( key).toByteArray();
         if(initArr.size() == PatchTotalLength && initArr.at(1) == patchId)
         {
-            QByteArray oldPatchName = patchDataList[currentPatchEdited].mid(PatchName, PatchNameLength);
-            patchDataList[currentPatchEdited] = initArr;
-            patchDataList[currentPatchEdited].replace(PatchName, PatchNameLength, oldPatchName);
-            editWidget->setDataArray(& patchDataList[currentPatchEdited]);
+            QByteArray &dataArrRef = newPatchDataList[currentPatchEdited.first][currentPatchEdited.second];
+
+            QByteArray oldPatchName = dataArrRef.mid(PatchName, PatchNameLength);
+            dataArrRef = initArr;
+            dataArrRef.replace(PatchName, PatchNameLength, oldPatchName);
+            editWidget->setDataArray(& (newPatchDataList[currentPatchEdited.first][currentPatchEdited.second]));
         }
         else
         {
             QMessageBox::critical(this, tr("Error"), tr("Error loading effect init data. Check if effects.ini is present and if is correct"));
         }
     }
-    dirtyPatches.insert(currentPatchEdited);
-    patchListModel->patchUpdated(currentPatchEdited);
+    if(backupPatchesMapList.at(currentPatchEdited.first).value(currentPatchEdited.second).first ==
+                newPatchDataList.at(currentPatchEdited.first).at(currentPatchEdited.second) )
+    {
+            backupPatchesMapList[currentPatchEdited.first].take(currentPatchEdited.second);
+    }
+    patchListModelList[currentPatchEdited.first]->patchUpdated(currentPatchEdited.second);
 
 }
 
@@ -498,14 +589,27 @@ void MainWindow::cancelTransmission()
 
 void MainWindow::patchListDoubleClicked(const QModelIndex &idx)
 {
-    if( patchDataList.at( idx.row()).isEmpty())
+    const PatchListModel *model = static_cast<const PatchListModel *>(idx.model());
+    int i;
+    for(i=0; i<patchListModelList.size(); i++)
+    {
+        if(patchListModelList.at(i)==model)
+            break;
+    }
+
+    if(i >= patchListModelList.size())
         return;
 
-    sendPatch(idx.row());
+    PatchListType type = static_cast<PatchListType>(i);
+
+    if( newPatchDataList.at(type).at( idx.row()).isEmpty())
+        return;
+
+    sendPatch(idx.row(), true, type);
     midiOutTimer->start();
     ArrayDataEditWidget *widget = static_cast<ArrayDataEditWidget *>(centralWidget());
-    widget->setDataArray(& patchDataList[idx.row()]);
-    currentPatchEdited = idx.row();
+    widget->setDataArray(& newPatchDataList[type][idx.row()]);
+    currentPatchEdited = QPair<PatchListType, int>(type, idx.row());
 }
 
 void MainWindow::patchListSelectionChanged()
@@ -534,7 +638,7 @@ void MainWindow::patchListSelectionChanged()
 
 void MainWindow::swapButtonPressed()
 {
-    QModelIndexList selectedRows = patchListView->selectionModel()->selectedRows();
+    /*QModelIndexList selectedRows = patchListView->selectionModel()->selectedRows();
     if(selectedRows.size() != 2)
         return;
 
@@ -560,12 +664,12 @@ void MainWindow::swapButtonPressed()
     dirtyPatches.insert(rowA);
     dirtyPatches.insert(rowB);
     patchListModel->patchUpdated(rowA);
-    patchListModel->patchUpdated(rowB);
+    patchListModel->patchUpdated(rowB);*/
 }
 
 void MainWindow::copyButtonPressed()
 {
-    PatchCopyDialog copydialog( patchListModel, patchToCopy, this);
+    /*PatchCopyDialog copydialog( patchListModel, patchToCopy, this);
     if( copydialog.exec() == QDialog::Accepted)
     {
         int targetRow = copydialog.targetPatchIndex();
@@ -578,6 +682,18 @@ void MainWindow::copyButtonPressed()
             sendPatch(targetRow);
         }
         dirtyPatches.insert(targetRow);
+    }*/
+}
+
+void MainWindow::loadPresetPatches(int index, const QString &filename)
+{
+    QSettings cacheSettings(QDir::currentPath() + "/"+ filename, QSettings::IniFormat);
+    for(int i=0; i<numOfPatches;i++)
+    {
+        QByteArray arr;
+        arr = cacheSettings.value("Patchdata"+QString::number(i+1).rightJustified(2, '0')).toByteArray();
+        if(arr.size() == PatchTotalLength && arr.at(PatchType+1)<EffectTypeNUMBER)
+            newPatchDataList[index].append(arr);
     }
 }
 

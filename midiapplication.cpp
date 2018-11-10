@@ -249,6 +249,10 @@ void MidiApplication::onPortConnectionStatusChanged(MidiClientPortId srcId, Midi
 }
 void MidiApplication::onPortClientPortStatusChanged(MidiClientPortId mpId, bool isExisting)
 {
+#ifdef Q_OS_LINUX
+   Q_UNUSED(mpId)
+   Q_UNUSED(isExisting)
+#endif
 #ifdef Q_OS_MACOS
     // In MacOS there is not notification on disconecting before removeing a connected midi client
     if( !isExisting)

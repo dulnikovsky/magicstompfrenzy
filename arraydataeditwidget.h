@@ -27,6 +27,7 @@ protected:
     virtual bool writeEditedParameter(QObject *editor);
 
 signals:
+    void parameterAboutToBeChanged(int offset, int length);
     void parameterChanged(int offset, int length);
 
 private slots:

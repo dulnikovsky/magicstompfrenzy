@@ -104,7 +104,7 @@ LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit -frame
 ICON = magicstomp.icns
 }
 
-copydata.commands = $(COPY_DIR) $$PWD/effects.ini $$OUT_PWD
+copydata.commands = $(COPY_DIR) $$PWD/effects.ini $$OUT_PWD && $(COPY_DIR) $$PWD/guitarpresets.ini $$OUT_PWD && $(COPY_DIR) $$PWD/basspresets.ini $$OUT_PWD && $(COPY_DIR) $$PWD/acousticpresets.ini $$OUT_PWD
 first.depends = $(first) copydata
 export(first.depends)
 export(copydata.commands)
