@@ -48,7 +48,7 @@ private slots:
     void midiOutTimeOut();
     void cancelTransmission();
     void patchListDoubleClicked(const QModelIndex& idx);
-    void patchListSelectionChanged(const QItemSelection &, const QItemSelection &);
+    void patchListSelectionChanged();
     void putGuiToTransmissionState( bool isTransmitting, bool sending);
 
     void swapButtonPressed();

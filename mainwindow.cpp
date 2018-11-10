@@ -79,7 +79,7 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     patchListView->setModel(patchListModel);
     connect(patchListView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(patchListDoubleClicked(QModelIndex)));
     connect(patchListView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
-            this, SLOT(patchListSelectionChanged(QItemSelection,QItemSelection)));
+            this, SLOT(patchListSelectionChanged()));
     patchListLayout->addWidget(patchListView);
     patchListGroupbox->setLayout(patchListLayout);
 
@@ -462,6 +462,8 @@ void MainWindow::putGuiToTransmissionState(bool isTransmitting, bool sending)
         sendButton->setEnabled(false);
         patchListView->setEnabled(false);
         centralWidget()->setEnabled( false);
+        swapButton->setEnabled(false);
+        copyButton->setEnabled(false);
 
         progressWidget = new ProgressWidget();
         connect(progressWidget, SIGNAL(cancel()), this, SLOT(cancelTransmission()));
@@ -480,6 +482,9 @@ void MainWindow::putGuiToTransmissionState(bool isTransmitting, bool sending)
         requestButton->setEnabled(true);
         sendButton->setEnabled(true);
         patchListView->setEnabled(true);
+
+        patchListSelectionChanged();
+
         patchListLayout->removeWidget( progressWidget );
         progressWidget->deleteLater();
     }
@@ -503,16 +508,14 @@ void MainWindow::patchListDoubleClicked(const QModelIndex &idx)
     currentPatchEdited = idx.row();
 }
 
-void MainWindow::patchListSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
+void MainWindow::patchListSelectionChanged()
 {
-    Q_UNUSED(selected)
-    Q_UNUSED(deselected)
 
     QModelIndexList selectedRows = patchListView->selectionModel()->selectedRows();
     if( selectedRows.size() == 1)
     {
         copyButton->setEnabled(true);
-        patchToCopy =selectedRows.at(0).row();
+        patchToCopy = selectedRows.at(0).row();
     }
     else
     {

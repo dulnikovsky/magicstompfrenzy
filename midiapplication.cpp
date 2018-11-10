@@ -81,8 +81,8 @@ void MIDIEngineReadProc(const MIDIPacketList *pktlist, void *arg, void *connRefC
              Q_ASSERT( midievent != nullptr);
         }
 
-//        if( midievent->type() == static_cast<QEvent::Type>(MidiEvent::SysEx))
-//            qDebug() << midievent->sysExData()->toHex(',');
+        if( midievent->type() == static_cast<QEvent::Type>(MidiEvent::SysEx))
+            qDebug() << midievent->sysExData()->toHex(',');
         QApplication::postEvent( static_cast< QObject *>(arg), midievent);
         midievent = nullptr;
 
@@ -166,6 +166,7 @@ bool MidiApplication::event(QEvent *e)
     return QApplication::event(e);
 }
 
+
 void  MidiApplication::midiSystemInit()
 {
 #ifdef Q_OS_LINUX
@@ -248,6 +249,16 @@ void MidiApplication::onPortConnectionStatusChanged(MidiClientPortId srcId, Midi
 }
 void MidiApplication::onPortClientPortStatusChanged(MidiClientPortId mpId, bool isExisting)
 {
+#ifdef Q_OS_MACOS
+    // In MacOS there is not notification on disconecting before removeing a connected midi client
+    if( !isExisting)
+    {
+        if(readablePortsModel->ConnectionsSet().contains(mpId))
+            onPortConnectionStatusChanged( mpId, thisInPort, false);
+        else if(writablePortsModel->ConnectionsSet().contains(mpId))
+            onPortConnectionStatusChanged( thisOutPort, mpId, false);
+    }
+#endif
     readablePortsModel->scan();
     writablePortsModel->scan();
 }
