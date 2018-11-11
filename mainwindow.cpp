@@ -39,8 +39,8 @@ static const unsigned char sysExParameterSendHeader[parameterSendHeaderLength] =
 
 MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod, QWidget *parent)
     : QMainWindow(parent), currentPatchTransmitted(-1), currentPatchEdited(QPair<PatchListType,int>(User,-1)), patchToCopy(-1),
-      cancelOperation(false), isInTransmissionState(false),
-      readablePortsModel(readPortsMod), writablePortsModel(writePortsMod)
+      readablePortsModel(readPortsMod), writablePortsModel(writePortsMod),
+      cancelOperation(false), isInTransmissionState(false)
 {
     newPatchDataList.append(QList<QByteArray>());
     for(int i=0; i<numOfPatches; i++)
@@ -98,7 +98,7 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
 
     patchListLayout = new QVBoxLayout();
 
-    QTabWidget *patchTabWidget = new QTabWidget();
+    patchTabWidget = new QTabWidget();
 
     patchListView = new QTableView();
     patchListView->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -112,23 +112,30 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     guitarPatchListView->setSelectionBehavior(QAbstractItemView::SelectRows);
     guitarPatchListView->setModel(patchListModelList.at(GuitarPreset));
     connect(guitarPatchListView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(patchListDoubleClicked(QModelIndex)));
+    connect(guitarPatchListView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
+            this, SLOT(patchListSelectionChanged()));
     patchTabWidget->addTab( guitarPatchListView, tr("Guitar Presets"));
 
     QTableView *bassPatchListView = new QTableView();
     bassPatchListView->setSelectionBehavior(QAbstractItemView::SelectRows);
     bassPatchListView->setModel(patchListModelList.at(BassPreset));
     connect(bassPatchListView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(patchListDoubleClicked(QModelIndex)));
+    connect(bassPatchListView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
+            this, SLOT(patchListSelectionChanged()));
     patchTabWidget->addTab( bassPatchListView, tr("Bass Presets"));
 
     QTableView *acousticPatchListView = new QTableView();
     acousticPatchListView->setSelectionBehavior(QAbstractItemView::SelectRows);
     acousticPatchListView->setModel(patchListModelList.at(AcousticPreset));
     connect(acousticPatchListView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(patchListDoubleClicked(QModelIndex)));
+    connect(acousticPatchListView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
+            this, SLOT(patchListSelectionChanged()));
     patchTabWidget->addTab( acousticPatchListView, tr("Acoustic Presets"));
-
     patchListGroupbox->setLayout(patchListLayout);
     patchListLayout->addLayout(patchButtonsLayout);
     patchListLayout->addWidget(patchTabWidget);
+
+    connect(patchTabWidget, SIGNAL(currentChanged(int)), this, SLOT(patchListSelectionChanged()));
 
     QHBoxLayout *listEditButtonsLayout = new QHBoxLayout();
     listEditButtonsLayout->addWidget(swapButton = new QPushButton(tr("Swap")));
@@ -137,6 +144,10 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     listEditButtonsLayout->addWidget(copyButton = new QPushButton(tr("Copy")));
     copyButton->setEnabled(false);
     connect(copyButton, SIGNAL(pressed()), this, SLOT(copyButtonPressed()));
+
+    listEditButtonsLayout->addWidget(undoRedoButton = new QPushButton(tr("Undo")));
+    undoRedoButton->setEnabled(false);
+    connect(undoRedoButton, SIGNAL(pressed()), this, SLOT(undoRedoButtonPressed()));
 
     patchListLayout->addLayout( listEditButtonsLayout);
 
@@ -614,25 +625,70 @@ void MainWindow::patchListDoubleClicked(const QModelIndex &idx)
 
 void MainWindow::patchListSelectionChanged()
 {
+    QTableView *tableview = static_cast<QTableView *>(patchTabWidget->currentWidget());
+    const PatchListModel *model = static_cast<const PatchListModel *>(tableview->model());
 
-    QModelIndexList selectedRows = patchListView->selectionModel()->selectedRows();
-    if( selectedRows.size() == 1)
+    int i;
+    for(i=0; i<patchListModelList.size(); i++)
+    {
+        if(patchListModelList.at(i)==model)
+            break;
+    }
+
+    if(i >= patchListModelList.size())
+        return;
+
+    PatchListType type = static_cast<PatchListType>(i);
+
+    QModelIndexList indexes = tableview->selectionModel()->selectedRows(0);
+
+    if(indexes.size() == 0 || indexes.size() > 2)
+    {
+        swapButton->setEnabled(false);
+        copyButton->setEnabled(false);
+        undoRedoButton->setEnabled(false);
+        undoRedoButton->setText(tr("Undo"));
+        patchToCopy = -1;
+        return;
+    }
+    if( indexes.size() == 1)
     {
         copyButton->setEnabled(true);
-        patchToCopy = selectedRows.at(0).row();
+        patchToCopy = indexes.at(0).row();
+        for(int x=0; x< backupPatchesMapList.size(); x++)
+        {
+            QMap<int, QPair<QByteArray, bool>>::const_iterator iter;
+            iter = backupPatchesMapList.at(x).constFind(indexes.at(0).row());
+            if(iter != backupPatchesMapList.at(x).constEnd() && x==type)
+            {
+                undoRedoButton->setEnabled(true);
+                if(iter.value().second == true)
+                    undoRedoButton->setText(tr("Undo"));
+                else
+                    undoRedoButton->setText(tr("Redo"));
+                break;
+            }
+            else
+            {
+                undoRedoButton->setEnabled(false);
+                undoRedoButton->setText(tr("Undo"));
+            }
+        }
+        swapButton->setEnabled(false);
     }
-    else
-    {
-        copyButton->setEnabled(false);
-        patchToCopy = -1;
-    }
-    if( selectedRows.size() == 2)
+    else if( indexes.size() == 2 && type==User)
     {
         swapButton->setEnabled(true);
+        copyButton->setEnabled(false);
+        undoRedoButton->setEnabled(false);
+        undoRedoButton->setText(tr("Undo"));
     }
     else
     {
         swapButton->setEnabled(false);
+        copyButton->setEnabled(false);
+        undoRedoButton->setEnabled(false);
+        undoRedoButton->setText(tr("Undo"));
     }
 }
 
@@ -683,6 +739,11 @@ void MainWindow::copyButtonPressed()
         }
         dirtyPatches.insert(targetRow);
     }*/
+}
+
+void MainWindow::undoRedoButtonPressed()
+{
+
 }
 
 void MainWindow::loadPresetPatches(int index, const QString &filename)

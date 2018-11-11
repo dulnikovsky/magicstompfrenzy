@@ -57,6 +57,7 @@ private slots:
 
     void swapButtonPressed();
     void copyButtonPressed();
+    void undoRedoButtonPressed();
 
     void showPreferences();
 
@@ -66,8 +67,6 @@ private:
     int currentPatchTransmitted;
     QPair<PatchListType, int> currentPatchEdited;
     int patchToCopy;
-    bool cancelOperation;
-    bool isInTransmissionState;
 
     MidiPortModel *readablePortsModel;
     MidiPortModel *writablePortsModel;
@@ -85,6 +84,8 @@ private:
     QList<QByteArray> tmpPatchDataList;
     QList<QMap<int, QPair<QByteArray, bool>>> backupPatchesMapList;
 
+    QTabWidget *patchTabWidget;
+
     QTableView *patchListView;
     QPushButton *requestButton;
     QPushButton *sendButton;
@@ -92,10 +93,14 @@ private:
 
     QPushButton *swapButton;
     QPushButton *copyButton;
+    QPushButton *undoRedoButton;
 
     QVBoxLayout *patchListLayout;
 
     QAction *showPreferencesAction;
+
+    bool cancelOperation;
+    bool isInTransmissionState;
 
     static char calcChecksum(const char *data, int dataLength);
 };
