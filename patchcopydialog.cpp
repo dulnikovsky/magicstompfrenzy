@@ -7,18 +7,18 @@
 #include "patchlistmodel.h"
 #include "patchlistcombomodel.h"
 
-PatchCopyDialog::PatchCopyDialog(PatchListModel *model, int patchToCopyIdx, QWidget *parent)
+PatchCopyDialog::PatchCopyDialog(PatchListModel *model, const QString& patchToCopyName, QWidget *parent)
     : QDialog(parent)
 {
     setWindowTitle(tr("Copy Patch"));
 
     PatchListComboModel *comboModel = new PatchListComboModel(this);
-    comboModel->setDisabledRow( patchToCopyIdx);
+    //comboModel->setDisabledRow( patchToCopyIdx);
     comboModel->setSourceModel(model);
 
     QVBoxLayout *vlyt = new QVBoxLayout();
 
-    QString txt = tr("Copy Patch '%1' to :").arg(comboModel->data(comboModel->index(patchToCopyIdx, 0)).toString());
+    QString txt = tr("Copy Patch '%1' to User patch:").arg(patchToCopyName);
 
     QLabel *infoLobale = new QLabel(txt);
     vlyt->addWidget(infoLobale);

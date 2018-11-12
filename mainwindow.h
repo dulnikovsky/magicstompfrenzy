@@ -43,7 +43,7 @@ private slots:
     void requestAll();
     void sendAll();
     void requestPatch(int patchIndex);
-    void sendPatch(int patchIndex, bool sendToTmpArea = true, PatchListType type =User);
+    void sendPatch(int patchIndex, bool sendToTmpArea = true, PatchListType type=User);
 
     void parameterToBeChanged(int offset, int length);
     void parameterChanged(int offset, int length);
@@ -63,10 +63,10 @@ private slots:
 
 private:
     void loadPresetPatches(int index, const QString &filename);
+    PatchListType getCurrentPatchType() const;
 
     int currentPatchTransmitted;
     QPair<PatchListType, int> currentPatchEdited;
-    int patchToCopy;
 
     MidiPortModel *readablePortsModel;
     MidiPortModel *writablePortsModel;

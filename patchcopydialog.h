@@ -9,7 +9,7 @@ class PatchCopyDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit PatchCopyDialog(PatchListModel *model, int patchToCopyIdx, QWidget *parent = nullptr);
+    explicit PatchCopyDialog(PatchListModel *model, const QString& patchToCopyName, QWidget *parent = nullptr);
 
     int targetPatchIndex() const;
 private:

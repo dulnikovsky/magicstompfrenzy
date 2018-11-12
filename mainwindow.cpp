@@ -38,7 +38,7 @@ static const int parameterSendHeaderLength = 6;
 static const unsigned char sysExParameterSendHeader[parameterSendHeaderLength] = { 0xF0, 0x43, 0x7D, 0x40, 0x55, 0x42 };
 
 MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod, QWidget *parent)
-    : QMainWindow(parent), currentPatchTransmitted(-1), currentPatchEdited(QPair<PatchListType,int>(User,-1)), patchToCopy(-1),
+    : QMainWindow(parent), currentPatchTransmitted(-1), currentPatchEdited(QPair<PatchListType,int>(User,-1)),
       readablePortsModel(readPortsMod), writablePortsModel(writePortsMod),
       cancelOperation(false), isInTransmissionState(false)
 {
@@ -287,6 +287,7 @@ void MainWindow::requestAll()
 
     patchListView->setModel( tmpPatchListModel);
 
+    patchTabWidget->setCurrentIndex(0);
     putGuiToTransmissionState(true, false);
 
     currentPatchTransmitted = -1;
@@ -327,6 +328,16 @@ void MainWindow::requestPatch(int patchIndex)
 
 void MainWindow::sendAll()
 {
+    const QList<QByteArray> &userList = newPatchDataList.at(User);
+    for(int i=0; i<userList.size(); i++)
+    {
+        if(userList.at(i).size() != PatchTotalLength)
+        {
+            QMessageBox::warning(this, QStringLiteral("MagicstompFrenzy"), tr("Sending data to Magicstomp if User patch list is not complete is not possible."));
+            return;
+        }
+    }
+
     putGuiToTransmissionState(true, true);
 
     MidiEvent *midiev = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));
@@ -344,7 +355,7 @@ void MainWindow::sendAll()
     midiOutQueue.enqueue( midiev);
 
     for(int i=0; i<numOfPatches; i++)
-        sendPatch(i, false);
+        sendPatch(i, false, User);
 
     //Bulk out all end
     midiev = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));
@@ -387,7 +398,7 @@ void MainWindow::sendPatch( int patchIdx, bool sendToTmpArea, PatchListType type
     reqArr->append(static_cast<char>(0x00));
     reqArr->append(static_cast<char>(0x00));
     reqArr->append(newPatchDataList[type][patchIdx].left(PatchCommonLength));
-    reqArr->append( calcChecksum( reqArr->constBegin()+ sysExBulkHeaderLength, reqArr->length()-sysExBulkHeaderLength));
+    reqArr->append(calcChecksum( reqArr->constBegin()+ sysExBulkHeaderLength, reqArr->length()-sysExBulkHeaderLength));
     reqArr->append(static_cast<char>(0xF7));
     midiOutQueue.enqueue( midiev);
 #if QT_VERSION >= 0x059000
@@ -402,7 +413,7 @@ void MainWindow::sendPatch( int patchIdx, bool sendToTmpArea, PatchListType type
     reqArr->append(static_cast<char>(0x01));
     reqArr->append(static_cast<char>(0x00));
     reqArr->append(newPatchDataList[type][patchIdx].mid(PatchCommonLength, PatchEffectLength));
-    reqArr->append( calcChecksum( reqArr->constBegin()+ sysExBulkHeaderLength, reqArr->length()-sysExBulkHeaderLength));
+    reqArr->append(calcChecksum( reqArr->constBegin()+ sysExBulkHeaderLength, reqArr->length()-sysExBulkHeaderLength));
     reqArr->append(static_cast<char>(0xF7));
     midiOutQueue.enqueue( midiev);
 #if QT_VERSION >= 0x059000
@@ -562,7 +573,7 @@ void MainWindow::putGuiToTransmissionState(bool isTransmitting, bool sending)
     {
         requestButton->setEnabled(false);
         sendButton->setEnabled(false);
-        patchListView->setEnabled(false);
+        patchTabWidget->setEnabled(false);
         centralWidget()->setEnabled( false);
         swapButton->setEnabled(false);
         copyButton->setEnabled(false);
@@ -583,7 +594,7 @@ void MainWindow::putGuiToTransmissionState(bool isTransmitting, bool sending)
             editWidget->setEnabled( true);
         requestButton->setEnabled(true);
         sendButton->setEnabled(true);
-        patchListView->setEnabled(true);
+        patchTabWidget->setEnabled(true);
 
         patchListSelectionChanged();
 
@@ -626,20 +637,7 @@ void MainWindow::patchListDoubleClicked(const QModelIndex &idx)
 void MainWindow::patchListSelectionChanged()
 {
     QTableView *tableview = static_cast<QTableView *>(patchTabWidget->currentWidget());
-    const PatchListModel *model = static_cast<const PatchListModel *>(tableview->model());
-
-    int i;
-    for(i=0; i<patchListModelList.size(); i++)
-    {
-        if(patchListModelList.at(i)==model)
-            break;
-    }
-
-    if(i >= patchListModelList.size())
-        return;
-
-    PatchListType type = static_cast<PatchListType>(i);
-
+    PatchListType type = getCurrentPatchType();
     QModelIndexList indexes = tableview->selectionModel()->selectedRows(0);
 
     if(indexes.size() == 0 || indexes.size() > 2)
@@ -648,13 +646,11 @@ void MainWindow::patchListSelectionChanged()
         copyButton->setEnabled(false);
         undoRedoButton->setEnabled(false);
         undoRedoButton->setText(tr("Undo"));
-        patchToCopy = -1;
         return;
     }
     if( indexes.size() == 1)
     {
         copyButton->setEnabled(true);
-        patchToCopy = indexes.at(0).row();
         for(int x=0; x< backupPatchesMapList.size(); x++)
         {
             QMap<int, QPair<QByteArray, bool>>::const_iterator iter;
@@ -694,61 +690,105 @@ void MainWindow::patchListSelectionChanged()
 
 void MainWindow::swapButtonPressed()
 {
-    /*QModelIndexList selectedRows = patchListView->selectionModel()->selectedRows();
+    QModelIndexList selectedRows = patchListView->selectionModel()->selectedRows();
     if(selectedRows.size() != 2)
         return;
 
     int rowA = selectedRows.at(0).row();
     int rowB = selectedRows.at(1).row();
 
-    QByteArray tmpArr = patchDataList.at(rowA);
-    patchDataList[rowA] = patchDataList.at(rowB);
-    patchDataList[rowB] = tmpArr;
+    QByteArray tmpArr = newPatchDataList.at(User).at(rowA);
+    newPatchDataList[User][rowA] = newPatchDataList.at(User).at(rowB);
+    newPatchDataList[User][rowB] = tmpArr;
 
-    if(rowA == currentPatchEdited)
+    QMap<int, QPair<QByteArray, bool>>::iterator iterA;
+    iterA = backupPatchesMapList[User].find(rowA);
+    QMap<int, QPair<QByteArray, bool>>::iterator iterB;
+    iterB = backupPatchesMapList[User].find(rowB);
+
+    QPair<QByteArray, bool> tmpPair;
+    if(iterA != backupPatchesMapList[User].end())
     {
-        currentPatchEdited = rowB;
-        ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>(centralWidget());
-        editWidget->setDataArray(& patchDataList[currentPatchEdited]);
+        tmpPair = *iterA;
     }
-    else if(rowB == currentPatchEdited)
+    if(iterB != backupPatchesMapList[User].end())
     {
-        currentPatchEdited = rowA;
-        ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>(centralWidget());
-        editWidget->setDataArray(& patchDataList[currentPatchEdited]);
+        backupPatchesMapList[User].insert(rowA, iterB.value());
+        backupPatchesMapList[User].remove(rowB);
     }
-    dirtyPatches.insert(rowA);
-    dirtyPatches.insert(rowB);
-    patchListModel->patchUpdated(rowA);
-    patchListModel->patchUpdated(rowB);*/
+    if(! tmpPair.first.isEmpty())
+    {
+        backupPatchesMapList[User].insert(rowB, tmpPair);
+        if(iterB == backupPatchesMapList[User].end())
+            backupPatchesMapList[User].remove(rowA);
+    }
+
+    if(QPair<PatchListType, int>( User, rowA) == currentPatchEdited)
+    {
+        currentPatchEdited =  QPair<PatchListType, int>( User, rowB);
+        ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>(centralWidget());
+        editWidget->setDataArray(& newPatchDataList[User][rowB]);
+    }
+    else if(QPair<PatchListType, int>( User, rowB)  == currentPatchEdited)
+    {
+        currentPatchEdited =  QPair<PatchListType, int>( User, rowA);
+        ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>(centralWidget());
+        editWidget->setDataArray(& newPatchDataList[User][rowA]);
+    }
+    patchListModelList[User]->patchUpdated(rowA);
+    patchListModelList[User]->patchUpdated(rowB);
 }
 
 void MainWindow::copyButtonPressed()
 {
-    /*PatchCopyDialog copydialog( patchListModel, patchToCopy, this);
+    QTableView *tableview = static_cast<QTableView *>(patchTabWidget->currentWidget());
+    PatchListType type = getCurrentPatchType();
+    QModelIndexList indexes = tableview->selectionModel()->selectedRows(0);
+
+    QString name = indexes.at(0).data().toString();
+
+    PatchCopyDialog copydialog( patchListModelList[User], name, this);
     if( copydialog.exec() == QDialog::Accepted)
     {
         int targetRow = copydialog.targetPatchIndex();
-        patchDataList[targetRow] = patchDataList.at(patchToCopy);
-        patchListModel->patchUpdated(targetRow);
-        if(targetRow == currentPatchEdited)
+        newPatchDataList[User][targetRow] = newPatchDataList.at(type).at(indexes.at(0).row());
+        patchListModelList[User]->patchUpdated(targetRow);
+        if(QPair<PatchListType, int>( User, targetRow) == currentPatchEdited)
         {
             ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>(centralWidget());
-            editWidget->setDataArray(& patchDataList[targetRow]);
+            editWidget->setDataArray(& (newPatchDataList[User][targetRow]));
             sendPatch(targetRow);
         }
-        dirtyPatches.insert(targetRow);
-    }*/
+        backupPatchesMapList[User].remove(targetRow);
+    }
 }
 
 void MainWindow::undoRedoButtonPressed()
 {
+    QTableView *tableview = static_cast<QTableView *>(patchTabWidget->currentWidget());
+    PatchListType type = getCurrentPatchType();
+    QModelIndexList indexes = tableview->selectionModel()->selectedRows(0);
+    int row = indexes.at(0).row();
 
+    QByteArray tmpArray = newPatchDataList[type][row];
+    QPair<QByteArray, bool> pairVal = backupPatchesMapList[type].value(row);
+    pairVal.second = !pairVal.second;
+    newPatchDataList[type][row] = pairVal.first;
+    pairVal.first = tmpArray;
+    backupPatchesMapList[type].insert(row, pairVal);
+
+    ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>(centralWidget());
+    editWidget->setDataArray(& (newPatchDataList[type][row]));
+    sendPatch(row);
+
+    patchListModelList[type]->patchUpdated(row);
+    patchListSelectionChanged();
 }
 
 void MainWindow::loadPresetPatches(int index, const QString &filename)
 {
-    QSettings cacheSettings(QDir::currentPath() + "/"+ filename, QSettings::IniFormat);
+    QString dir = QCoreApplication::applicationDirPath();
+    QSettings cacheSettings(dir + "/"+ filename, QSettings::IniFormat);
     for(int i=0; i<numOfPatches;i++)
     {
         QByteArray arr;
@@ -756,6 +796,24 @@ void MainWindow::loadPresetPatches(int index, const QString &filename)
         if(arr.size() == PatchTotalLength && arr.at(PatchType+1)<EffectTypeNUMBER)
             newPatchDataList[index].append(arr);
     }
+}
+
+MainWindow::PatchListType MainWindow::getCurrentPatchType() const
+{
+    QTableView *tableview = static_cast<QTableView *>(patchTabWidget->currentWidget());
+    const PatchListModel *model = static_cast<const PatchListModel *>(tableview->model());
+
+    int i;
+    for(i=0; i<patchListModelList.size(); i++)
+    {
+        if(patchListModelList.at(i)==model)
+            break;
+    }
+
+//    if(i >= patchListModelList.size())
+//        return;
+
+    return static_cast<PatchListType>(i);
 }
 
 void MainWindow::showPreferences()

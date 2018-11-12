@@ -26,7 +26,7 @@ QVariant PatchListModel::data(const QModelIndex &index, int role) const
         else if(role==Qt::DecorationRole)
         {
             int row = index.row();
-            if(backupPatchDataMapRef.contains(row))
+            if(backupPatchDataMapRef.contains(row) && backupPatchDataMapRef.value(row).second == true)
                 return QColor(Qt::yellow);
         }
     }
