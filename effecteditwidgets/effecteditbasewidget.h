@@ -18,6 +18,7 @@ public:
 
 static QDoubleSpinBox* createStandard10DblSpinBox(int offset);
 static QSpinBox* createStandardRawSpinBox(int offset, int minimum, int maximum, int length = 1);
+static QDoubleSpinBox* createStd12GainSpinBox(int offset);
 
 };
 

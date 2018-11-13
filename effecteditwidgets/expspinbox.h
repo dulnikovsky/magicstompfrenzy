@@ -14,10 +14,11 @@ public:
     virtual void setRawValue( int val);
 
     double RealValue() const { return realValue; }
-
     void setParameters(double minRealVal, double maxRealVal, int minRawVal = 0, int maxRawVal = 0x7F);
-
     void stepBy(int steps) override;
+
+    void setSuffix(const QString &str) { suffix = str; }
+    QString Suffix() const { return suffix;}
 Q_SIGNALS:
     void rawValueChanged(int);
 
@@ -26,6 +27,7 @@ protected:
     StepEnabled stepEnabled() const override;
 
 private:
+    QString suffix;
     double realValue;
     double minRealVal;
     double maxRealVal;

@@ -39,7 +39,7 @@ QString ExpSpinBox::convertToString() const
         txt = QString::number( val, 'f', 2 );
     else
         txt = QString::number( val, 'f', 1 );
-    return txt;
+    return txt + suffix;
 }
 
 void ExpSpinBox::stepBy(int steps)

@@ -7,7 +7,11 @@ class NoiseGateWidget : public EffectEditBaseWidget
 {
     Q_OBJECT
 public:
-    explicit NoiseGateWidget(QWidget *parent = nullptr);
+    explicit NoiseGateWidget(int thresholdOffset,
+                             int attackOffset,
+                             int holdOffset,
+                             int decayOffset,
+                             QWidget *parent = nullptr);
 };
 
 #endif // NOISEGATEWIDGET_H

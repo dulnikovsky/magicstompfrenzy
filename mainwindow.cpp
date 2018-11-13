@@ -28,6 +28,7 @@
 #include <QItemSelectionModel>
 #include <QTabWidget>
 #include <QAction>
+#include <QCloseEvent>
 #include <QDebug>
 
 static const int sysExBulkHeaderLength = 8;
@@ -38,8 +39,8 @@ static const int parameterSendHeaderLength = 6;
 static const unsigned char sysExParameterSendHeader[parameterSendHeaderLength] = { 0xF0, 0x43, 0x7D, 0x40, 0x55, 0x42 };
 
 MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod, QWidget *parent)
-    : QMainWindow(parent), currentPatchTransmitted(-1), currentPatchEdited(QPair<PatchListType,int>(User,-1)),
-      readablePortsModel(readPortsMod), writablePortsModel(writePortsMod),
+    : QMainWindow(parent), readablePortsModel(readPortsMod), writablePortsModel(writePortsMod),
+      currentPatchTransmitted(-1), currentPatchEdited(QPair<PatchListType,int>(User,-1)),
       cancelOperation(false), isInTransmissionState(false)
 {
     newPatchDataList.append(QList<QByteArray>());
@@ -187,6 +188,23 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    for(int i=0; i <= AcousticPreset; i++)
+    {
+        if(! backupPatchesMapList.at(i).isEmpty() )
+        {
+            QMessageBox msgBox;
+            msgBox.setText(tr("Application contains unsaved/untranferred data."));
+            msgBox.setInformativeText(tr("Do you really want to exit?"));
+            msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+            msgBox.setDefaultButton(QMessageBox::No);
+            int ret = msgBox.exec();
+            if(ret == QMessageBox::No)
+            {
+                event->ignore();
+                return;
+            }
+        }
+    }
     QSettings cacheSettings(QStandardPaths::writableLocation(QStandardPaths::CacheLocation)+QStringLiteral("/patchcache.ini"), QSettings::IniFormat);
     for(int i=0; i<numOfPatches;i++)
     {
@@ -303,13 +321,16 @@ void MainWindow::requestPatch(int patchIndex)
         if( ! cancelOperation)
         {
             newPatchDataList[User] = tmpPatchDataList;
+            backupPatchesMapList[User].clear();
             QMessageBox::information(this, tr("MagicstimpFrenzy"), tr("Data requested successfully"));
         }
         else
         {
-            QMessageBox::information(this, tr("MagicstimpFrenzy"), tr("Oparation was cancelled. Press a button of your Magicstomp."));
+            QMessageBox::information(this, tr("MagicstimpFrenzy"), tr("Oparation was cancelled. Press a button on your Magicstomp."));
         }
         patchListView->setModel( patchListModelList.at(User));
+        connect(patchListView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
+                this, SLOT(patchListSelectionChanged()));
         patchListView->resizeColumnsToContents();
         cancelOperation = false;
         return;
@@ -488,6 +509,12 @@ void MainWindow::parameterToBeChanged(int offset, int length)
         backupPatchesMapList[currentPatchEdited.first].insert(currentPatchEdited.second,
                   QPair<QByteArray, bool>(newPatchDataList[currentPatchEdited.first][currentPatchEdited.second], true));
     }
+    else if ( backupPatchesMapList.at(currentPatchEdited.first).value(currentPatchEdited.second).second == false)
+    { //If backup map contains the edited patch ( and not the original patch). This happens after the "undo" operation
+        backupPatchesMapList[currentPatchEdited.first].insert(currentPatchEdited.second,
+                  QPair<QByteArray, bool>(newPatchDataList[currentPatchEdited.first][currentPatchEdited.second], true));
+    }
+    patchListSelectionChanged();
 }
 
 void MainWindow::parameterChanged(int offset, int length)

@@ -61,7 +61,8 @@ public:
 
     enum AmpMultiSubtype
     {
-        SimulatorOnly,
+        AmpSimulatorOnly,
+        DistortionOnly,
         AmpChorus,
         AmpFlange,
         AmpTremolo,

@@ -1,5 +1,6 @@
 #include "ampmultiwidget.h"
 #include "ampwidget.h"
+#include "distortionwidget.h"
 #include "noisegatewidget.h"
 #include "compressorwidget.h"
 #include "ampmultimodulationwidget.h"
@@ -14,10 +15,37 @@ AmpMultiWidget::AmpMultiWidget(AmpMultiSubtype subtype, QWidget *parent) :
 
     QGridLayout *mainlyt = new QGridLayout();
 
-    mainlyt->addWidget( new AmpWidget(), 0, 0);
-    mainlyt->addWidget( new NoiseGateWidget(), 0, 1);
+    if(subtype == AmpSimulatorOnly || subtype==AmpChorus || subtype==AmpFlange || subtype==AmpTremolo || subtype==AmpPhaser)
+    {
+        mainlyt->addWidget( new AmpWidget(), 0, 0);
+        mainlyt->addWidget( new NoiseGateWidget(AmpMultiWidget::NoiseGateThreshold,
+                                                AmpMultiWidget::NoiseGateAttack,
+                                                AmpMultiWidget::NoiseGateHold,
+                                                AmpMultiWidget::NoiseGateDecay),
+                                                0, 1);
+    }
+    else
+    {
+        mainlyt->addWidget( new DistortionWidget(), 0, 0);
+        if(subtype == DistortionOnly)
+        {
+            mainlyt->addWidget( new NoiseGateWidget(DistortionWidget::NoiseGateThreshold,
+                                                DistortionWidget::NoiseGateAttack,
+                                                DistortionWidget::NoiseGateHold,
+                                                DistortionWidget::NoiseGateDecay),
+                                                0, 1);
+        }
+        else
+        {
+            mainlyt->addWidget( new NoiseGateWidget(DistortionWidget::NoiseGateThresholdMulti,
+                                                DistortionWidget::NoiseGateAttackMulti,
+                                                DistortionWidget::NoiseGateHoldMulti,
+                                                DistortionWidget::NoiseGateDecayMulti),
+                                                0, 1);
+        }
+    }
 
-    if( subtype != SimulatorOnly)
+    if( subtype != AmpSimulatorOnly && subtype != DistortionOnly)
     {
 
         mainlyt->addWidget( new CompressorWidget(

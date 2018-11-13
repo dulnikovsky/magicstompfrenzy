@@ -32,3 +32,17 @@ QSpinBox * EffectEditBaseWidget::createStandardRawSpinBox(int offset, int minimu
     spinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, length);
     return spinBox;
 }
+
+QDoubleSpinBox* EffectEditBaseWidget::createStd12GainSpinBox(int offset)
+{
+    QDoubleSpinBox *dspinBox = new QDoubleSpinBox();
+    dspinBox->setMinimum(-12.0);
+    dspinBox->setMaximum(12.0);
+    dspinBox->setSingleStep(0.2);
+    dspinBox->setDecimals(1);
+    dspinBox->setSuffix(QStringLiteral(" dB"));
+    dspinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, offset);
+    dspinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    dspinBox->setProperty( ArrayDataEditWidget::convertMethodProperty, QStringLiteral("scaleAndAdd(0.2, -12.0)"));
+    return dspinBox;
+}

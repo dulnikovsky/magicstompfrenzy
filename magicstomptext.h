@@ -163,4 +163,50 @@ const QStringList OffOnStringList =
     QStringLiteral("On")
 };
 
+const QStringList MicTypeNameList =
+{
+    QStringLiteral("Condenser 1"),
+    QStringLiteral("Condenser 2"),
+    QStringLiteral("Dynamic 1"),
+    QStringLiteral("Dynamic 2"),
+    QStringLiteral("Tube 1"),
+    QStringLiteral("Tube 2"),
+    QStringLiteral("Nylon String 1"),
+    QStringLiteral("Nylon String 2")
+};
+
+const QStringList AcousticReverbTypeNameList =
+{
+    QStringLiteral("Off"),
+    QStringLiteral("Hall"),
+    QStringLiteral("Room"),
+    QStringLiteral("Plate")
+};
+
+const QStringList AcousticChorusDelayTypeNameList =
+{
+    QStringLiteral("Off"),
+    QStringLiteral("Chorus"),
+    QStringLiteral("Delay")
+};
+
+const QStringList DistortionTypeNameList =
+{
+    QStringLiteral("Lead 1"),
+    QStringLiteral("Lead 2"),
+    QStringLiteral("Drive 1"),
+    QStringLiteral("Drive 2"),
+    QStringLiteral("Crunch 1"),
+    QStringLiteral("Crunch 2"),
+    QStringLiteral("Fuzz 1"),
+    QStringLiteral("Fuzz 2"),
+    QStringLiteral("Distortion 1"),
+    QStringLiteral("Distortion 2"),
+    QStringLiteral("Overdrive 1"),
+    QStringLiteral("Overdrive 2"),
+    QStringLiteral("Tube"),
+    QStringLiteral("Solidstate"),
+    QStringLiteral("Bypass"),
+};
+
 #endif

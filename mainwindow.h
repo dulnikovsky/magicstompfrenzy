@@ -65,9 +65,6 @@ private:
     void loadPresetPatches(int index, const QString &filename);
     PatchListType getCurrentPatchType() const;
 
-    int currentPatchTransmitted;
-    QPair<PatchListType, int> currentPatchEdited;
-
     MidiPortModel *readablePortsModel;
     MidiPortModel *writablePortsModel;
 
@@ -98,6 +95,9 @@ private:
     QVBoxLayout *patchListLayout;
 
     QAction *showPreferencesAction;
+
+    int currentPatchTransmitted;
+    QPair<PatchListType, int> currentPatchEdited;
 
     bool cancelOperation;
     bool isInTransmissionState;

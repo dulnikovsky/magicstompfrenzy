@@ -9,7 +9,7 @@
 HQPitchWidget::HQPitchWidget(QWidget *parent) :
     EffectEditBaseWidget(parent)
 {
-    QSpinBox *spinBox = new QSpinBox();
+    QSpinBox *spinBox;
     QDoubleSpinBox *dspinBox;
     QGridLayout *mainlyt = new QGridLayout();
 

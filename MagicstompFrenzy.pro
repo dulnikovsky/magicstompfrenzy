@@ -51,7 +51,9 @@ SOURCES += main.cpp\
     effecteditwidgets/bassfreqspinbox.cpp \
     effecteditwidgets/expspinbox.cpp \
     effecteditwidgets/hqpitchwidget.cpp \
-    effecteditwidgets/dualpitchwidget.cpp
+    effecteditwidgets/dualpitchwidget.cpp \
+    effecteditwidgets/acousticmultiwidget.cpp \
+    effecteditwidgets/distortionwidget.cpp
 
 HEADERS  += mainwindow.h \
     midiportmodel.h \
@@ -82,7 +84,9 @@ HEADERS  += mainwindow.h \
     effecteditwidgets/bassfreqspinbox.h \
     effecteditwidgets/expspinbox.h \
     effecteditwidgets/hqpitchwidget.h \
-    effecteditwidgets/dualpitchwidget.h
+    effecteditwidgets/dualpitchwidget.h \
+    effecteditwidgets/acousticmultiwidget.h \
+    effecteditwidgets/distortionwidget.h
 
 linux {
 

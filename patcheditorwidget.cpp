@@ -13,6 +13,7 @@
 #include "effecteditwidgets/basspreamp.h"
 #include "effecteditwidgets/hqpitchwidget.h"
 #include "effecteditwidgets/dualpitchwidget.h"
+#include "effecteditwidgets/acousticmultiwidget.h"
 
 PatchEditorWidget::PatchEditorWidget( QWidget *parent)
     : ArrayDataEditWidget( parent),effectEditWidget(nullptr)
@@ -42,7 +43,9 @@ void PatchEditorWidget::setDataArray(QByteArray *arr)
     EffectTypeId patchType = (EffectTypeId)arr->at(PatchType+1);
     switch(patchType)
     {
-
+    case AcousticMulti:
+        mainLayout->addWidget( effectEditWidget = new AcousticMultiWidget(), 8);
+        break;
     case EightBandParallelDelay:
     case EightBandSeriesDelay:
     case FourBand2TapModDelay:
@@ -64,7 +67,10 @@ void PatchEditorWidget::setDataArray(QByteArray *arr)
                 , 8);
         break;
     case AmpSimulator:
-        mainLayout->addWidget( effectEditWidget = new AmpMultiWidget(AmpMultiWidget::SimulatorOnly), 8);
+        mainLayout->addWidget( effectEditWidget = new AmpMultiWidget(AmpMultiWidget::AmpSimulatorOnly), 8);
+        break;
+    case Distortion:
+        mainLayout->addWidget( effectEditWidget = new AmpMultiWidget(AmpMultiWidget::DistortionOnly), 8);
         break;
     case AmpMultiChorus:
         mainLayout->addWidget( effectEditWidget = new AmpMultiWidget(AmpMultiWidget::AmpChorus), 8);
@@ -77,6 +83,18 @@ void PatchEditorWidget::setDataArray(QByteArray *arr)
         break;
     case AmpMultiTremolo:
         mainLayout->addWidget( effectEditWidget = new AmpMultiWidget(AmpMultiWidget::AmpTremolo), 8);
+        break;
+    case DistorionMultiChorus:
+        mainLayout->addWidget( effectEditWidget = new AmpMultiWidget(AmpMultiWidget::DistortionChorus), 8);
+        break;
+    case DistorionMultiFlange:
+        mainLayout->addWidget( effectEditWidget = new AmpMultiWidget(AmpMultiWidget::DistortionFlange), 8);
+        break;
+    case DistorionMultiPhaser:
+        mainLayout->addWidget( effectEditWidget = new AmpMultiWidget(AmpMultiWidget::DistortionPhaser), 8);
+        break;
+    case DistorionMultiTremolo:
+        mainLayout->addWidget( effectEditWidget = new AmpMultiWidget(AmpMultiWidget::DistortionTremolo), 8);
         break;
     case HQPitch:
         mainLayout->addWidget( effectEditWidget = new HQPitchWidget(), 8);
