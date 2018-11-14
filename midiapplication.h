@@ -11,16 +11,21 @@ typedef snd_seq_t* MidiClientHandle;
 #include "midiportidalsa.h"
 Q_DECLARE_METATYPE(MidiPortIdAlsa)
 
+class MidiInThread;
+class MidiSender;
+
 #endif
 
 #ifdef Q_OS_MACOS
 typedef quint32 MidiClientHandle;
 typedef quint32 MidiClientPortId;
+
+class MIDINotification;
+class MIDIPacketList;
+class MIDISysexSendRequest;
 #endif
 
 
-class MidiInThread;
-class MidiSender;
 class MidiPortModel;
 class MidiEvent;
 
@@ -44,16 +49,24 @@ public slots:
 
     void sendMidiEvent(MidiEvent *ev);
 
+private slots:
 
     void onPortConnectionStatusChanged(MidiClientPortId srcId, MidiClientPortId destId, bool isConnected);
     void onPortClientPortStatusChanged(MidiClientPortId mpId, bool isExisting);
-private slots:
+
     void isQuitting();
 
 private:
+#ifdef Q_OS_LINUX
     MidiInThread *midiInThread;
     QThread *midiOutThread;
     MidiSender *midiSender;
+#endif
+#ifdef Q_OS_MACOS
+    static void MIDIEngineNotifyProc(const MIDINotification *message, void *refCon);
+    static void MIDIEngineReadProc(const MIDIPacketList *pktlist, void *arg, void *connRefCon);
+    static void sysexCompletionProc(MIDISysexSendRequest *req);
+#endif
 
     MidiPortModel *readablePortsModel;
     MidiPortModel *writablePortsModel;

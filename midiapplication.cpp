@@ -17,7 +17,7 @@
 #include <QtDebug>
 
 #ifdef Q_OS_MAC
-void MIDIEngineNotifyProc(const MIDINotification *message, void *refCon)
+void MidiApplication::MIDIEngineNotifyProc(const MIDINotification *message, void *refCon)
 {
     MidiApplication *midiApp = static_cast< MidiApplication *>( refCon);
     if( message->messageID == kMIDIMsgObjectAdded || message->messageID == kMIDIMsgObjectRemoved)
@@ -35,8 +35,8 @@ void MIDIEngineNotifyProc(const MIDINotification *message, void *refCon)
     qDebug("MIDI Notify, messageId=%d,", message->messageID);
 }
 
-static MidiEvent *midievent = nullptr;
-void MIDIEngineReadProc(const MIDIPacketList *pktlist, void *arg, void *connRefCon)
+static MidiEvent *midiEvent;
+void MidiApplication::MIDIEngineReadProc(const MIDIPacketList *pktlist, void *arg, void *connRefCon)
 {
     Q_UNUSED(connRefCon)
 
@@ -47,9 +47,9 @@ void MIDIEngineReadProc(const MIDIPacketList *pktlist, void *arg, void *connRefC
         //port |= static_cast<quint32>(ev->source.client) << 8;
        // midisysexevent->setPort(port);
 
-        if( midievent != nullptr)
+        if( midiEvent != nullptr)
         {
-            QByteArray *data = midievent->sysExData();
+            QByteArray *data = midiEvent->sysExData();
             data->append( reinterpret_cast< const char *>( & (packet->data[0])), static_cast<int>( packet->length) );
             if( static_cast< unsigned char>( packet->data[packet->length-1]) != 0xF7 )
             {
@@ -63,39 +63,38 @@ void MIDIEngineReadProc(const MIDIPacketList *pktlist, void *arg, void *connRefC
 
         if( packet->data[0] == 0xF0 )
         {
-            Q_ASSERT( midievent == nullptr);
-            midievent = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));
-            QByteArray *data = midievent->sysExData();
+            Q_ASSERT( midiEvent == nullptr);
+            midiEvent = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));
+            QByteArray *data = midiEvent->sysExData();
             data->append( reinterpret_cast< const char *>( & (packet->data[0])), static_cast<int>( packet->length) );
             if( static_cast< unsigned char>( packet->data[packet->length-1]) != 0xF7 )
             {
                 continue;
             }
         }
-        else if(midievent == nullptr)
+        else if(midiEvent == nullptr)
         {
-            midievent = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::Common));
+             midiEvent = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::Common));
         }
         else
         {
-             Q_ASSERT( midievent != nullptr);
+             Q_ASSERT( midiEvent != nullptr);
         }
 
-        if( midievent->type() == static_cast<QEvent::Type>(MidiEvent::SysEx))
-            qDebug() << midievent->sysExData()->toHex(',');
-        QApplication::postEvent( static_cast< QObject *>(arg), midievent);
-        midievent = nullptr;
+        if( midiEvent->type() == static_cast<QEvent::Type>(MidiEvent::SysEx))
+            qDebug() << midiEvent->sysExData()->toHex(',');
+        QApplication::postEvent( static_cast< QObject *>(arg), midiEvent);
+        midiEvent = nullptr;
 
         //fprintf(stderr,"MIDI Read, Channel=%d, Command=%X, data1=%d, data2=%d\n", (mevent.status & 0x0F) +1 , mevent.status >> 4, mevent.data1, mevent.data2);
     }
 }
 
 static MIDISysexSendRequest sysexReq;
-void sysexCompletionProc(MIDISysexSendRequest *req)
+void MidiApplication::sysexCompletionProc(MIDISysexSendRequest *req)
 {
     Q_UNUSED(req)
 }
-
 #endif
 
 MidiApplication::MidiApplication(int &argc, char **argv)
