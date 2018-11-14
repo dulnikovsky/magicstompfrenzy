@@ -172,6 +172,7 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     connect(editor, SIGNAL(parameterChanged(int,int)), this, SLOT(parameterChanged(int,int)));
     setCentralWidget(editor);
 
+#if defined(QT_DEBUG) && defined(Q_OS_LINUX)
     QSettings cacheSettings(QStandardPaths::writableLocation(QStandardPaths::CacheLocation)+QStringLiteral("/patchcache.ini"), QSettings::IniFormat);
     for(int i=0; i<numOfPatches;i++)
     {
@@ -180,6 +181,7 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
         if(arr.size() == PatchTotalLength && arr.at(PatchType+1)<EffectTypeNUMBER)
             newPatchDataList[User][i] = arr;
     }
+#endif
     patchListView->resizeColumnsToContents();
     guitarPatchListView->resizeColumnsToContents();
     bassPatchListView->resizeColumnsToContents();
@@ -205,12 +207,14 @@ void MainWindow::closeEvent(QCloseEvent *event)
             }
         }
     }
+#if defined(QT_DEBUG) && defined(Q_OS_LINUX)
     QSettings cacheSettings(QStandardPaths::writableLocation(QStandardPaths::CacheLocation)+QStringLiteral("/patchcache.ini"), QSettings::IniFormat);
     for(int i=0; i<numOfPatches;i++)
     {
         if(newPatchDataList.at(User).at(i).size() == PatchTotalLength)
             cacheSettings.setValue("Patchdata"+QString::number(i+1).rightJustified(2, '0'), newPatchDataList.at(User).at(i));
     }
+#endif
     QMainWindow::closeEvent(event);
 }
 
@@ -234,6 +238,12 @@ void MainWindow::midiEvent(MidiEvent *ev)
         if( checkSum != inData->at( inData->length()-1-1))
         {
             qDebug("Checksum Error!");
+            return;
+        }
+
+        if(! isInTransmissionState) // incoming unexpected data
+        {
+            qDebug("Incoming unexpected data!");
             return;
         }
 
