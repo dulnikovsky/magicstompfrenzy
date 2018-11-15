@@ -75,7 +75,7 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     connect(timeOutTimer, SIGNAL(timeout()), this, SLOT(timeout()));
 
     midiOutTimer = new QTimer(this);
-    midiOutTimer->setInterval(70);
+    midiOutTimer->setInterval(50);
     connect(midiOutTimer, SIGNAL(timeout()), this, SLOT(midiOutTimeOut()));
 
     showPreferencesAction = new QAction(tr("&Preferences"), this);
@@ -182,7 +182,7 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
             newPatchDataList[User][i] = arr;
     }
 #endif
-    patchListView->resizeColumnsToContents();
+    //patchListView->resizeColumnsToContents();
     guitarPatchListView->resizeColumnsToContents();
     bassPatchListView->resizeColumnsToContents();
     acousticPatchListView->resizeColumnsToContents();

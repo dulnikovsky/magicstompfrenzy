@@ -35,57 +35,54 @@ void MidiApplication::MIDIEngineNotifyProc(const MIDINotification *message, void
     qDebug("MIDI Notify, messageId=%d,", message->messageID);
 }
 
-static MidiEvent *midiEvent;
 void MidiApplication::MIDIEngineReadProc(const MIDIPacketList *pktlist, void *arg, void *connRefCon)
 {
     Q_UNUSED(connRefCon)
 
+    static MidiEvent *midiEvent;
+
     const MIDIPacket *packet = pktlist->packet;
     for (unsigned int i=0; i < pktlist->numPackets; i++)
     {
-        //quint32 port = ev->source.port;
-        //port |= static_cast<quint32>(ev->source.client) << 8;
-       // midisysexevent->setPort(port);
-
-        if( midiEvent != nullptr)
+        for(int j=0; j< static_cast<int>( packet->length); j++)
         {
-            QByteArray *data = midiEvent->sysExData();
-            data->append( reinterpret_cast< const char *>( & (packet->data[0])), static_cast<int>( packet->length) );
-            if( static_cast< unsigned char>( packet->data[packet->length-1]) != 0xF7 )
-            {
+
+            if( (packet->data[j] & 0xF8) == 0xF8 )
+            { // Skip MIDI realtime messages
                 continue;
             }
-        }
 
-        if( packet->data[0] == 0xFE)
-            continue;
-
-
-        if( packet->data[0] == 0xF0 )
-        {
-            Q_ASSERT( midiEvent == nullptr);
-            midiEvent = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));
-            QByteArray *data = midiEvent->sysExData();
-            data->append( reinterpret_cast< const char *>( & (packet->data[0])), static_cast<int>( packet->length) );
-            if( static_cast< unsigned char>( packet->data[packet->length-1]) != 0xF7 )
+            if( midiEvent != nullptr)
             {
-                continue;
+                QByteArray *data = midiEvent->sysExData();
+                data->append( static_cast<char>( packet->data[j]));
+                if( packet->data[j] == 0xF7 )
+                {
+                    QApplication::postEvent( static_cast< QObject *>(arg), midiEvent);
+                    midiEvent = nullptr;
+                    qDebug() << data->toHex(',');
+                    continue;
+                }
+            }
+            else if( packet->data[0] == 0xF0 )
+            {
+                Q_ASSERT( midiEvent == nullptr);
+                midiEvent = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));
+                QByteArray *data = midiEvent->sysExData();
+                data->append( static_cast<char>( packet->data[j]));
+            }
+            else if(midiEvent == nullptr)
+            {
+                //handle other MIDI messages here
+                 //midiEvent = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::Common));
+                 //QApplication::postEvent( static_cast< QObject *>(arg), midiEvent);
+                 midiEvent = nullptr;
+            }
+            else
+            {
+                 Q_ASSERT( midiEvent != nullptr);
             }
         }
-        else if(midiEvent == nullptr)
-        {
-             midiEvent = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::Common));
-        }
-        else
-        {
-             Q_ASSERT( midiEvent != nullptr);
-        }
-
-        if( midiEvent->type() == static_cast<QEvent::Type>(MidiEvent::SysEx))
-            qDebug() << midiEvent->sysExData()->toHex(',');
-        QApplication::postEvent( static_cast< QObject *>(arg), midiEvent);
-        midiEvent = nullptr;
-
         //fprintf(stderr,"MIDI Read, Channel=%d, Command=%X, data1=%d, data2=%d\n", (mevent.status & 0x0F) +1 , mevent.status >> 4, mevent.data1, mevent.data2);
     }
 }
