@@ -41,7 +41,7 @@ void MidiApplication::MIDIEngineReadProc(const MIDIPacketList *pktlist, void *ar
 
     static MidiEvent *midiEvent;
 
-    const MIDIPacket *packet = pktlist->packet;
+    const MIDIPacket *packet = &pktlist->packet[0];
     for (unsigned int i=0; i < pktlist->numPackets; i++)
     {
         for(int j=0; j< static_cast<int>( packet->length); j++)
@@ -83,6 +83,7 @@ void MidiApplication::MIDIEngineReadProc(const MIDIPacketList *pktlist, void *ar
                  Q_ASSERT( midiEvent != nullptr);
             }
         }
+        packet = MIDIPacketNext(packet);
         //fprintf(stderr,"MIDI Read, Channel=%d, Command=%X, data1=%d, data2=%d\n", (mevent.status & 0x0F) +1 , mevent.status >> 4, mevent.data1, mevent.data2);
     }
 }
