@@ -15,6 +15,7 @@
 #include "effecteditwidgets/dualpitchwidget.h"
 #include "effecteditwidgets/acousticmultiwidget.h"
 #include "effecteditwidgets/reverbwidget.h"
+#include "effecteditwidgets/gatereverbwidget.h"
 
 PatchEditorWidget::PatchEditorWidget( QWidget *parent)
     : ArrayDataEditWidget( parent),effectEditWidget(nullptr)
@@ -58,6 +59,13 @@ void PatchEditorWidget::setDataArray(QByteArray *arr)
         break;
     case Reverb:
         mainLayout->addWidget( effectEditWidget = new ReverbWidget(), 8);
+        break;
+    case EarlyRef:
+        mainLayout->addWidget( effectEditWidget = new GateReverbWidget(true), 8);
+        break;
+    case GateReverb:
+    case ReverseGate:
+        mainLayout->addWidget( effectEditWidget = new GateReverbWidget(), 8);
         break;
     case Compressor:
         mainLayout->addWidget( effectEditWidget =

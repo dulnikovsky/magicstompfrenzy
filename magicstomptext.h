@@ -217,4 +217,20 @@ const QStringList ReverbTypeNameList =
     QStringLiteral("Plate")
 };
 
+const QStringList GateReverbTypeNameList =
+{
+    QStringLiteral("Type-A"),
+    QStringLiteral("Type-B")
+};
+
+const QStringList EarlyRefTypeNameList =
+{
+    QStringLiteral("Small Hall"),
+    QStringLiteral("Large Hall"),
+    QStringLiteral("Random"),
+    QStringLiteral("Reverse"),
+    QStringLiteral("Plate"),
+    QStringLiteral("Spring")
+};
+
 #endif

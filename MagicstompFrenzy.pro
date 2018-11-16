@@ -57,7 +57,8 @@ SOURCES += main.cpp\
     effecteditwidgets/reverbwidget.cpp \
     effecteditwidgets/reverbtimespinbox.cpp \
     effecteditwidgets/hpfspinbox.cpp \
-    effecteditwidgets/lpfspinbox.cpp
+    effecteditwidgets/lpfspinbox.cpp \
+    effecteditwidgets/gatereverbwidget.cpp
 
 HEADERS  += mainwindow.h \
     midiportmodel.h \
@@ -94,7 +95,8 @@ HEADERS  += mainwindow.h \
     effecteditwidgets/reverbwidget.h \
     effecteditwidgets/reverbtimespinbox.h \
     effecteditwidgets/hpfspinbox.h \
-    effecteditwidgets/lpfspinbox.h
+    effecteditwidgets/lpfspinbox.h \
+    effecteditwidgets/gatereverbwidget.h
 
 linux {
 
