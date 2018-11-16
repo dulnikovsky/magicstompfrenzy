@@ -209,4 +209,12 @@ const QStringList DistortionTypeNameList =
     QStringLiteral("Bypass"),
 };
 
+const QStringList ReverbTypeNameList =
+{
+    QStringLiteral("Hall"),
+    QStringLiteral("Room"),
+    QStringLiteral("Stage"),
+    QStringLiteral("Plate")
+};
+
 #endif

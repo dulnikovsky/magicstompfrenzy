@@ -1,5 +1,6 @@
 #include "ampmultireverbwidget.h"
 #include "ampmultiwidget.h"
+#include "reverbtimespinbox.h"
 #include <QGridLayout>
 #include <QDoubleSpinBox>
 #include <QLabel>
@@ -18,18 +19,13 @@ AmpMultiReverbWidget::AmpMultiReverbWidget(QWidget *parent) :
     dspinBox = createStandard10DblSpinBox( AmpMultiWidget::ReverbLevel);
     mainlyt->addWidget(dspinBox, 1, 0);
 
-    mainlyt->addWidget(new QLabel(tr("Time(?)")), 2, 0);
-    spinBox = createStandardRawSpinBox( AmpMultiWidget::ReverbTime, 0, 0x53);
-    /*dspinBox = new QDoubleSpinBox();
-    dspinBox->setSuffix(QStringLiteral(" s"));
-    dspinBox->setMinimum(0.3);
-    dspinBox->setMaximum(500.0);
-    dspinBox->setSingleStep(0.1);
-    dspinBox->setDecimals(1);
-    dspinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, AmpMultiWidget::ReverbIniDelay);
-    dspinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 2);
-    dspinBox->setProperty( ArrayDataEditWidget::convertMethodProperty, QStringLiteral("scaleAndAdd(0.1, 0)"));*/
-    mainlyt->addWidget(spinBox, 3, 0);
+    mainlyt->addWidget(new QLabel(tr("Time")), 2, 0);
+    ReverbTimeSpinBox *revTimeSpinBox = new ReverbTimeSpinBox();
+    revTimeSpinBox->setParameters(0, 0x53);
+    revTimeSpinBox->setSuffix(" ms");
+    revTimeSpinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, AmpMultiWidget::ReverbTime);
+    revTimeSpinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    mainlyt->addWidget(revTimeSpinBox, 3, 0);
 
     mainlyt->addWidget(new QLabel(tr("High")), 0, 1);
     dspinBox = new QDoubleSpinBox();

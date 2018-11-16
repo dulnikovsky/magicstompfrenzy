@@ -122,7 +122,7 @@ BassPreampWidget::BassPreampWidget( QWidget *parent) :
     spinBox = new QSpinBox();
     spinBox->setMinimum(-54);
     spinBox->setMaximum(0);
-    //spinBox->setSpecialValueText("Off");
+    spinBox->setSpecialValueText(QStringLiteral("Off"));
     spinBox->setSuffix(QStringLiteral(" dB"));
     spinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, Gate);
     spinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);

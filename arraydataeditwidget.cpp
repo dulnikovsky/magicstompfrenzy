@@ -10,6 +10,7 @@
 #include <QLineEdit>
 #include <QChildEvent>
 #include "effecteditwidgets/expspinbox.h"
+#include "effecteditwidgets/reverbtimespinbox.h"
 
 ArrayDataEditWidget::ArrayDataEditWidget( QWidget *parent)
         : QWidget( parent), dataArray(nullptr)
@@ -238,6 +239,12 @@ void ArrayDataEditWidget::connectObjectToValueChangedSlot( QObject *object)
     if( exbox != nullptr)
     {
         connect(exbox, SIGNAL(rawValueChanged(int)), this, SLOT(valueChanged()));
+        return;
+    }
+    ReverbTimeSpinBox *revtimebox = dynamic_cast<ReverbTimeSpinBox *>(object);
+    if( revtimebox != nullptr)
+    {
+        connect(revtimebox, SIGNAL(rawValueChanged(int)), this, SLOT(valueChanged()));
         return;
     }
 }

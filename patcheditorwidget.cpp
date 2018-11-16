@@ -14,6 +14,7 @@
 #include "effecteditwidgets/hqpitchwidget.h"
 #include "effecteditwidgets/dualpitchwidget.h"
 #include "effecteditwidgets/acousticmultiwidget.h"
+#include "effecteditwidgets/reverbwidget.h"
 
 PatchEditorWidget::PatchEditorWidget( QWidget *parent)
     : ArrayDataEditWidget( parent),effectEditWidget(nullptr)
@@ -54,6 +55,9 @@ void PatchEditorWidget::setDataArray(QByteArray *arr)
     case TwoBandLong4ShortModDelay:
     case ShortMediumLongModDelay:
         mainLayout->addWidget( effectEditWidget = new MultibandDelayWidget(patchType), 8);
+        break;
+    case Reverb:
+        mainLayout->addWidget( effectEditWidget = new ReverbWidget(), 8);
         break;
     case Compressor:
         mainLayout->addWidget( effectEditWidget =

@@ -23,9 +23,8 @@ void ExpSpinBox::setRawValue( int val)
     double exponentStep = ((maxExponent-1) / ( maxRawVal - minRawVal ));
     realValue = qPow(minRealVal, (1 + (exponentStep * (val - minRawVal))));
 
-    lineEdit()->setText(convertToString());
-
     rawValue = val;
+    lineEdit()->setText(convertToString());
     emit rawValueChanged( rawValue);
 }
 
