@@ -27,8 +27,8 @@ AmpMultiModulationWidget::AmpMultiModulationWidget(EffectType type, QWidget *par
     waveComboBox->setProperty( ArrayDataEditWidget::valuePropertyName, QStringLiteral("currentIndex"));
     waveComboBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, AmpMultiWidget::ModWave);
     waveComboBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
-    waveComboBox->addItem(tr("Sine"));
-    waveComboBox->addItem(tr("Triangle"));
+    waveComboBox->addItem(QStringLiteral("Sine"));
+    waveComboBox->addItem(QStringLiteral("Triangle"));
     if(type == Tremolo)
         waveComboBox->addItem(tr("Square"));
     mainlyt->addWidget(waveComboBox, 1, 0);

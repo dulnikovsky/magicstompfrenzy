@@ -16,6 +16,9 @@
 #include "effecteditwidgets/acousticmultiwidget.h"
 #include "effecteditwidgets/reverbwidget.h"
 #include "effecteditwidgets/gatereverbwidget.h"
+#include "effecteditwidgets/choruswidget.h"
+#include "effecteditwidgets/flangewidget.h"
+#include "effecteditwidgets/symphonicwidget.h"
 
 PatchEditorWidget::PatchEditorWidget( QWidget *parent)
     : ArrayDataEditWidget( parent),effectEditWidget(nullptr)
@@ -66,6 +69,15 @@ void PatchEditorWidget::setDataArray(QByteArray *arr)
     case GateReverb:
     case ReverseGate:
         mainLayout->addWidget( effectEditWidget = new GateReverbWidget(), 8);
+        break;
+    case Chorus:
+        mainLayout->addWidget( effectEditWidget = new ChorusWidget(), 8);
+        break;
+    case Flange:
+        mainLayout->addWidget( effectEditWidget = new FlangeWidget(), 8);
+        break;
+    case Symphonic:
+        mainLayout->addWidget( effectEditWidget = new SymphonicWidget(), 8);
         break;
     case Compressor:
         mainLayout->addWidget( effectEditWidget =
