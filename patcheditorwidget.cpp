@@ -19,6 +19,9 @@
 #include "effecteditwidgets/choruswidget.h"
 #include "effecteditwidgets/flangewidget.h"
 #include "effecteditwidgets/symphonicwidget.h"
+#include "effecteditwidgets/vintageflangewidget.h"
+#include "effecteditwidgets/phaserwidget.h"
+#include "effecteditwidgets/vintagephaserwidget.h"
 
 PatchEditorWidget::PatchEditorWidget( QWidget *parent)
     : ArrayDataEditWidget( parent),effectEditWidget(nullptr)
@@ -45,7 +48,7 @@ void PatchEditorWidget::setDataArray(QByteArray *arr)
         delete effectEditWidget;
     }
 
-    EffectTypeId patchType = (EffectTypeId)arr->at(PatchType+1);
+    EffectTypeId patchType = static_cast<EffectTypeId>(arr->at(PatchType+1)); // only last byte is used in PatchType
     switch(patchType)
     {
     case AcousticMulti:
@@ -76,8 +79,20 @@ void PatchEditorWidget::setDataArray(QByteArray *arr)
     case Flange:
         mainLayout->addWidget( effectEditWidget = new FlangeWidget(), 8);
         break;
+    case VintageFlange:
+        mainLayout->addWidget( effectEditWidget = new VintageFlangeWidget(), 8);
+        break;
     case Symphonic:
         mainLayout->addWidget( effectEditWidget = new SymphonicWidget(), 8);
+        break;
+    case Phaser:
+        mainLayout->addWidget( effectEditWidget = new PhaserWidget(), 8);
+        break;
+    case MonoVintagePhaser:
+        mainLayout->addWidget( effectEditWidget = new VintagePhaserWidget(), 8);
+        break;
+    case StereoVintagePhaser:
+        mainLayout->addWidget( effectEditWidget = new VintagePhaserWidget(false), 8);
         break;
     case Compressor:
         mainLayout->addWidget( effectEditWidget =

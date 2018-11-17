@@ -61,7 +61,10 @@ SOURCES += main.cpp\
     effecteditwidgets/gatereverbwidget.cpp \
     effecteditwidgets/choruswidget.cpp \
     effecteditwidgets/flangewidget.cpp \
-    effecteditwidgets/symphonicwidget.cpp
+    effecteditwidgets/symphonicwidget.cpp \
+    effecteditwidgets/vintageflangewidget.cpp \
+    effecteditwidgets/phaserwidget.cpp \
+    effecteditwidgets/vintagephaserwidget.cpp
 
 HEADERS  += mainwindow.h \
     midiportmodel.h \
@@ -102,7 +105,10 @@ HEADERS  += mainwindow.h \
     effecteditwidgets/gatereverbwidget.h \
     effecteditwidgets/choruswidget.h \
     effecteditwidgets/flangewidget.h \
-    effecteditwidgets/symphonicwidget.h
+    effecteditwidgets/symphonicwidget.h \
+    effecteditwidgets/vintageflangewidget.h \
+    effecteditwidgets/phaserwidget.h \
+    effecteditwidgets/vintagephaserwidget.h
 
 linux {
 

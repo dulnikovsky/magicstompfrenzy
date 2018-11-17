@@ -816,7 +816,7 @@ void MainWindow::undoRedoButtonPressed()
 
     ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>(centralWidget());
     editWidget->setDataArray(& (newPatchDataList[type][row]));
-    sendPatch(row);
+    sendPatch(row, true, type);
 
     patchListModelList[type]->patchUpdated(row);
     patchListSelectionChanged();

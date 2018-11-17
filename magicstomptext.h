@@ -60,7 +60,7 @@ const QStringList EffectTypeNameList =
     QStringLiteral("Distortion"),
 
     QStringLiteral("Vintage Flange"),
-    QStringLiteral("Mono Vintage Flange"),
+    QStringLiteral("Mono Vintage Phaser"),
     QStringLiteral("Stereo Vintage Phaser"),
     QStringLiteral("3 Band Parametric EQ"),
     QStringLiteral("Spring Reverb"),
