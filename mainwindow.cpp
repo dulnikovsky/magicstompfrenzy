@@ -599,7 +599,7 @@ void MainWindow::parameterChanged(int offset, int length)
 
     if( offset == PatchType)
     {
-        QSettings effectiniSettings(QDir::currentPath()+"/effects.ini", QSettings::IniFormat);
+        QSettings effectiniSettings(QApplication::applicationDirPath()+"/effects.ini", QSettings::IniFormat);
         QByteArray initArr;
         int patchId = static_cast<EffectTypeId>( *(editWidget->DataArray()->constData()+PatchType+1));
         QString key = "Type" + (QString::number(patchId, 16).rightJustified(2, '0').toUpper());
