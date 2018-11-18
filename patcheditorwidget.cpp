@@ -44,6 +44,10 @@
 #include "effecteditwidgets/vintageflangewidget.h"
 #include "effecteditwidgets/phaserwidget.h"
 #include "effecteditwidgets/vintagephaserwidget.h"
+#include "effecteditwidgets/monodelaywidget.h"
+#include "effecteditwidgets/stereodelaywidget.h"
+#include "effecteditwidgets/moddelaywidget.h"
+#include "effecteditwidgets/delaylcrwidget.h"
 
 PatchEditorWidget::PatchEditorWidget( QWidget *parent)
     : ArrayDataEditWidget( parent),effectEditWidget(nullptr)
@@ -165,6 +169,18 @@ void PatchEditorWidget::setDataArray(QByteArray *arr)
         break;
     case BassPreamp:
         mainLayout->addWidget( effectEditWidget = new BassPreampWidget(), 8);
+        break;
+    case MonoDelay:
+        mainLayout->addWidget( effectEditWidget = new MonoDelayWidget(), 8);
+        break;
+    case StereoDelay:
+        mainLayout->addWidget( effectEditWidget = new StereoDelayWidget(), 8);
+        break;
+    case ModDelay:
+        mainLayout->addWidget( effectEditWidget = new ModDelayWidget(), 8);
+        break;
+    case DelayLCR:
+        mainLayout->addWidget( effectEditWidget = new DelayLCRWidget(), 8);
         break;
     default:
         mainLayout->addWidget(effectEditWidget = new QWidget());

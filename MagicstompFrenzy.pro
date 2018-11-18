@@ -64,7 +64,11 @@ SOURCES += main.cpp\
     effecteditwidgets/symphonicwidget.cpp \
     effecteditwidgets/vintageflangewidget.cpp \
     effecteditwidgets/phaserwidget.cpp \
-    effecteditwidgets/vintagephaserwidget.cpp
+    effecteditwidgets/vintagephaserwidget.cpp \
+    effecteditwidgets/monodelaywidget.cpp \
+    effecteditwidgets/stereodelaywidget.cpp \
+    effecteditwidgets/moddelaywidget.cpp \
+    effecteditwidgets/delaylcrwidget.cpp
 
 HEADERS  += mainwindow.h \
     midiportmodel.h \
@@ -108,7 +112,11 @@ HEADERS  += mainwindow.h \
     effecteditwidgets/symphonicwidget.h \
     effecteditwidgets/vintageflangewidget.h \
     effecteditwidgets/phaserwidget.h \
-    effecteditwidgets/vintagephaserwidget.h
+    effecteditwidgets/vintagephaserwidget.h \
+    effecteditwidgets/monodelaywidget.h \
+    effecteditwidgets/stereodelaywidget.h \
+    effecteditwidgets/moddelaywidget.h \
+    effecteditwidgets/delaylcrwidget.h
 
 linux {
 
