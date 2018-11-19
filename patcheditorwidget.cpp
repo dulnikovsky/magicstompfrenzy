@@ -48,6 +48,8 @@
 #include "effecteditwidgets/stereodelaywidget.h"
 #include "effecteditwidgets/moddelaywidget.h"
 #include "effecteditwidgets/delaylcrwidget.h"
+#include "effecteditwidgets/echowidget.h"
+#include "effecteditwidgets/tapeechowidget.h"
 
 PatchEditorWidget::PatchEditorWidget( QWidget *parent)
     : ArrayDataEditWidget( parent),effectEditWidget(nullptr)
@@ -181,6 +183,12 @@ void PatchEditorWidget::setDataArray(QByteArray *arr)
         break;
     case DelayLCR:
         mainLayout->addWidget( effectEditWidget = new DelayLCRWidget(), 8);
+        break;
+    case Echo:
+        mainLayout->addWidget( effectEditWidget = new EchoWidget(), 8);
+        break;
+    case TapeEcho:
+        mainLayout->addWidget( effectEditWidget = new TapeEchoWidget(), 8);
         break;
     default:
         mainLayout->addWidget(effectEditWidget = new QWidget());

@@ -68,7 +68,9 @@ SOURCES += main.cpp\
     effecteditwidgets/monodelaywidget.cpp \
     effecteditwidgets/stereodelaywidget.cpp \
     effecteditwidgets/moddelaywidget.cpp \
-    effecteditwidgets/delaylcrwidget.cpp
+    effecteditwidgets/delaylcrwidget.cpp \
+    effecteditwidgets/echowidget.cpp \
+    effecteditwidgets/tapeechowidget.cpp
 
 HEADERS  += mainwindow.h \
     midiportmodel.h \
@@ -116,7 +118,9 @@ HEADERS  += mainwindow.h \
     effecteditwidgets/monodelaywidget.h \
     effecteditwidgets/stereodelaywidget.h \
     effecteditwidgets/moddelaywidget.h \
-    effecteditwidgets/delaylcrwidget.h
+    effecteditwidgets/delaylcrwidget.h \
+    effecteditwidgets/echowidget.h \
+    effecteditwidgets/tapeechowidget.h
 
 linux {
 
