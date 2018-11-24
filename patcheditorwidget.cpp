@@ -50,6 +50,8 @@
 #include "effecteditwidgets/delaylcrwidget.h"
 #include "effecteditwidgets/echowidget.h"
 #include "effecteditwidgets/tapeechowidget.h"
+#include "effecteditwidgets/tremolowidget.h"
+#include "effecteditwidgets/autopanwidget.h"
 
 PatchEditorWidget::PatchEditorWidget( QWidget *parent)
     : ArrayDataEditWidget( parent),effectEditWidget(nullptr)
@@ -189,6 +191,12 @@ void PatchEditorWidget::setDataArray(QByteArray *arr)
         break;
     case TapeEcho:
         mainLayout->addWidget( effectEditWidget = new TapeEchoWidget(), 8);
+        break;
+    case Tremolo:
+        mainLayout->addWidget( effectEditWidget = new TremoloWidget(), 8);
+        break;
+    case AutoPan:
+        mainLayout->addWidget( effectEditWidget = new AutoPanWidget(), 8);
         break;
     default:
         mainLayout->addWidget(effectEditWidget = new QWidget());

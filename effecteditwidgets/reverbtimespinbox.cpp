@@ -50,8 +50,8 @@ void ReverbTimeSpinBox::setRawValue( int val)
     else
         txt = QString::number( static_cast<double>(val-0x43)*5 +20);
     lineEdit()->setText(txt + suffix);
-    update();
     rawValue = val;
+    update();
     emit rawValueChanged( rawValue);
 }
 

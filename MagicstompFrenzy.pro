@@ -70,7 +70,9 @@ SOURCES += main.cpp\
     effecteditwidgets/moddelaywidget.cpp \
     effecteditwidgets/delaylcrwidget.cpp \
     effecteditwidgets/echowidget.cpp \
-    effecteditwidgets/tapeechowidget.cpp
+    effecteditwidgets/tapeechowidget.cpp \
+    effecteditwidgets/tremolowidget.cpp \
+    effecteditwidgets/autopanwidget.cpp
 
 HEADERS  += mainwindow.h \
     midiportmodel.h \
@@ -120,7 +122,9 @@ HEADERS  += mainwindow.h \
     effecteditwidgets/moddelaywidget.h \
     effecteditwidgets/delaylcrwidget.h \
     effecteditwidgets/echowidget.h \
-    effecteditwidgets/tapeechowidget.h
+    effecteditwidgets/tapeechowidget.h \
+    effecteditwidgets/tremolowidget.h \
+    effecteditwidgets/autopanwidget.h
 
 linux {
 
