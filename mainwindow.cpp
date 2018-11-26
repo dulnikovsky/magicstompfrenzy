@@ -180,7 +180,7 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     mainLeftlayout->addWidget( patchListGroupbox);
 
     QWidget *dockWidgetDummy = new QWidget();
-    dockWidgetDummy->setMinimumSize(440, 600);
+    dockWidgetDummy->setMinimumSize(440, 196);
     dockWidgetDummy->setLayout(mainLeftlayout);
 
     QDockWidget *dockWidget = new QDockWidget();
@@ -209,6 +209,7 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     guitarPatchListView->resizeColumnsToContents();
     bassPatchListView->resizeColumnsToContents();
     acousticPatchListView->resizeColumnsToContents();
+    setMinimumHeight(256);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
