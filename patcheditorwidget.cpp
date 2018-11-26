@@ -52,6 +52,8 @@
 #include "effecteditwidgets/tapeechowidget.h"
 #include "effecteditwidgets/tremolowidget.h"
 #include "effecteditwidgets/autopanwidget.h"
+#include "effecteditwidgets/reverbchoruswidget.h"
+#include "effecteditwidgets/reverbflangewidget.h"
 
 PatchEditorWidget::PatchEditorWidget( QWidget *parent)
     : ArrayDataEditWidget( parent),effectEditWidget(nullptr)
@@ -197,6 +199,24 @@ void PatchEditorWidget::setDataArray(QByteArray *arr)
         break;
     case AutoPan:
         mainLayout->addWidget( effectEditWidget = new AutoPanWidget(), 8);
+        break;
+    case ReverbChorusParallel:
+        mainLayout->addWidget( effectEditWidget = new ReverbChorusWidget(), 8);
+        break;
+    case ReverbChorusSerial:
+        mainLayout->addWidget( effectEditWidget = new ReverbChorusWidget(false), 8);
+        break;
+    case ReverbFlangeParallel:
+        mainLayout->addWidget( effectEditWidget = new ReverbFlangeWidget(), 8);
+        break;
+    case ReverbFlangeSerial:
+        mainLayout->addWidget( effectEditWidget = new ReverbFlangeWidget(false), 8);
+        break;
+    case ReverbSymphonicParallel:
+        mainLayout->addWidget( effectEditWidget = new ReverbFlangeWidget(true, true), 8);
+        break;
+    case ReverbSymphonicSerial:
+        mainLayout->addWidget( effectEditWidget = new ReverbFlangeWidget(false, true), 8);
         break;
     default:
         mainLayout->addWidget(effectEditWidget = new QWidget());

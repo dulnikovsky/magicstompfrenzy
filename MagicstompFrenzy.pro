@@ -72,7 +72,10 @@ SOURCES += main.cpp\
     effecteditwidgets/echowidget.cpp \
     effecteditwidgets/tapeechowidget.cpp \
     effecteditwidgets/tremolowidget.cpp \
-    effecteditwidgets/autopanwidget.cpp
+    effecteditwidgets/autopanwidget.cpp \
+    effecteditwidgets/reverbmultiwidget.cpp \
+    effecteditwidgets/reverbchoruswidget.cpp \
+    effecteditwidgets/reverbflangewidget.cpp
 
 HEADERS  += mainwindow.h \
     midiportmodel.h \
@@ -124,7 +127,10 @@ HEADERS  += mainwindow.h \
     effecteditwidgets/echowidget.h \
     effecteditwidgets/tapeechowidget.h \
     effecteditwidgets/tremolowidget.h \
-    effecteditwidgets/autopanwidget.h
+    effecteditwidgets/autopanwidget.h \
+    effecteditwidgets/reverbmultiwidget.h \
+    effecteditwidgets/reverbchoruswidget.h \
+    effecteditwidgets/reverbflangewidget.h
 
 linux {
 
