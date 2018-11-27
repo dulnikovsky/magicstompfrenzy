@@ -75,7 +75,11 @@ SOURCES += main.cpp\
     effecteditwidgets/autopanwidget.cpp \
     effecteditwidgets/reverbmultiwidget.cpp \
     effecteditwidgets/reverbchoruswidget.cpp \
-    effecteditwidgets/reverbflangewidget.cpp
+    effecteditwidgets/reverbflangewidget.cpp \
+    effecteditwidgets/reverbpanwidget.cpp \
+    effecteditwidgets/delaymultiwidget.cpp \
+    effecteditwidgets/delayearlyrefwidget.cpp \
+    effecteditwidgets/delayreverbwidget.cpp
 
 HEADERS  += mainwindow.h \
     midiportmodel.h \
@@ -130,7 +134,11 @@ HEADERS  += mainwindow.h \
     effecteditwidgets/autopanwidget.h \
     effecteditwidgets/reverbmultiwidget.h \
     effecteditwidgets/reverbchoruswidget.h \
-    effecteditwidgets/reverbflangewidget.h
+    effecteditwidgets/reverbflangewidget.h \
+    effecteditwidgets/reverbpanwidget.h \
+    effecteditwidgets/delaymultiwidget.h \
+    effecteditwidgets/delayearlyrefwidget.h \
+    effecteditwidgets/delayreverbwidget.h
 
 linux {
 

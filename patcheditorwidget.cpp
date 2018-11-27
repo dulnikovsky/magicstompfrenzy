@@ -54,6 +54,9 @@
 #include "effecteditwidgets/autopanwidget.h"
 #include "effecteditwidgets/reverbchoruswidget.h"
 #include "effecteditwidgets/reverbflangewidget.h"
+#include "effecteditwidgets/reverbpanwidget.h"
+#include "effecteditwidgets/delayearlyrefwidget.h"
+#include "effecteditwidgets/delayreverbwidget.h"
 
 PatchEditorWidget::PatchEditorWidget( QWidget *parent)
     : ArrayDataEditWidget( parent),effectEditWidget(nullptr)
@@ -217,6 +220,21 @@ void PatchEditorWidget::setDataArray(QByteArray *arr)
         break;
     case ReverbSymphonicSerial:
         mainLayout->addWidget( effectEditWidget = new ReverbFlangeWidget(false, true), 8);
+        break;
+    case ReverbPan:
+        mainLayout->addWidget( effectEditWidget = new ReverbPanWidget(), 8);
+        break;
+    case DelayEarlyRefParallel:
+        mainLayout->addWidget( effectEditWidget = new DelayEarlyRefWidget(), 8);
+        break;
+    case DelayEarlyRefSerial:
+        mainLayout->addWidget( effectEditWidget = new DelayEarlyRefWidget(false), 8);
+        break;
+    case DelayReverbParallel:
+        mainLayout->addWidget( effectEditWidget = new DelayReverbWidget(), 8);
+        break;
+    case DelayReverbSerial:
+        mainLayout->addWidget( effectEditWidget = new DelayReverbWidget(false), 8);
         break;
     default:
         mainLayout->addWidget(effectEditWidget = new QWidget());
