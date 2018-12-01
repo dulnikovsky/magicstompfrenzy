@@ -57,6 +57,13 @@
 #include "effecteditwidgets/reverbpanwidget.h"
 #include "effecteditwidgets/delayearlyrefwidget.h"
 #include "effecteditwidgets/delayreverbwidget.h"
+#include "effecteditwidgets/distortiondelaywidget.h"
+#include "effecteditwidgets/multifilterwidget.h"
+#include "effecteditwidgets/threebandeqwidget.h"
+#include "effecteditwidgets/rotarywidget.h"
+#include "effecteditwidgets/ringmodwidget.h"
+#include "effecteditwidgets/modfilterwidget.h"
+#include "effecteditwidgets/mbanddynawidget.h"
 
 PatchEditorWidget::PatchEditorWidget( QWidget *parent)
     : ArrayDataEditWidget( parent),effectEditWidget(nullptr)
@@ -235,6 +242,30 @@ void PatchEditorWidget::setDataArray(QByteArray *arr)
         break;
     case DelayReverbSerial:
         mainLayout->addWidget( effectEditWidget = new DelayReverbWidget(false), 8);
+        break;
+    case DistortionDelay:
+        mainLayout->addWidget( effectEditWidget = new DistortionDelayWidget(), 8);
+        break;
+    case MultiFilter:
+        mainLayout->addWidget( effectEditWidget = new MultiFilterWidget(), 8);
+        break;
+    case ThreeBandParametricEQ:
+        mainLayout->addWidget( effectEditWidget = new ThreeBandEqWidget(), 8);
+        break;
+    case Rotary:
+        mainLayout->addWidget( effectEditWidget = new RotaryWidget(), 8);
+        break;
+    case RingMod:
+        mainLayout->addWidget( effectEditWidget = new RingModWidget(), 8);
+        break;
+    case ModFilter:
+        mainLayout->addWidget( effectEditWidget = new ModFilterWidget(), 8);
+        break;
+    case DigitalDistortion:
+        mainLayout->addWidget( effectEditWidget = new DistortionDelayWidget( true), 8);
+        break;
+    case MBandDyna:
+        mainLayout->addWidget( effectEditWidget = new MBandDynaWidget(), 8);
         break;
     default:
         mainLayout->addWidget(effectEditWidget = new QWidget());

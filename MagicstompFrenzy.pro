@@ -79,7 +79,14 @@ SOURCES += main.cpp\
     effecteditwidgets/reverbpanwidget.cpp \
     effecteditwidgets/delaymultiwidget.cpp \
     effecteditwidgets/delayearlyrefwidget.cpp \
-    effecteditwidgets/delayreverbwidget.cpp
+    effecteditwidgets/delayreverbwidget.cpp \
+    effecteditwidgets/distortiondelaywidget.cpp \
+    effecteditwidgets/multifilterwidget.cpp \
+    effecteditwidgets/threebandeqwidget.cpp \
+    effecteditwidgets/rotarywidget.cpp \
+    effecteditwidgets/ringmodwidget.cpp \
+    effecteditwidgets/modfilterwidget.cpp \
+    effecteditwidgets/mbanddynawidget.cpp
 
 HEADERS  += mainwindow.h \
     midiportmodel.h \
@@ -138,7 +145,14 @@ HEADERS  += mainwindow.h \
     effecteditwidgets/reverbpanwidget.h \
     effecteditwidgets/delaymultiwidget.h \
     effecteditwidgets/delayearlyrefwidget.h \
-    effecteditwidgets/delayreverbwidget.h
+    effecteditwidgets/delayreverbwidget.h \
+    effecteditwidgets/distortiondelaywidget.h \
+    effecteditwidgets/multifilterwidget.h \
+    effecteditwidgets/threebandeqwidget.h \
+    effecteditwidgets/rotarywidget.h \
+    effecteditwidgets/ringmodwidget.h \
+    effecteditwidgets/modfilterwidget.h \
+    effecteditwidgets/mbanddynawidget.h
 
 linux {
 
