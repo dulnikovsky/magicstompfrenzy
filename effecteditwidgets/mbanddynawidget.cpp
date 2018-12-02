@@ -133,34 +133,124 @@ MBandDynaWidget::MBandDynaWidget( QWidget *parent) :
     spinBox->setProperty( ArrayDataEditWidget::convertMethodProperty, QStringLiteral("scaleAndAdd( 1, -10)"));
     mainlyt->addWidget(spinBox, 3, 3);
 
-    QGroupBox *filter1GroupBox = new QGroupBox(QStringLiteral("Compressor"));
-    QGridLayout *filter1Layout = new QGridLayout();
+    QGroupBox *compGroupBox = new QGroupBox(QStringLiteral("Compressor"));
+    QGridLayout *compLayout = new QGridLayout();
+
+    compLayout->addWidget(new QLabel(tr("Bypass")), 0, 0);
+    QComboBox *compBypassComboBox = new QComboBox();
+    compBypassComboBox->addItem(QStringLiteral("Off"));
+    compBypassComboBox->addItem(QStringLiteral("On"));
+    compBypassComboBox->setCurrentIndex(-1);
+    compBypassComboBox->setProperty( ArrayDataEditWidget::valuePropertyName, QStringLiteral("currentIndex"));
+    compBypassComboBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, CompressorBypass);
+    compBypassComboBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    compLayout->addWidget( compBypassComboBox, 1, 0);
+
+    compLayout->addWidget(new QLabel(tr("Threshold")), 0, 1);
+    dspinBox = new QDoubleSpinBox();
+    dspinBox->setMinimum(-24.0);
+    dspinBox->setMaximum(0.0);
+    dspinBox->setSingleStep(0.1);
+    dspinBox->setDecimals(1);
+    dspinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, CompressorThreshold);
+    dspinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 2);
+    dspinBox->setProperty( ArrayDataEditWidget::convertMethodProperty, QStringLiteral("scaleAndAdd(0.1, -24)"));
+    compLayout->addWidget(dspinBox, 1, 1);
+
+    compLayout->addWidget(new QLabel(tr("Ratio(?)")), 0, 2);
+    spinBox = createStandardRawSpinBox(CompressorRatio, 0, 0x0F);
+    compLayout->addWidget(spinBox, 1, 2);
+
+    compLayout->addWidget(new QLabel(tr("Attack")), 0, 3);
+    spinBox = createStandardRawSpinBox(CompressorAttack, 0, 120);
+    compLayout->addWidget(spinBox, 1, 3);
+
+    compLayout->addWidget(new QLabel(tr("Release(?)")), 0, 4);
+    spinBox = createStandardRawSpinBox(CompressorRelease, 0, 0x7F);
+    compLayout->addWidget(spinBox, 1, 4);
+
+    compLayout->addWidget(new QLabel(tr("Knee")), 0, 5);
+    spinBox = createStandardRawSpinBox(CompressorKnee, 0, 5);
+    compLayout->addWidget(spinBox, 1, 5);
+
+    compGroupBox->setLayout( compLayout);
 
 
+    QGroupBox *expanderGroupBox = new QGroupBox(QStringLiteral("Expander"));
+    QGridLayout *expanderLayout = new QGridLayout();
+
+    expanderLayout->addWidget(new QLabel(tr("Bypass")), 0, 0);
+    QComboBox *expanderBypassComboBox = new QComboBox();
+    expanderBypassComboBox->addItem(QStringLiteral("Off"));
+    expanderBypassComboBox->addItem(QStringLiteral("On"));
+    expanderBypassComboBox->setCurrentIndex(-1);
+    expanderBypassComboBox->setProperty( ArrayDataEditWidget::valuePropertyName, QStringLiteral("currentIndex"));
+    expanderBypassComboBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, ExpanderBypass);
+    expanderBypassComboBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    expanderLayout->addWidget( expanderBypassComboBox, 1, 0);
+
+    expanderLayout->addWidget(new QLabel(tr("Threshold")), 0, 1);
+    dspinBox = new QDoubleSpinBox();
+    dspinBox->setMinimum(-54.0);
+    dspinBox->setMaximum(-24.0);
+    dspinBox->setSingleStep(0.1);
+    dspinBox->setDecimals(1);
+    dspinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, ExpanderThreshold);
+    dspinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 2);
+    dspinBox->setProperty( ArrayDataEditWidget::convertMethodProperty, QStringLiteral("scaleAndAdd(0.1, -54)"));
+    expanderLayout->addWidget(dspinBox, 1, 1);
+
+    expanderLayout->addWidget(new QLabel(tr("Ratio(?)")), 0, 2);
+    spinBox = createStandardRawSpinBox(ExpanderRatio, 0, 0x0F);
+    expanderLayout->addWidget(spinBox, 1, 2);
+
+    expanderLayout->addWidget(new QLabel(tr("Release(?)")), 0, 3);
+    spinBox = createStandardRawSpinBox(ExpanderRelease, 0, 0x7F);
+    expanderLayout->addWidget(spinBox, 1, 3);
+
+    expanderGroupBox->setLayout(expanderLayout);
+
+    QGroupBox *limiterGroupBox = new QGroupBox(QStringLiteral("Limiter"));
+    QGridLayout *limiterLayout = new QGridLayout();
+
+    limiterLayout->addWidget(new QLabel(tr("Bypass")), 0, 0);
+    QComboBox *limiterBypassComboBox = new QComboBox();
+    limiterBypassComboBox->addItem(QStringLiteral("Off"));
+    limiterBypassComboBox->addItem(QStringLiteral("On"));
+    limiterBypassComboBox->setCurrentIndex(-1);
+    limiterBypassComboBox->setProperty( ArrayDataEditWidget::valuePropertyName, QStringLiteral("currentIndex"));
+    limiterBypassComboBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, LimiterBypass);
+    limiterBypassComboBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    limiterLayout->addWidget( limiterBypassComboBox, 1, 0);
+
+    limiterLayout->addWidget(new QLabel(tr("Threshold")), 0, 1);
+    dspinBox = new QDoubleSpinBox();
+    dspinBox->setMinimum(-12.0);
+    dspinBox->setMaximum(-0.0);
+    dspinBox->setSingleStep(0.1);
+    dspinBox->setDecimals(1);
+    dspinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, LimiterThreshold);
+    dspinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 2);
+    dspinBox->setProperty( ArrayDataEditWidget::convertMethodProperty, QStringLiteral("scaleAndAdd(0.1, -12)"));
+    limiterLayout->addWidget(dspinBox, 1, 1);
+
+    limiterLayout->addWidget(new QLabel(tr("Attack")), 0, 2);
+    spinBox = createStandardRawSpinBox(LimiterAttack, 0, 0x78);
+    limiterLayout->addWidget(spinBox, 1, 2);
+
+    limiterLayout->addWidget(new QLabel(tr("Release(?)")), 0, 4);
+    spinBox = createStandardRawSpinBox(LimiterRelease, 0, 0x7F);
+    limiterLayout->addWidget(spinBox, 1, 4);
+
+    limiterLayout->addWidget(new QLabel(tr("Knee")), 0, 5);
+    spinBox = createStandardRawSpinBox(LimiterKnee, 0, 5);
+    limiterLayout->addWidget(spinBox, 1, 5);
+
+    limiterGroupBox->setLayout(limiterLayout);
 
 
-
-    filter1GroupBox->setLayout( filter1Layout);
-
-
-    QGroupBox *filter2GroupBox = new QGroupBox(QStringLiteral("Expander"));
-    QGridLayout *filter2Layout = new QGridLayout();
-
-
-    filter2GroupBox->setLayout(filter2Layout);
-
-    QGroupBox *filter3GroupBox = new QGroupBox(QStringLiteral("Limiter"));
-    QGridLayout *filter3Layout = new QGridLayout();
-
-
-
-
-
-    filter3GroupBox->setLayout(filter3Layout);
-
-
-    mainlyt->addWidget(filter1GroupBox, 4, 0);
-    mainlyt->addWidget(filter2GroupBox, 5, 0);
-    mainlyt->addWidget(filter3GroupBox, 6, 0);
+    mainlyt->addWidget(compGroupBox, 4, 0, 1, 5);
+    mainlyt->addWidget(expanderGroupBox, 5, 0, 1, 5);
+    mainlyt->addWidget(limiterGroupBox, 6, 0, 1, 5);
     setLayout(mainlyt);
 }

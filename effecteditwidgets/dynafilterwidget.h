@@ -20,53 +20,30 @@
 ** be met: https://www.gnu.org/licenses/gpl-2.0.html and
 ** https://www.gnu.org/licenses/gpl-3.0.html.
 **/
-#ifndef MBANDDYNAWIDGET_H
-#define MBANDDYNAWIDGET_H
+#ifndef DYNAFILTERWIDGET_H
+#define DYNAFILTERWIDGET_H
 
 #include "effecteditbasewidget.h"
 
-class MBandDynaWidget: public EffectEditBaseWidget
+class DynaFilterWidget: public EffectEditBaseWidget
 {
     Q_OBJECT
 public:
-    explicit MBandDynaWidget( QWidget *parent = nullptr);
+    explicit DynaFilterWidget( QWidget *parent = nullptr);
 
     enum ParameterOffsets
     {
-        LookUp = 0x00, // 2 Bytes
-        CompressorThreshold = 0x02, // 2 Bytes
-        ExpanderThreshold = 0x04, // 2 Bytes
-        LimiterThreshold = 0x06, // 2 Bytes
+        Decay =0x14, // 2 Bytes
+        Type = 0x16,
 
-        LowGain = 0x10, // 2 Bytes
-        MiddleGain = 0x12, // 2 Bytes
-        HighGain = 0x14, // 2 Bytes
+        Direction = 0x1E,
+        Sense = 0x1F,
+        Offset = 0x20,
+        Resonance = 0x21,
+        Level = 0x22,
 
-        Slope = 0x16,
-
-        CompressorBypass = 0x17,
-        ExpanderBypass = 0x18,
-        LimiterBypass = 0x18,
-
-        Ceiling = 0x1F,
-        LMXover = 0x20,
-        MHXover = 0x21,
-        Presence = 0x22,
-
-        Mix = 0x28,
-
-        CompressorRatio = 0x29,
-        CompressorAttack = 0x2A,
-        CompressorRelease = 0x2B,
-        CompressorKnee = 0x2C,
-
-        ExpanderRatio = 0x34,
-        ExpanderRelease = 0x36,
-
-        LimiterAttack = 0x40,
-        LimiterRelease = 0x41,
-        LimiterKnee = 0x42
+        Mix = 0x28
     };
 };
 
-#endif // MBANDDYNAWIDGET_H
+#endif // DYNAFILTERWIDGET_H

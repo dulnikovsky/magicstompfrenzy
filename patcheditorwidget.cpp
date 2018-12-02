@@ -64,6 +64,10 @@
 #include "effecteditwidgets/ringmodwidget.h"
 #include "effecteditwidgets/modfilterwidget.h"
 #include "effecteditwidgets/mbanddynawidget.h"
+#include "effecteditwidgets/dynafilterwidget.h"
+#include "effecteditwidgets/dynaflangewidget.h"
+#include "effecteditwidgets/dynaphaserwidget.h"
+#include "effecteditwidgets/springreverbwidget.h"
 
 PatchEditorWidget::PatchEditorWidget( QWidget *parent)
     : ArrayDataEditWidget( parent),effectEditWidget(nullptr)
@@ -266,6 +270,18 @@ void PatchEditorWidget::setDataArray(QByteArray *arr)
         break;
     case MBandDyna:
         mainLayout->addWidget( effectEditWidget = new MBandDynaWidget(), 8);
+        break;
+    case DynaFilter:
+        mainLayout->addWidget( effectEditWidget = new DynaFilterWidget(), 8);
+        break;
+    case DynaFlange:
+        mainLayout->addWidget( effectEditWidget = new DynaFlangeWidget(), 8);
+        break;
+    case DynaPhaser:
+        mainLayout->addWidget( effectEditWidget = new DynaPhaserWidget(), 8);
+        break;
+    case SpringReverb:
+        mainLayout->addWidget( effectEditWidget = new SpringReverbWidget(), 8);
         break;
     default:
         mainLayout->addWidget(effectEditWidget = new QWidget());

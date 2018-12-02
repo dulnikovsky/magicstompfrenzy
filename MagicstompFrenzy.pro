@@ -86,7 +86,11 @@ SOURCES += main.cpp\
     effecteditwidgets/rotarywidget.cpp \
     effecteditwidgets/ringmodwidget.cpp \
     effecteditwidgets/modfilterwidget.cpp \
-    effecteditwidgets/mbanddynawidget.cpp
+    effecteditwidgets/mbanddynawidget.cpp \
+    effecteditwidgets/dynafilterwidget.cpp \
+    effecteditwidgets/dynaflangewidget.cpp \
+    effecteditwidgets/dynaphaserwidget.cpp \
+    effecteditwidgets/springreverbwidget.cpp
 
 HEADERS  += mainwindow.h \
     midiportmodel.h \
@@ -152,7 +156,11 @@ HEADERS  += mainwindow.h \
     effecteditwidgets/rotarywidget.h \
     effecteditwidgets/ringmodwidget.h \
     effecteditwidgets/modfilterwidget.h \
-    effecteditwidgets/mbanddynawidget.h
+    effecteditwidgets/mbanddynawidget.h \
+    effecteditwidgets/dynafilterwidget.h \
+    effecteditwidgets/dynaflangewidget.h \
+    effecteditwidgets/dynaphaserwidget.h \
+    effecteditwidgets/springreverbwidget.h
 
 linux {
 
