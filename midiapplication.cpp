@@ -286,8 +286,8 @@ void MidiApplication::sendMidiEvent(MidiEvent *ev)
 #ifdef Q_OS_MACOS
     if( ev->type() == static_cast< QEvent::Type>( MidiEvent::SysEx))
     {
-        QSet<MidiClientPortId>::const_iterator iter = writablePortsModel->ConnectionsSet().constBegin();
-        while (iter != writablePortsModel->ConnectionsSet().constEnd())
+        ConnectionsContainer::const_iterator iter = writablePortsModel->currentConnections().constBegin();
+        while (iter != writablePortsModel->currentConnections().constEnd())
         {
             sysexReq.bytesToSend = static_cast< unsigned int>(ev->sysExData()->size());
             sysexReq.complete = false;
@@ -344,9 +344,9 @@ void MidiApplication::onPortClientPortStatusChanged(MidiClientPortId mpId, bool 
     // In MacOS there is not notification on disconecting before removeing a connected midi client
     if( !isExisting)
     {
-        if(readablePortsModel->ConnectionsSet().contains(mpId))
+        if(readablePortsModel->currentConnections().contains(mpId))
             onPortConnectionStatusChanged( mpId, thisInPort, false);
-        else if(writablePortsModel->ConnectionsSet().contains(mpId))
+        else if(writablePortsModel->currentConnections().contains(mpId))
             onPortConnectionStatusChanged( thisOutPort, mpId, false);
     }
 #endif
