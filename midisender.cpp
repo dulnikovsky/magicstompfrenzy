@@ -38,7 +38,7 @@ bool MidiSender::event(QEvent *e)
 {
 
     MidiEvent *me = dynamic_cast<MidiEvent *>(e);
-    if(me && me->type()==static_cast<QEvent::Type>(MidiEvent::SysEx))
+    if(me && me->type()==static_cast<QEvent::Type>(UserEventTypes::MidiSysEx))
     {
         snd_seq_event_t ev;
         snd_seq_ev_clear(&ev);

@@ -56,7 +56,7 @@ void MidiInThread::run()
             }
             else
             {
-                midisysexevent = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));
+                midisysexevent = new MidiEvent(static_cast<QEvent::Type>(UserEventTypes::MidiSysEx));
                 quint32 port = ev->source.port;
                 port |= static_cast<quint32>(ev->source.client) << 8;
                 midisysexevent->setPort(port);
