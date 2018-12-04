@@ -160,7 +160,8 @@ HEADERS  += mainwindow.h \
     effecteditwidgets/dynafilterwidget.h \
     effecteditwidgets/dynaflangewidget.h \
     effecteditwidgets/dynaphaserwidget.h \
-    effecteditwidgets/springreverbwidget.h
+    effecteditwidgets/springreverbwidget.h \
+    userevents.h
 
 linux {
 
@@ -183,10 +184,14 @@ ICON = magicstomp.icns
 }
 
 win64 {
+HEADERS += inmidiheaderusedevent.h
+SOURCES += inmidiheaderusedevent.cpp
 LIBS += -lwinmm
 }
 
 win32 {
+HEADERS += inmidiheaderusedevent.h
+SOURCES += inmidiheaderusedevent.cpp
 LIBS += -lwinmm
 }
 

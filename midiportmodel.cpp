@@ -30,6 +30,7 @@
 #ifdef Q_OS_WIN
 #include <windows.h>
 #include <mmsystem.h>
+#include "inmidiheaderusedevent.h"
 extern void CALLBACK MidiInProc(HMIDIIN hMidiIn, UINT wMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2);
 #endif
 
@@ -195,9 +196,19 @@ bool MidiPortModel::connectPorts(MidiClientPortId srcId, MidiClientPortId destId
                 return true;
 #ifdef Q_OS_WIN
             HMIDIIN hmidiin;
-            MMRESULT rv = midiInOpen(&hmidiin, srcId, (DWORD_PTR)MidiInProc, 0, CALLBACK_FUNCTION);
+            MMRESULT rv = midiInOpen(&hmidiin, srcId, (DWORD_PTR)MidiInProc, (DWORD_PTR)this, CALLBACK_FUNCTION);
             if (rv == MMSYSERR_NOERROR)
             {
+                for( int i = 0; i< inBufferCount; i++)
+                {
+                    LPMIDIHDR hdr = (LPMIDIHDR) malloc(sizeof(MIDIHDR));
+                    hdr->dwBufferLength = inBufferSize;
+                    hdr->lpData = (char *) malloc(inBufferSize);
+                    hdr->dwFlags = 0;
+                    midiInPrepareHeader(hmidiin, hdr, sizeof(MIDIHDR));
+                    midiInAddBuffer(hmidiin, hdr, sizeof(MIDIHDR));
+                    inHeaderMap.insert(hmidiin, hdr);
+                }
                 midiInStart(hmidiin);
                 connectionsCont.insert(srcId, hmidiin);
                 emitPortChanged(srcId);
@@ -279,6 +290,22 @@ void MidiPortModel::emitPortChanged(MidiClientPortId id)
         emit dataChanged( index(row,0), index(row,0));
     }
 }
+
+#ifdef Q_OS_WIN
+bool MidiPortModel::event(QEvent *e)
+{
+    InMidiHeaderUsedEvent *me = dynamic_cast<InMidiHeaderUsedEvent *>(e);
+    if(me)
+    {
+        QMultiMap<void *, LPMIDIHDR>::const_iterator iter = inHeaderMap.find( me->Handle(), me->midiHeader());
+        Q_ASSERT( iter != inHeaderMap.constEnd());
+        midiInAddBuffer((HMIDIIN)iter.key(), iter.value(), sizeof(MIDIHDR));
+        me->accept();
+        return true;
+    }
+    return MidiPortModel::event(e);
+}
+#endif
 
 QModelIndex MidiPortModel::index(int row, int column, const QModelIndex &parent) const
 {

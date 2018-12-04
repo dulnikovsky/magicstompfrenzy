@@ -33,6 +33,7 @@ typedef QSet<MidiClientPortId> ConnectionsContainer;
 
 #ifdef Q_OS_WIN
 typedef QMap<MidiClientPortId, void *> ConnectionsContainer;
+typedef struct midihdr_tag *LPMIDIHDR;
 #endif
 
 class MidiPortModel : public QAbstractItemModel
@@ -55,7 +56,9 @@ public:
 
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
     QModelIndex parent(const QModelIndex &child) const override;
-
+#ifdef Q_OS_WIN
+    bool event(QEvent *) override;
+#endif
 public slots:
     void scan();
     bool connectPorts(MidiClientPortId src, MidiClientPortId dest, bool connected);
@@ -68,6 +71,12 @@ private:
     ConnectionsContainer connectionsCont;
 
     void emitPortChanged(MidiClientPortId id);
+
+#ifdef Q_OS_WIN
+    const int inBufferCount = 4;
+    const int inBufferSize = 256;
+    QMultiMap<void *, LPMIDIHDR> inHeaderMap;
+#endif
 };
 
 #endif // MIDIPORTMODEL_H

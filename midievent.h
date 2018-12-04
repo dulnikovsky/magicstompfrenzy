@@ -24,23 +24,22 @@
 #define MIDIEVENT_H
 
 #include <QEvent>
+#include "userevents.h"
 
 class MidiEvent : public QEvent
 {
     Q_GADGET
 public:
 
-    enum MidiEventQtType { Common = QEvent::User, SysEx };
-
     enum MidiEventType { NoteOff=0x08, NoteOn, PolyphonicKeyPressure, ControlChange, ProgramChange, ChannelPressure, PitchBend, SystemCommon };
 
-    explicit MidiEvent(Type type) : QEvent(type),dataUnion{nullptr}, port(0) {}
+    explicit MidiEvent(Type type) : QEvent(type), dataUnion{nullptr}, port(0) {}
 
     ~MidiEvent();
 
     bool isValid() const
     {
-        if(type()==(int)Common)
+        if(type()==(int)UserEventTypes::MidiCommon)
             return ( !(dataUnion.status & 0x80));
         else
             return dataUnion.dataArray!=nullptr;
@@ -56,7 +55,7 @@ public:
 
     QByteArray* sysExData()
     {
-        Q_ASSERT(type()==(int)SysEx);
+        Q_ASSERT(type()==(int)UserEventTypes::MidiSysEx);
 
         if(dataUnion.dataArray == nullptr)
             dataUnion.dataArray = new QByteArray();

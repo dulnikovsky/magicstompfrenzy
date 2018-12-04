@@ -29,10 +29,12 @@
 #include <AudioToolbox/AudioToolbox.h>
 #endif
 #ifdef Q_OS_WIN
+#include "inmidiheaderusedevent.h"
 #include <windows.h>
 #include <mmsystem.h>
 #include <QThread>
 #endif
+
 
 #include "midievent.h"
 #ifdef Q_OS_LINUX
@@ -126,35 +128,48 @@ void CALLBACK MidiInProc(HMIDIIN hMidiIn, UINT wMsg, DWORD dwInstance, DWORD dwP
 {
     switch(wMsg) {
     case MIM_OPEN:
-        qDebug("wMsg=MIM_OPEN\n");
+        qDebug("wMsg=MIM_OPEN");
         break;
     case MIM_CLOSE:
-        qDebug("wMsg=MIM_CLOSE\n");
+        qDebug("wMsg=MIM_CLOSE");
         break;
     case MIM_DATA:
         if( (dwParam1 & 0xF8) == 0xF8 )
         { // Skip MIDI realtime messages
             return;
         }
-        qDebug("wMsg=MIM_DATA, dwInstance=%08lx, dwParam1=%08lx, dwParam2=%08lx\n", dwInstance, dwParam1, dwParam2);
+        qDebug("wMsg=MIM_DATA, dwInstance=%08lx, dwParam1=%08lx, dwParam2=%08lx", dwInstance, dwParam1, dwParam2);
         break;
     case MIM_LONGDATA:
-        qDebug("wMsg=MIM_LONGDATA\n");
+        qDebug("wMsg=MIM_LONGDATA");
         {
             LPMIDIHDR midihdr = reinterpret_cast<LPMIDIHDR>(dwParam1);
+            QByteArray dataArr = QByteArray::fromRawData((char *)(midihdr->lpData), midihdr->dwBytesRecorded);
+            if(midihdr->dwBytesRecorded > 2 && dataArr.at(0) == static_cast<char>(0xF0) && dataArr.at(midihdr->dwBytesRecorded - 1) == static_cast<char>(0xF7))
+            {
+                qDebug("Sysex. Len=%d", midihdr->dwBytesRecorded);
+
+                MidiEvent *midiEvent = new MidiEvent(static_cast<QEvent::Type>(UserEventTypes::MidiSysEx));
+                QByteArray *data = midiEvent->sysExData();
+                data->append( dataArr);
+                QApplication::postEvent( qApp, midiEvent);
+                InMidiHeaderUsedEvent *midiheaderev = new InMidiHeaderUsedEvent(static_cast<QEvent::Type>(UserEventTypes::MidiHeaderUsedEvent), hMidiIn, midihdr);
+                MidiPortModel *portmodel = reinterpret_cast<MidiPortModel *>(dwInstance);
+                QApplication::postEvent( portmodel, midiheaderev);
+            }
         }
         break;
     case MIM_ERROR:
-        qDebug("wMsg=MIM_ERROR\n");
+        qDebug("wMsg=MIM_ERROR");
         break;
     case MIM_LONGERROR:
-        qDebug("wMsg=MIM_LONGERROR\n");
+        qDebug("wMsg=MIM_LONGERROR");
         break;
     case MIM_MOREDATA:
-        qDebug("wMsg=MIM_MOREDATA\n");
+        qDebug("wMsg=MIM_MOREDATA");
         break;
     default:
-        qDebug("wMsg = unknown\n");
+        qDebug("wMsg = unknown");
         break;
     }
     return;
@@ -165,10 +180,12 @@ MidiApplication::MidiApplication(int &argc, char **argv)
     :QApplication( argc, argv)
 {
     int  midiEventType;
-    midiEventType = QEvent::registerEventType(MidiEvent::Common);
-    Q_ASSERT(midiEventType==MidiEvent::Common);
-    midiEventType = QEvent::registerEventType(MidiEvent::SysEx);
-    Q_ASSERT(midiEventType==MidiEvent::SysEx);
+    midiEventType = QEvent::registerEventType(UserEventTypes::MidiCommon);
+    Q_ASSERT(midiEventType==UserEventTypes::MidiCommon);
+    midiEventType = QEvent::registerEventType(UserEventTypes::MidiSysEx);
+    Q_ASSERT(midiEventType==UserEventTypes::MidiSysEx);
+    midiEventType = QEvent::registerEventType(UserEventTypes::MidiHeaderUsedEvent);
+    Q_ASSERT(midiEventType==UserEventTypes::MidiHeaderUsedEvent);
 
     qRegisterMetaType<MidiClientPortId>("MidiClientPortId");
 
@@ -302,7 +319,7 @@ void MidiApplication::sendMidiEvent(MidiEvent *ev)
     }
 #endif
 #ifdef Q_OS_WIN
-    if( ev->type() == static_cast< QEvent::Type>( MidiEvent::SysEx))
+    if( ev->type() == static_cast< QEvent::Type>( UserEventTypes::MidiSysEx))
     {
         ConnectionsContainer::const_iterator iter = writablePortsModel->currentConnections().constBegin();
         while (iter != writablePortsModel->currentConnections().constEnd())

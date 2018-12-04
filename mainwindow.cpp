@@ -244,7 +244,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::midiEvent(MidiEvent *ev)
 {
-    if( ev->type()==static_cast<QEvent::Type>(MidiEvent::SysEx))
+    if( ev->type()==static_cast<QEvent::Type>(UserEventTypes::MidiSysEx))
     {
         const QByteArray *inData = ev->sysExData();
         if( inData->size() < 13)
@@ -371,7 +371,7 @@ void MainWindow::requestPatch(int patchIndex)
     }
     progressWidget->setValue(patchIndex+1);
 
-    MidiEvent *midiev = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));
+    MidiEvent *midiev = new MidiEvent(static_cast<QEvent::Type>(UserEventTypes::MidiSysEx));
     QByteArray *reqArr = midiev->sysExData();
 
     reqArr->append(QByteArray(reinterpret_cast<const char*>(&dumpRequestHeader[0]),std::extent<decltype(dumpRequestHeader)>::value));
@@ -395,7 +395,7 @@ void MainWindow::sendAll()
 
     putGuiToTransmissionState(true, true);
 
-    MidiEvent *midiev = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));
+    MidiEvent *midiev = new MidiEvent(static_cast<QEvent::Type>(UserEventTypes::MidiSysEx));
     QByteArray *reqArr = midiev->sysExData();
 
     //Bulk out all start
@@ -413,7 +413,7 @@ void MainWindow::sendAll()
         sendPatch(i, false, User);
 
     //Bulk out all end
-    midiev = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));
+    midiev = new MidiEvent(static_cast<QEvent::Type>(UserEventTypes::MidiSysEx));
     reqArr = midiev->sysExData();
     reqArr->append(QByteArray(reinterpret_cast<const char*>(&sysExBulkHeader[0]), sysExBulkHeaderLength));
     reqArr->append(static_cast<char>(0x00));
@@ -429,7 +429,7 @@ void MainWindow::sendAll()
 
 void MainWindow::sendPatch( int patchIdx, bool sendToTmpArea, PatchListType type )
 {
-    MidiEvent *midiev = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));
+    MidiEvent *midiev = new MidiEvent(static_cast<QEvent::Type>(UserEventTypes::MidiSysEx));
     QByteArray *reqArr = midiev->sysExData();
     reqArr->append(QByteArray(reinterpret_cast<const char*>(&sysExBulkHeader[0]), sysExBulkHeaderLength));
     reqArr->append(static_cast<char>(0x00));
@@ -444,7 +444,7 @@ void MainWindow::sendPatch( int patchIdx, bool sendToTmpArea, PatchListType type
     reqArr->append(static_cast<char>(0xF7));
     midiOutQueue.enqueue( midiev);
 
-    midiev = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));
+    midiev = new MidiEvent(static_cast<QEvent::Type>(UserEventTypes::MidiSysEx));
     reqArr = midiev->sysExData();
     reqArr->append(QByteArray(reinterpret_cast<const char*>(&sysExBulkHeader[0]), sysExBulkHeaderLength));
     reqArr->append(static_cast<char>(0x00));
@@ -459,7 +459,7 @@ void MainWindow::sendPatch( int patchIdx, bool sendToTmpArea, PatchListType type
 #if QT_VERSION >= 0x059000
     qDebug() << "send Patch Common :" << reqArr->toHex(',');
 #endif
-    midiev = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));
+    midiev = new MidiEvent(static_cast<QEvent::Type>(UserEventTypes::MidiSysEx));
     reqArr = midiev->sysExData();
     reqArr->append(QByteArray(reinterpret_cast<const char*>(&sysExBulkHeader[0]), sysExBulkHeaderLength));
     reqArr->append(static_cast<char>(0x00));
@@ -474,7 +474,7 @@ void MainWindow::sendPatch( int patchIdx, bool sendToTmpArea, PatchListType type
 #if QT_VERSION >= 0x059000
     qDebug() << "send Patch Effect :" << reqArr->toHex(',');
 #endif
-    midiev = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));
+    midiev = new MidiEvent(static_cast<QEvent::Type>(UserEventTypes::MidiSysEx));
     reqArr = midiev->sysExData();
     reqArr->append(QByteArray(reinterpret_cast<const char*>(&sysExBulkHeader[0]), sysExBulkHeaderLength));
     reqArr->append(static_cast<char>(0x00));
@@ -565,7 +565,7 @@ void MainWindow::parameterChanged(int offset, int length)
         patchListModelList[currentPatchEdited.first]->patchUpdated(currentPatchEdited.second);
     }
 
-    MidiEvent *midiev = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));
+    MidiEvent *midiev = new MidiEvent(static_cast<QEvent::Type>(UserEventTypes::MidiSysEx));
     QByteArray *reqArr = midiev->sysExData();
     reqArr->append(QByteArray(reinterpret_cast<const char*>(&sysExParameterSendHeader[0]), parameterSendHeaderLength));
     reqArr->append(0x20);

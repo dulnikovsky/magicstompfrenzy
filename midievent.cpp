@@ -24,6 +24,6 @@
 
 MidiEvent::~MidiEvent()
 {
-    if( type() == (int)SysEx && dataUnion.dataArray!=nullptr)
+    if( type() == (int)UserEventTypes::MidiSysEx && dataUnion.dataArray!=nullptr)
         delete dataUnion.dataArray;
 }
