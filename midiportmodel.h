@@ -27,6 +27,14 @@
 
 #include "midiapplication.h"
 
+#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+typedef QSet<MidiClientPortId> ConnectionsContainer;
+#endif
+
+#ifdef Q_OS_WIN
+typedef QMap<MidiClientPortId, void *> ConnectionsContainer;
+#endif
+
 class MidiPortModel : public QAbstractItemModel
 {
     Q_OBJECT
@@ -38,7 +46,7 @@ public:
     MidiPortModel(MidiClientHandle handle,  Direction d = ReadablePorts, QObject *parent = Q_NULLPTR) :
         QAbstractItemModel(parent), handle(handle), direction(d) {}
 
-    const QSet<MidiClientPortId> &ConnectionsSet() const { return connectionsSet; }
+    const ConnectionsContainer &currentConnections() const { return connectionsCont; }
 
     QVariant data(const QModelIndex &index, int role) const override;
 
@@ -57,7 +65,7 @@ private:
     Direction direction;
 
     QList<QPair<MidiClientPortId, QString>> portList;
-    QSet<MidiClientPortId> connectionsSet;
+    ConnectionsContainer connectionsCont;
 
     void emitPortChanged(MidiClientPortId id);
 };

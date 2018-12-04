@@ -47,6 +47,12 @@ class MIDIPacketList;
 class MIDISysexSendRequest;
 #endif
 
+#ifdef Q_OS_WIN
+typedef quint32 MidiClientHandle;
+typedef quint32 MidiClientPortId;
+
+#endif
+
 
 class MidiPortModel;
 class MidiEvent;
@@ -89,6 +95,9 @@ private:
     static void MIDIEngineReadProc(const MIDIPacketList *pktlist, void *arg, void *connRefCon);
     static void sysexCompletionProc(MIDISysexSendRequest *req);
 #endif
+//#ifdef Q_OS_WIN
+//    static void CALLBACK MidiInProc(HMIDIIN hMidiIn, UINT wMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2);
+//#endif
 
     MidiPortModel *readablePortsModel;
     MidiPortModel *writablePortsModel;

@@ -27,7 +27,11 @@
 #ifdef Q_OS_MACOS
 #include <AudioToolbox/AudioToolbox.h>
 #endif
-
+#ifdef Q_OS_WIN
+#include <windows.h>
+#include <mmsystem.h>
+extern void CALLBACK MidiInProc(HMIDIIN hMidiIn, UINT wMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2);
+#endif
 
 QVariant MidiPortModel::data(const QModelIndex &index, int role) const
 {
@@ -43,7 +47,7 @@ QVariant MidiPortModel::data(const QModelIndex &index, int role) const
     }
     else if( role == isConnectedRole)
     {
-        return connectionsSet.contains(portList.at(index.row()).first);
+        return connectionsCont.contains(portList.at(index.row()).first);
     }
     return QVariant();
 }
@@ -140,6 +144,30 @@ void MidiPortModel::scan()
         }
     }
 #endif
+#ifdef Q_OS_WIN
+    unsigned int numdevs;
+    if( direction == ReadablePorts)
+    {
+        numdevs = midiInGetNumDevs();
+        for( unsigned int i = 0; i<numdevs; i++)
+        {
+            MIDIINCAPS caps;
+            midiInGetDevCaps(i, &caps, sizeof (caps));
+            portList.append(QPair<MidiClientPortId, QString>( i, QString::fromWCharArray(caps.szPname)));
+
+        }
+    }
+    else
+    {
+        numdevs = midiOutGetNumDevs();
+        for( unsigned int i = 0; i<numdevs; i++)
+        {
+            MIDIOUTCAPS caps;
+            midiOutGetDevCaps(i, &caps, sizeof (caps));
+            portList.append(QPair<MidiClientPortId, QString>( i, QString::fromWCharArray(caps.szPname)));
+        }
+    }
+#endif
     endResetModel();
 }
 
@@ -163,16 +191,47 @@ bool MidiPortModel::connectPorts(MidiClientPortId srcId, MidiClientPortId destId
     {
         if(direction == ReadablePorts)
         {
-            if(connectionsSet.contains(srcId))
+            if(connectionsCont.contains(srcId))
                 return true;
-            connectionsSet.insert(srcId);
+#ifdef Q_OS_WIN
+            HMIDIIN hmidiin;
+            MMRESULT rv = midiInOpen(&hmidiin, srcId, (DWORD_PTR)MidiInProc, 0, CALLBACK_FUNCTION);
+            if (rv == MMSYSERR_NOERROR)
+            {
+                midiInStart(hmidiin);
+                connectionsCont.insert(srcId, hmidiin);
+                emitPortChanged(srcId);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+#else
+            connectionsCont.insert(srcId);
+#endif
             emitPortChanged(srcId);
         }
         else
         {
-            if(connectionsSet.contains(destId))
+            if(connectionsCont.contains(destId))
                 return true;
-            connectionsSet.insert(destId);
+#ifdef Q_OS_WIN
+            HMIDIOUT hmidiout;
+            MMRESULT rv = midiOutOpen(&hmidiout, destId, 0, 0, CALLBACK_NULL);
+            if (rv == MMSYSERR_NOERROR)
+            {
+                connectionsCont.insert(destId, hmidiout);
+                emitPortChanged(srcId);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+#else
+           connectionsCont.insert(destId);
+#endif
             emitPortChanged(destId);
         }
 #ifdef Q_OS_LINUX
@@ -186,16 +245,16 @@ bool MidiPortModel::connectPorts(MidiClientPortId srcId, MidiClientPortId destId
     {
         if(direction == ReadablePorts)
         {
-            if(! connectionsSet.contains(srcId))
+            if(! connectionsCont.contains(srcId))
                 return true;
-            connectionsSet.remove(srcId);
+            connectionsCont.remove(srcId);
             emitPortChanged(srcId);
         }
         else
         {
-            if(! connectionsSet.contains(destId))
+            if(! connectionsCont.contains(destId))
                 return true;
-            connectionsSet.remove(destId);
+            connectionsCont.remove(destId);
             emitPortChanged(destId);
         }
 #ifdef Q_OS_LINUX

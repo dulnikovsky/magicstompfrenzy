@@ -182,6 +182,14 @@ LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit -frame
 ICON = magicstomp.icns
 }
 
+win64 {
+LIBS += -lwinmm
+}
+
+win32 {
+LIBS += -lwinmm
+}
+
 CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
 
 copydata.commands = $(COPY_DIR) $$PWD/effects.ini $$OUT_PWD && $(COPY_DIR) $$PWD/guitarpresets.ini $$OUT_PWD && $(COPY_DIR) $$PWD/basspresets.ini $$OUT_PWD && $(COPY_DIR) $$PWD/acousticpresets.ini $$OUT_PWD

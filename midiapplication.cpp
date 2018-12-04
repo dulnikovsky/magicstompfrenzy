@@ -28,6 +28,11 @@
 #ifdef Q_OS_MACOS
 #include <AudioToolbox/AudioToolbox.h>
 #endif
+#ifdef Q_OS_WIN
+#include <windows.h>
+#include <mmsystem.h>
+#include <QThread>
+#endif
 
 #include "midievent.h"
 #ifdef Q_OS_LINUX
@@ -114,6 +119,45 @@ static MIDISysexSendRequest sysexReq;
 void MidiApplication::sysexCompletionProc(MIDISysexSendRequest *req)
 {
     Q_UNUSED(req)
+}
+#endif
+#ifdef Q_OS_WIN
+void CALLBACK MidiInProc(HMIDIIN hMidiIn, UINT wMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2)
+{
+    switch(wMsg) {
+    case MIM_OPEN:
+        qDebug("wMsg=MIM_OPEN\n");
+        break;
+    case MIM_CLOSE:
+        qDebug("wMsg=MIM_CLOSE\n");
+        break;
+    case MIM_DATA:
+        if( (dwParam1 & 0xF8) == 0xF8 )
+        { // Skip MIDI realtime messages
+            return;
+        }
+        qDebug("wMsg=MIM_DATA, dwInstance=%08lx, dwParam1=%08lx, dwParam2=%08lx\n", dwInstance, dwParam1, dwParam2);
+        break;
+    case MIM_LONGDATA:
+        qDebug("wMsg=MIM_LONGDATA\n");
+        {
+            LPMIDIHDR midihdr = reinterpret_cast<LPMIDIHDR>(dwParam1);
+        }
+        break;
+    case MIM_ERROR:
+        qDebug("wMsg=MIM_ERROR\n");
+        break;
+    case MIM_LONGERROR:
+        qDebug("wMsg=MIM_LONGERROR\n");
+        break;
+    case MIM_MOREDATA:
+        qDebug("wMsg=MIM_MOREDATA\n");
+        break;
+    default:
+        qDebug("wMsg = unknown\n");
+        break;
+    }
+    return;
 }
 #endif
 
@@ -253,6 +297,30 @@ void MidiApplication::sendMidiEvent(MidiEvent *ev)
             sysexReq.destination = *iter;
             MIDISendSysex( & sysexReq);
             MIDIFlushOutput( *iter);
+            ++iter;
+        }
+    }
+#endif
+#ifdef Q_OS_WIN
+    if( ev->type() == static_cast< QEvent::Type>( MidiEvent::SysEx))
+    {
+        ConnectionsContainer::const_iterator iter = writablePortsModel->currentConnections().constBegin();
+        while (iter != writablePortsModel->currentConnections().constEnd())
+        {
+            MIDIHDR midihdr;
+            midihdr.lpData = ev->sysExData()->data();
+            midihdr.dwBufferLength = ev->sysExData()->size();
+            midihdr.dwFlags = 0;
+            MMRESULT res = midiOutPrepareHeader((HMIDIOUT)iter.value(), &midihdr, sizeof(MIDIHDR));
+            res = midiOutLongMsg( (HMIDIOUT)iter.value(), &midihdr, sizeof(MIDIHDR));
+            if (res)
+            {
+                qDebug("error %d", res);
+            }
+            while (MIDIERR_STILLPLAYING == midiOutUnprepareHeader((HMIDIOUT)iter.value(), &midihdr, sizeof(MIDIHDR)))
+            {
+                QThread::msleep(5);
+            }
             ++iter;
         }
     }
