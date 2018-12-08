@@ -98,7 +98,7 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     connect(timeOutTimer, SIGNAL(timeout()), this, SLOT(timeout()));
 
     midiOutTimer = new QTimer(this);
-    midiOutTimer->setInterval(50);
+    midiOutTimer->setInterval(70);
     connect(midiOutTimer, SIGNAL(timeout()), this, SLOT(midiOutTimeOut()));
 
     showPreferencesAction = new QAction(tr("&Preferences"), this);
