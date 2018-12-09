@@ -33,6 +33,7 @@
 #include <windows.h>
 #include <mmsystem.h>
 #include <QThread>
+#include <QMessageBox>
 #endif
 
 
@@ -295,7 +296,7 @@ bool MidiApplication::changeWritebleeMidiPortStatus( MidiClientPortId mcpId, boo
 {
     return writablePortsModel->connectPorts(thisOutPort, mcpId, connect);
 }
-void MidiApplication::sendMidiEvent(MidiEvent *ev)
+bool MidiApplication::sendMidiEvent(MidiEvent *ev)
 {
 #ifdef Q_OS_LINUX
     postEvent( midiSender, ev);
@@ -330,9 +331,10 @@ void MidiApplication::sendMidiEvent(MidiEvent *ev)
             midihdr.dwFlags = 0;
             MMRESULT res = midiOutPrepareHeader((HMIDIOUT)iter.value(), &midihdr, sizeof(MIDIHDR));
             res = midiOutLongMsg( (HMIDIOUT)iter.value(), &midihdr, sizeof(MIDIHDR));
-            if (res)
+            if (res != MMSYSERR_NOERROR)
             {
-                qDebug("error %d", res);
+                QMessageBox::critical(nullptr, tr("MIDI Error"), tr("Error sending MIDI data. Check your MIDI setup and restart the application"));
+                return false;
             }
             while (MIDIERR_STILLPLAYING == midiOutUnprepareHeader((HMIDIOUT)iter.value(), &midihdr, sizeof(MIDIHDR)))
             {
@@ -342,6 +344,7 @@ void MidiApplication::sendMidiEvent(MidiEvent *ev)
         }
     }
 #endif
+    return true;
 }
 
 void MidiApplication::onPortConnectionStatusChanged(MidiClientPortId srcId, MidiClientPortId destId, bool isConnected)

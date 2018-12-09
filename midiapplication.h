@@ -75,7 +75,7 @@ public slots:
     bool changeReadableMidiPortStatus( MidiClientPortId mcpId, bool connect );
     bool changeWritebleeMidiPortStatus( MidiClientPortId mcpId, bool connect );
 
-    void sendMidiEvent(MidiEvent *ev);
+    bool sendMidiEvent(MidiEvent *ev);
 
 private slots:
 
