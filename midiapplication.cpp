@@ -97,7 +97,7 @@ void MidiApplication::MIDIEngineReadProc(const MIDIPacketList *pktlist, void *ar
             else if( packet->data[0] == 0xF0 )
             {
                 Q_ASSERT( midiEvent == nullptr);
-                midiEvent = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::SysEx));
+                midiEvent = new MidiEvent(static_cast<QEvent::Type>(UserEventTypes::MidiSysEx));
                 QByteArray *data = midiEvent->sysExData();
                 data->append( static_cast<char>( packet->data[j]));
             }
@@ -302,7 +302,7 @@ bool MidiApplication::sendMidiEvent(MidiEvent *ev)
     postEvent( midiSender, ev);
 #endif
 #ifdef Q_OS_MACOS
-    if( ev->type() == static_cast< QEvent::Type>( MidiEvent::SysEx))
+    if( ev->type() == static_cast< QEvent::Type>( UserEventTypes::MidiSysEx))
     {
         ConnectionsContainer::const_iterator iter = writablePortsModel->currentConnections().constBegin();
         while (iter != writablePortsModel->currentConnections().constEnd())
