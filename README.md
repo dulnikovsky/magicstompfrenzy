@@ -6,11 +6,11 @@ MagicstompFrenzy is an editor for Magicstomp multieffect processor by YAMAHA. It
 
 ## Installation
 
-*On Linux the application has to be build from source.
+* On Linux the application has to be build from source.
 
-*On MacOS the application is distributed as dmg file. 
+* On MacOS the application is distributed as dmg file. 
 
-*On Windows application is currently distributed as zip file. In order to start it unpack the zip archive including the exe file and the ini files. Start the application by double click on the exe file.
+* On Windows application is currently distributed as zip file. In order to start it unpack the zip archive including the exe file and the ini files. Start the application by double click on the exe file.
 
 ## Working with the editor
 
