@@ -240,7 +240,9 @@ bool MidiPortModel::connectPorts(MidiClientPortId srcId, MidiClientPortId destId
         return(snd_seq_subscribe_port(handle, subs) == 0);
 #endif
 #ifdef Q_OS_MACOS
-        return( MIDIPortConnectSource(destId, srcId, nullptr) == noErr);
+        //return( MIDIPortConnectSource(destId, srcId, nullptr) == kAudioServicesNoError);
+        MIDIPortConnectSource(destId, srcId, nullptr);
+        return true;
 #endif
     }
     else
@@ -279,7 +281,7 @@ bool MidiPortModel::connectPorts(MidiClientPortId srcId, MidiClientPortId destId
         return(snd_seq_unsubscribe_port(handle, subs)==0);
 #endif
 #ifdef Q_OS_MACOS
-        return(MIDIPortDisconnectSource( srcId, destId) == noErr);
+        return(MIDIPortDisconnectSource( srcId, destId) == kAudioServicesNoError);
 #endif
     }
 #ifdef Q_OS_WIN

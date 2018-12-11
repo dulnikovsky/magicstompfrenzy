@@ -283,7 +283,7 @@ void  MidiApplication::midiSystemInit()
     }
 #endif
 #ifdef Q_OS_MACOS
-    MIDIClientCreate(applicationName().toLocal8Bit().constData(), MIDIEngineNotifyProc, this, &handle);
+    MIDIClientCreate( CFStringCreateWithCString( kCFAllocatorDefault, applicationName().toLocal8Bit().constData(), kCFStringEncodingASCII), MIDIEngineNotifyProc, this, &handle);
 #endif
 }
 
