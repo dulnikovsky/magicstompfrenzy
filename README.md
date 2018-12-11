@@ -2,7 +2,7 @@
 
 ## Introduction
 
-MagicstompFrenzy is a editor for Magicstomp multieffect processor by YAMAHA. It works on MacOS, Linux and Windows
+MagicstompFrenzy is an editor for Magicstomp multieffect processor by YAMAHA. It works on MacOS, Linux and Windows
 
 ## Installation
 
@@ -42,16 +42,16 @@ You can build MagicstompFrenzy like any other Qt application on Linux:
 
 3. Install ALSA library development packages
 
-4. Clone the git repository: <addr>git clone https://github.com/dulnikovsky/magicstompfrenzy.git</addr>
+4. Clone the git repository: <pre><code>git clone https://github.com/dulnikovsky/magicstompfrenzy.git</code></pre>
 
-5. Change into the created directory:  <addr>cd magistomprenzy</addr>
+5. Change into the created directory:  <pre><code>cd magistomprenzy</code></pre>
 
-6. Create a build directory: <addr>mkdir build</addr>
+6. Create a build directory: <pre><code>mkdir build</code></pre>
 
-7. Change into the created directory:  <addr>cd build</addr>
+7. Change into the created directory:  <pre><code>cd build</code></pre>
 
-8. Run qmake: <addr>qmake ../MagistompFrenzy.pro</addr>
+8. Run qmake: <pre><code>qmake ../MagistompFrenzy.pro</code></pre>
 
-9. Run make: <addr>make</addr>
+9. Run make: <pre><code>>make</code></pre>
 
 After a while the buil process will end and the MagicstompFrenzy executable will be present in the build directory
