@@ -24,7 +24,7 @@ The main window contains of the patch list window and the patch editor window. T
 
 ### Editing patches
 
-After that you can edit patches. To choose the patch to edit double-click on it in the patches list. The chosen patch will be transferred to the temporary memory of your Magistomp and will become the "active" patch. This will also open the editor window. In this window you can change the parameters of the chosen patch. The changes will become audible immidiately. When a patch has been changed it will be marked with a yellow box in the list. Using the "Undo/Redo" button you can compare the orginal patch with the edited patch.
+After that you can edit patches. To choose the patch to edit double-click on it in the patches list. The chosen patch will be transferred to the temporary memory of your Magicstomp and will become the "active" patch. This will also activate the editor window. In this window you can change the parameters of the chosen patch. The changes will become audible immidiately. When a patch has been changed it will be also marked with a yellow box in the list. Using the "Undo/Redo" button you can compare the orginal patch with the edited patch.
 
 You can also swap and copy patches in the list using according buttons.
 
@@ -36,7 +36,7 @@ You can transmit all user patches back to youy Magicstomp using the "Send All" b
 
 You can build MagicstompFrenzy like any other Qt application on Linux:
 
-1. Make sure you hava the development toolchain installed ( c++ compiler, make, git )
+1. Make sure you have the development toolchain installed ( c++ compiler, make, git )
 
 2. Install qt development packeges for Qt core, gui and widget modules as well as qmake
 
@@ -44,14 +44,14 @@ You can build MagicstompFrenzy like any other Qt application on Linux:
 
 4. Clone the git repository: <pre><code>git clone https://github.com/dulnikovsky/magicstompfrenzy.git</code></pre>
 
-5. Change into the created directory:  <pre><code>cd magistomprenzy</code></pre>
+5. Change into the created directory:  <pre><code>cd magicstompfrenzy</code></pre>
 
 6. Create a build directory: <pre><code>mkdir build</code></pre>
 
 7. Change into the created directory:  <pre><code>cd build</code></pre>
 
-8. Run qmake: <pre><code>qmake ../MagistompFrenzy.pro</code></pre>
+8. Run qmake: <pre><code>qmake ../MagicstompFrenzy.pro</code></pre>
 
-9. Run make: <pre><code>>make</code></pre>
+9. Run make: <pre><code>make</code></pre>
 
-After a while the buil process will end and the MagicstompFrenzy executable will be present in the build directory
+After a while the build process will end and the MagicstompFrenzy executable will be present in the build directory. You can run it using the command <pre><code>./MagicstompFrenzy</code></pre>
