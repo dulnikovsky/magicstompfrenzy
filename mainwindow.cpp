@@ -905,30 +905,33 @@ void MainWindow::saveSettings()
 void MainWindow::restoreSettings()
 {
     QSettings settings;
-    settings.beginGroup("MidiConnections");
-    QStringList connectionsList;
-    QSet<QString> failedPorts;
-    bool ret;
-    connectionsList = settings.value(QStringLiteral("IncomingConnections")).toStringList();
-    for(int i=0; i< connectionsList.size(); i++)
+    if(settings.value(QStringLiteral("RestoreMidiConnectionsAtStartUp"), true).toBool() == true)
     {
-        ret = static_cast<MidiApplication *>(qApp)->changeReadableMidiPortStatus(connectionsList.at(i), true);
-        if(! ret)
-            failedPorts.insert(connectionsList.at(i));
-    }
+        settings.beginGroup("MidiConnections");
+        QStringList connectionsList;
+        QSet<QString> failedPorts;
+        bool ret;
+        connectionsList = settings.value(QStringLiteral("IncomingConnections")).toStringList();
+        for(int i=0; i< connectionsList.size(); i++)
+        {
+            ret = static_cast<MidiApplication *>(qApp)->changeReadableMidiPortStatus(connectionsList.at(i), true);
+            if(! ret)
+                failedPorts.insert(connectionsList.at(i));
+        }
 
-    connectionsList = settings.value(QStringLiteral("OutgoingConnections")).toStringList();
-    for(int i=0; i< connectionsList.size(); i++)
-    {
-        ret = static_cast<MidiApplication *>(qApp)->changeWritebleMidiPortStatus(connectionsList.at(i), true);
-        if(! ret)
-            failedPorts.insert(connectionsList.at(i));
-    }
-    settings.endGroup();
+        connectionsList = settings.value(QStringLiteral("OutgoingConnections")).toStringList();
+        for(int i=0; i< connectionsList.size(); i++)
+        {
+            ret = static_cast<MidiApplication *>(qApp)->changeWritebleMidiPortStatus(connectionsList.at(i), true);
+            if(! ret)
+                failedPorts.insert(connectionsList.at(i));
+        }
+        settings.endGroup();
 
-    if( !failedPorts.isEmpty())
-    {
-        QMessageBox::warning(this, qApp->applicationName(), tr("Could not open MIDI ports used last time:\n %1").arg( QStringList(failedPorts.toList()).join('\n')));
+        if( !failedPorts.isEmpty())
+        {
+            QMessageBox::warning(this, qApp->applicationName(), tr("Could not open MIDI ports used last time:\n %1").arg( QStringList(failedPorts.toList()).join('\n')));
+        }
     }
 }
 

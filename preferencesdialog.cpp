@@ -23,8 +23,11 @@
 #include "preferencesdialog.h"
 #include <QDialogButtonBox>
 #include <QHBoxLayout>
+#include <QVBoxLayout>
 #include <QListView>
 #include <QLabel>
+#include <QCheckBox>
+#include <QSettings>
 
 #include "midiportmodel.h"
 
@@ -39,6 +42,7 @@ PreferencesDialog::PreferencesDialog(MidiPortModel *portsInModel, MidiPortModel 
 
     setWindowTitle(tr("Preferences"));
 
+    QVBoxLayout *mainLayout = new QVBoxLayout();
     QHBoxLayout *hlyt = new QHBoxLayout();
 
     hlyt->addWidget( new QLabel("Incoming MIDI Connections:"));
@@ -74,9 +78,23 @@ PreferencesDialog::PreferencesDialog(MidiPortModel *portsInModel, MidiPortModel 
     connect(buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
-    hlyt->addWidget(buttonBox);
+    mainLayout->addLayout(hlyt);
 
-    setLayout(hlyt);
+    QCheckBox *restoreConnectionsCheckBox = new QCheckBox(tr("Reconnect at startup"));
+    QSettings settings;
+    restoreConnectionsCheckBox->setChecked(settings.value(QStringLiteral("RestoreMidiConnectionsAtStartUp"), true).toBool());
+    connect(
+        restoreConnectionsCheckBox, &QCheckBox::toggled,
+        [=]( bool checked) {
+            QSettings settings;
+            settings.setValue(QStringLiteral("RestoreMidiConnectionsAtStartUp"), checked);
+        }
+    );
+
+    mainLayout->addWidget(restoreConnectionsCheckBox);
+    mainLayout->addWidget(buttonBox);
+
+    setLayout(mainLayout);
 
     QPalette palette = this->palette();
     QColor color = palette.color(QPalette::Active, QPalette::Highlight);
