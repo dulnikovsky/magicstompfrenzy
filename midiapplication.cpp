@@ -232,7 +232,7 @@ MidiApplication::MidiApplication(int &argc, char **argv)
         int client = QString(argv[3]).toInt( &okclient);
         int port = QString(argv[4]).toInt( &okport);
         if( okclient && okport  )
-            changeWritebleeMidiPortStatus(MidiClientPortId (client, port), true);
+            changeWritebleMidiPortStatus(MidiClientPortId (client, port), true);
     }
 #endif
 }
@@ -255,11 +255,11 @@ void  MidiApplication::midiSystemInit()
     int err;
     err = snd_seq_open(&handle, "default", SND_SEQ_OPEN_DUPLEX, 0);
 
-    snd_seq_set_client_name(handle, "MagicstompFrenzy");
+    snd_seq_set_client_name(handle, applicationName().toLocal8Bit().constData());
 
-    int inPort = snd_seq_create_simple_port(handle, "MagicstompFrenzy IN",
+    int inPort = snd_seq_create_simple_port(handle, applicationName().toLocal8Bit().constData(),
                                             SND_SEQ_PORT_CAP_WRITE|SND_SEQ_PORT_CAP_SUBS_WRITE, SND_SEQ_PORT_TYPE_MIDI_GENERIC | SND_SEQ_PORT_TYPE_APPLICATION);
-    int outPort = snd_seq_create_simple_port(handle, "MagicstompFrenzy OUT",
+    int outPort = snd_seq_create_simple_port(handle, applicationName().toLocal8Bit().constData(),
                                              SND_SEQ_PORT_CAP_READ|SND_SEQ_PORT_CAP_SUBS_READ, SND_SEQ_PORT_TYPE_MIDI_GENERIC );
 
     thisInPort = MidiClientPortId( snd_seq_client_id(handle), inPort);
@@ -283,7 +283,7 @@ void  MidiApplication::midiSystemInit()
     }
 #endif
 #ifdef Q_OS_MACOS
-    MIDIClientCreate(CFSTR("MagicstompFrenzy"), MIDIEngineNotifyProc, this, &handle);
+    MIDIClientCreate(applicationName().toLocal8Bit().constData(), MIDIEngineNotifyProc, this, &handle);
 #endif
 }
 
@@ -292,10 +292,20 @@ bool MidiApplication::changeReadableMidiPortStatus( MidiClientPortId mcpId, bool
     return readablePortsModel->connectPorts(mcpId, thisInPort, connect);
 }
 
-bool MidiApplication::changeWritebleeMidiPortStatus( MidiClientPortId mcpId, bool connect)
+bool MidiApplication::changeWritebleMidiPortStatus( MidiClientPortId mcpId, bool connect)
 {
     return writablePortsModel->connectPorts(thisOutPort, mcpId, connect);
 }
+bool MidiApplication::changeReadableMidiPortStatus( const QString &portName, bool connect )
+{
+    return readablePortsModel->connectPortsByName(portName, thisInPort, connect);
+}
+
+bool MidiApplication::changeWritebleMidiPortStatus( const QString &portName, bool connect )
+{
+    return writablePortsModel->connectPortsByName(thisOutPort, portName, connect);
+}
+
 bool MidiApplication::sendMidiEvent(MidiEvent *ev)
 {
 #ifdef Q_OS_LINUX

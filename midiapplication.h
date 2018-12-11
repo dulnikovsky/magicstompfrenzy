@@ -73,9 +73,13 @@ signals:
 
 public slots:
     bool changeReadableMidiPortStatus( MidiClientPortId mcpId, bool connect );
-    bool changeWritebleeMidiPortStatus( MidiClientPortId mcpId, bool connect );
+    bool changeWritebleMidiPortStatus( MidiClientPortId mcpId, bool connect );
+    bool changeReadableMidiPortStatus( const QString &portName, bool connect );
+    bool changeWritebleMidiPortStatus( const QString &portName, bool connect );
 
     bool sendMidiEvent(MidiEvent *ev);
+
+
 
 private slots:
 

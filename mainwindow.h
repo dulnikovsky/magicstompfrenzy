@@ -26,7 +26,7 @@
 #include <QMainWindow>
 #include <QQueue>
 #include <QSet>
-#include "midiapplication.h"
+#include <QMap>
 
 class MidiPortModel;
 class PatchListModel;
@@ -53,11 +53,6 @@ public slots:
 protected:
     void closeEvent(QCloseEvent *event) override;
 
-signals:
-    void readableMidiPortSelected( MidiClientPortId id);
-    void writableMidiPortSelected( MidiClientPortId id);
-    void sendMidiEvent(MidiEvent *);
-
 private:
     enum PatchListType { User, GuitarPreset, BassPreset, AcousticPreset};
 
@@ -82,6 +77,9 @@ private slots:
     void undoRedoButtonPressed();
 
     void showPreferences();
+
+    void saveSettings();
+    void restoreSettings();
 
 private:
     void loadPresetPatches(int index, const QString &filename);

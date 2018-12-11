@@ -234,13 +234,13 @@ bool MidiPortModel::connectPorts(MidiClientPortId srcId, MidiClientPortId destId
 #else
            connectionsCont.insert(destId);
 #endif
-            emitPortChanged(destId);
+           emitPortChanged(destId);
         }
 #ifdef Q_OS_LINUX
-        return snd_seq_subscribe_port(handle, subs);
+        return(snd_seq_subscribe_port(handle, subs) == 0);
 #endif
 #ifdef Q_OS_MACOS
-        return MIDIPortConnectSource(destId, srcId, nullptr);
+        return( MIDIPortConnectSource(destId, srcId, nullptr) == noErr);
 #endif
     }
     else
@@ -276,15 +276,35 @@ bool MidiPortModel::connectPorts(MidiClientPortId srcId, MidiClientPortId destId
             emitPortChanged(destId);
         }
 #ifdef Q_OS_LINUX
-        return snd_seq_unsubscribe_port(handle, subs);
+        return(snd_seq_unsubscribe_port(handle, subs)==0);
 #endif
 #ifdef Q_OS_MACOS
-        return MIDIPortDisconnectSource( srcId, destId);
+        return(MIDIPortDisconnectSource( srcId, destId) == noErr);
 #endif
     }
 #ifdef Q_OS_WIN
     return retval == MMSYSERR_NOERROR;
 #endif
+}
+
+bool MidiPortModel::connectPortsByName(const QString &srcName, MidiClientPortId destId, bool connected)
+{
+    for(int i=0; i<portList.size(); i++)
+    {
+        if(portList.at(i).second == srcName)
+            return connectPorts(portList.at(i).first, destId, connected);
+    }
+    return false;
+}
+
+bool MidiPortModel::connectPortsByName(MidiClientPortId srcId, const QString &destName, bool connected)
+{
+    for(int i=0; i<portList.size(); i++)
+    {
+        if(portList.at(i).second == destName)
+            return connectPorts(srcId, portList.at(i).first, connected);
+    }
+    return false;
 }
 
 void MidiPortModel::emitPortChanged(MidiClientPortId id)
@@ -316,6 +336,17 @@ bool MidiPortModel::event(QEvent *e)
     return MidiPortModel::event(e);
 }
 #endif
+
+QStringList MidiPortModel::currentConnectionsNameList() const
+{
+    QStringList strList;
+    for(int i=0; i<portList.size(); i++)
+    {
+        if( connectionsCont.contains(portList.at(i).first))
+            strList.append( portList.at(i).second);
+    }
+    return strList;
+}
 
 QModelIndex MidiPortModel::index(int row, int column, const QModelIndex &parent) const
 {

@@ -29,6 +29,8 @@
 #include <QVBoxLayout>
 #include <QVariant>
 
+#include <QApplication>
+
 #include "effecteditwidgets/ampmultiwidget.h"
 #include "effecteditwidgets/multibanddelaywidget.h"
 #include "effecteditwidgets/compressorwidget.h"
@@ -74,7 +76,7 @@ PatchEditorWidget::PatchEditorWidget( QWidget *parent)
 {
     mainLayout = new QVBoxLayout();
     mainLayout->addWidget( new PatchCommonEditorWidget());
-    mainLayout->addWidget( copyrightLabel = new QLabel(copyrightStr), 16);
+    mainLayout->addWidget( copyrightLabel = new QLabel(QString(copyrightStr) + ". Version: " + qApp->applicationVersion()), 16);
     setLayout( mainLayout);
 }
 

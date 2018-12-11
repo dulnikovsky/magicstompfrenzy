@@ -48,6 +48,7 @@ public:
         QAbstractItemModel(parent), handle(handle), direction(d) {}
 
     const ConnectionsContainer &currentConnections() const { return connectionsCont; }
+    QStringList currentConnectionsNameList() const;
 
     QVariant data(const QModelIndex &index, int role) const override;
 
@@ -62,7 +63,8 @@ public:
 public slots:
     void scan();
     bool connectPorts(MidiClientPortId src, MidiClientPortId dest, bool connected);
-
+    bool connectPortsByName(const QString &srcName, MidiClientPortId destId, bool connected);
+    bool connectPortsByName(MidiClientPortId srcId, const QString &destName, bool connected);
 private:
     MidiClientHandle handle;
     Direction direction;

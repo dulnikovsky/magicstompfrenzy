@@ -32,6 +32,8 @@
 
 #include "magicstomp.h"
 
+#include "midiapplication.h"
+
 #include <QGroupBox>
 #include <QListView>
 #include <QTableView>
@@ -210,6 +212,7 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     bassPatchListView->resizeColumnsToContents();
     acousticPatchListView->resizeColumnsToContents();
     setMinimumHeight(256);
+    restoreSettings();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -239,6 +242,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
             cacheSettings.setValue("Patchdata"+QString::number(i+1).rightJustified(2, '0'), newPatchDataList.at(User).at(i));
     }
 #endif
+    saveSettings();
     QMainWindow::closeEvent(event);
 }
 
@@ -377,7 +381,7 @@ void MainWindow::requestPatch(int patchIndex)
     reqArr->append(QByteArray(reinterpret_cast<const char*>(&dumpRequestHeader[0]),std::extent<decltype(dumpRequestHeader)>::value));
     reqArr->append(char(patchIndex));
     reqArr->append(static_cast<char>(0xF7));
-    emit sendMidiEvent( midiev);
+    static_cast<MidiApplication *>(qApp)->sendMidiEvent(midiev);
     timeOutTimer->start();
 }
 
@@ -528,7 +532,7 @@ void MainWindow::midiOutTimeOut()
         return;
     }
     MidiEvent *ev = midiOutQueue.dequeue();
-    emit sendMidiEvent( ev);
+    static_cast<MidiApplication *>(qApp)->sendMidiEvent(ev);
     if(isInTransmissionState)
         progressWidget->setValue( 100 - (midiOutQueue.size() / 4));
 }
@@ -588,7 +592,7 @@ void MainWindow::parameterChanged(int offset, int length)
 #if QT_VERSION >= 0x059000
     qDebug() << reqArr->toHex(',');
 #endif
-    emit sendMidiEvent( midiev);
+    static_cast<MidiApplication *>(qApp)->sendMidiEvent(midiev);
 
     if( offset == PatchName) // Name needs to be sent as single chars
     {
@@ -883,10 +887,49 @@ void MainWindow::showPreferences()
 
     PreferencesDialog prefDialog(readablePortsModel, writablePortsModel, this);
     connect( &prefDialog, SIGNAL(midiInPortStatusChanged( MidiClientPortId, bool)), thisMidiApp, SLOT(changeReadableMidiPortStatus(MidiClientPortId,bool)) );
-    connect( &prefDialog, SIGNAL(midiOutPortStatusChanged( MidiClientPortId, bool)), thisMidiApp, SLOT(changeWritebleeMidiPortStatus(MidiClientPortId,bool)) );
+    connect( &prefDialog, SIGNAL(midiOutPortStatusChanged( MidiClientPortId, bool)), thisMidiApp, SLOT(changeWritebleMidiPortStatus(MidiClientPortId,bool)) );
     prefDialog.exec();
 
     prefDialog.disconnect(thisMidiApp);
+}
+
+void MainWindow::saveSettings()
+{
+    QSettings settings;
+    settings.beginGroup("MidiConnections");
+    settings.setValue(QStringLiteral("IncomingConnections"), readablePortsModel->currentConnectionsNameList());
+    settings.setValue(QStringLiteral("OutgoingConnections"), writablePortsModel->currentConnectionsNameList());
+    settings.endGroup();
+}
+
+void MainWindow::restoreSettings()
+{
+    QSettings settings;
+    settings.beginGroup("MidiConnections");
+    QStringList connectionsList;
+    QSet<QString> failedPorts;
+    bool ret;
+    connectionsList = settings.value(QStringLiteral("IncomingConnections")).toStringList();
+    for(int i=0; i< connectionsList.size(); i++)
+    {
+        ret = static_cast<MidiApplication *>(qApp)->changeReadableMidiPortStatus(connectionsList.at(i), true);
+        if(! ret)
+            failedPorts.insert(connectionsList.at(i));
+    }
+
+    connectionsList = settings.value(QStringLiteral("OutgoingConnections")).toStringList();
+    for(int i=0; i< connectionsList.size(); i++)
+    {
+        ret = static_cast<MidiApplication *>(qApp)->changeWritebleMidiPortStatus(connectionsList.at(i), true);
+        if(! ret)
+            failedPorts.insert(connectionsList.at(i));
+    }
+    settings.endGroup();
+
+    if( !failedPorts.isEmpty())
+    {
+        QMessageBox::warning(this, qApp->applicationName(), tr("Could not open MIDI ports used last time:\n %1").arg( QStringList(failedPorts.toList()).join('\n')));
+    }
 }
 
 char MainWindow::calcChecksum(const char *data, int dataLength)

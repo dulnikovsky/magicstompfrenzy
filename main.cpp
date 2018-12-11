@@ -27,15 +27,14 @@ int main(int argc, char *argv[])
 {
     MidiApplication a(argc, argv);
     a.setApplicationName("MagicstompFrenzy");
-    a.setOrganizationName("Robert Vetter");
+    a.setOrganizationName("RobertVetter");
     a.setOrganizationDomain("www.robertvetter.com");
-    a.setApplicationVersion("0.90");
+    a.setApplicationVersion("0.905");
     a.setWindowIcon(QIcon(":magicstomp.png"));
 
     MainWindow w( a.ReadablePortsModel(), a.WritablePortsModel());
 
     QObject::connect( &a, SIGNAL(midiEventReceived(MidiEvent *)), &w, SLOT(midiEvent(MidiEvent*)));
-    QObject::connect( &w, SIGNAL(sendMidiEvent(MidiEvent*)), &a, SLOT(sendMidiEvent(MidiEvent*)));
 
     w.show();
 
