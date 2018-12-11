@@ -896,6 +896,9 @@ void MainWindow::showPreferences()
 void MainWindow::saveSettings()
 {
     QSettings settings;
+    settings.setValue("MainWindowGeometry", saveGeometry());
+    settings.setValue("MainWindowState", saveState());
+
     settings.beginGroup("MidiConnections");
     settings.setValue(QStringLiteral("IncomingConnections"), readablePortsModel->currentConnectionsNameList());
     settings.setValue(QStringLiteral("OutgoingConnections"), writablePortsModel->currentConnectionsNameList());
@@ -905,7 +908,21 @@ void MainWindow::saveSettings()
 void MainWindow::restoreSettings()
 {
     QSettings settings;
-    if(settings.value(QStringLiteral("RestoreMidiConnectionsAtStartUp"), true).toBool() == true)
+
+    restoreGeometry(settings.value("MainWindowGeometry").toByteArray());
+    restoreState(settings.value("MainWindowState").toByteArray());
+
+    /*QPalette palette = this->palette();
+    palette.setColor(QPalette::Window, Qt::gray);
+    palette.setColor(QPalette::Base, Qt::lightGray);
+    setPalette(palette);*/
+
+    if(!settings.contains(QStringLiteral("RestoreMidiConnectionsAtStartUp")))
+    {
+        settings.setValue(QStringLiteral("RestoreMidiConnectionsAtStartUp"), true);
+        QMetaObject::invokeMethod(this, "showPreferences", Qt::QueuedConnection);
+    }
+    else if(settings.value(QStringLiteral("RestoreMidiConnectionsAtStartUp"), true).toBool() == true)
     {
         settings.beginGroup("MidiConnections");
         QStringList connectionsList;

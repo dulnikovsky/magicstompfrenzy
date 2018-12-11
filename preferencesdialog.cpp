@@ -43,6 +43,7 @@ PreferencesDialog::PreferencesDialog(MidiPortModel *portsInModel, MidiPortModel 
     setWindowTitle(tr("Preferences"));
 
     QVBoxLayout *mainLayout = new QVBoxLayout();
+    mainLayout->addWidget(new QLabel(tr("Set the MIDI connections by selecting MIDI ports in both lists:")));
     QHBoxLayout *hlyt = new QHBoxLayout();
 
     hlyt->addWidget( new QLabel("Incoming MIDI Connections:"));
