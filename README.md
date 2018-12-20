@@ -16,7 +16,7 @@ MagicstompFrenzy is an editor for Magicstomp multieffect processor by YAMAHA. It
 
 ### Setting MIDI connections
 
-When MagicstompFrenzy is run for the first time the preferences windows appears. You have to connect to the MIDI ports of the Magicstomp by selecting them in the lists. If no MIDI ports of the Magistomp appear there you have to install the YAMAHA MIDI USB driver first and/or connect the Magicstomp to your PC. On Windows no MIDI hotplugging is supported, so you habe to restart the application. After that you can close the preferences window.
+When MagicstompFrenzy is run for the first time the preferences window appears. You have to make connections to the MIDI In and Out ports of the Magicstomp by selecting them in the lists. If no MIDI ports of the Magistomp appear there you have to install the YAMAHA MIDI USB driver first and/or connect the Magicstomp to your PC. On Windows no MIDI hotplugging is supported, so you habe to restart the application. After that you can close the preferences window.
 
 ### Requesting patches
 
@@ -32,11 +32,11 @@ You can also swap and copy patches in the list using according buttons.
 
 You can transmit all user patches back to youy Magicstomp using the "Send All" button. Alternatively you can save the active patch using the mathod described in the manual if the Magicstomp ( using the "Store" and "+" "-" buttons on your Magicstomp.
 
-## For interested: building MagicstompFrenzy on Linux
+## For the interested: Building MagicstompFrenzy on Linux
 
 You can build MagicstompFrenzy like any other Qt application on Linux:
 
-1. Make sure you have the development toolchain installed ( c++ compiler, make, git )
+1. Make sure you have the development toolchain installed: c++ compiler ( gnu or clang ), make, git
 
 2. Install qt development packeges for Qt core, gui and widget modules as well as qmake
 
