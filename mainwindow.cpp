@@ -34,6 +34,8 @@
 
 #include "midiapplication.h"
 
+#include "standardmidifile.h"
+
 #include <QGroupBox>
 #include <QListView>
 #include <QTableView>
@@ -54,6 +56,8 @@
 #include <QTabWidget>
 #include <QAction>
 #include <QCloseEvent>
+#include <QMenuBar>
+#include <QFileDialog>
 #include <QDebug>
 
 static const int sysExBulkHeaderLength = 8;
@@ -104,12 +108,23 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     connect(midiOutTimer, SIGNAL(timeout()), this, SLOT(midiOutTimeOut()));
 
     showPreferencesAction = new QAction(tr("&Preferences"), this);
-    //showPreferencesAction->setShortcuts(QKeySequence::);
-    //showPreferencesAction->setStatusTip(tr("Create a new file"));
     connect(showPreferencesAction, &QAction::triggered, this, &MainWindow::showPreferences);
 
-    QPushButton *preferencesButton = new QPushButton( tr("Preferences"));
-    connect( preferencesButton, SIGNAL(pressed()), showPreferencesAction, SLOT(trigger()));
+    importSMFAction = new QAction(tr("&Import SMF"), this);
+    connect(importSMFAction, &QAction::triggered, this, &MainWindow::importSMF);
+
+    exportSMFAction = new QAction(tr("&Export SMF"), this);
+    connect(exportSMFAction, &QAction::triggered, this, &MainWindow::exportSMF);
+
+    QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
+    fileMenu->addAction(importSMFAction);
+    fileMenu->addAction(exportSMFAction);
+    fileMenu->addSeparator();
+    fileMenu->addAction(showPreferencesAction);
+
+    QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
+    //helpMenu->addAction(aboutAct);
+    //helpMenu->addAction(aboutQtAct);
 
     QGroupBox *patchListGroupbox = new QGroupBox( tr("Patch List"));
 
@@ -178,7 +193,6 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     patchListLayout->addLayout( listEditButtonsLayout);
 
     QVBoxLayout *mainLeftlayout = new QVBoxLayout();
-    mainLeftlayout->addWidget( preferencesButton);
     mainLeftlayout->addWidget( patchListGroupbox);
 
     QWidget *dockWidgetDummy = new QWidget();
@@ -333,7 +347,6 @@ void MainWindow::midiEvent(MidiEvent *ev)
             }
         }
     }
-
 }
 
 void MainWindow::requestAll()
@@ -385,14 +398,14 @@ void MainWindow::requestPatch(int patchIndex)
     timeOutTimer->start();
 }
 
-void MainWindow::sendAll()
+void MainWindow::sendAll(bool startMidiOutTimer)
 {
     const QList<QByteArray> &userList = newPatchDataList.at(User);
     for(int i=0; i<userList.size(); i++)
     {
         if(userList.at(i).size() != PatchTotalLength)
         {
-            QMessageBox::warning(this, QStringLiteral("MagicstompFrenzy"), tr("Sending data to Magicstomp if User patch list is not complete is not possible."));
+            QMessageBox::warning(this, QStringLiteral("MagicstompFrenzy"), tr("Sending data to Magicstomp or exporting to SMF if User patch list is not complete is not possible."));
             return;
         }
     }
@@ -414,7 +427,7 @@ void MainWindow::sendAll()
     midiOutQueue.enqueue( midiev);
 
     for(int i=0; i<numOfPatches; i++)
-        sendPatch(i, false, User);
+        sendPatch(i, false, User, false);
 
     //Bulk out all end
     midiev = new MidiEvent(static_cast<QEvent::Type>(UserEventTypes::MidiSysEx));
@@ -428,10 +441,11 @@ void MainWindow::sendAll()
     reqArr->append( calcChecksum( reqArr->constBegin()+ sysExBulkHeaderLength, reqArr->length()-sysExBulkHeaderLength));
     reqArr->append(static_cast<char>(0xF7));
     midiOutQueue.enqueue( midiev);
-    midiOutTimer->start();
+    if(startMidiOutTimer)
+        midiOutTimer->start();
 }
 
-void MainWindow::sendPatch( int patchIdx, bool sendToTmpArea, PatchListType type )
+void MainWindow::sendPatch( int patchIdx, bool sendToTmpArea, PatchListType type, bool startMidiOutTimer )
 {
     MidiEvent *midiev = new MidiEvent(static_cast<QEvent::Type>(UserEventTypes::MidiSysEx));
     QByteArray *reqArr = midiev->sysExData();
@@ -492,7 +506,8 @@ void MainWindow::sendPatch( int patchIdx, bool sendToTmpArea, PatchListType type
     reqArr->append( calcChecksum( reqArr->constBegin()+ sysExBulkHeaderLength, reqArr->length()-sysExBulkHeaderLength));
     reqArr->append(static_cast<char>(0xF7));
     midiOutQueue.enqueue( midiev);
-    midiOutTimer->start();
+    if(startMidiOutTimer)
+        midiOutTimer->start();
 }
 
 void MainWindow::timeout()
@@ -950,6 +965,52 @@ void MainWindow::restoreSettings()
             QMessageBox::warning(this, qApp->applicationName(), tr("Could not open MIDI ports used last time:\n %1").arg( QStringList(failedPorts.toList()).join('\n')));
         }
     }
+}
+
+void MainWindow::importSMF()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open SMF File"),
+                                                    QStandardPaths::writableLocation(QStandardPaths::HomeLocation),
+                                                    tr("Standard MIDI Files (*.mid)"));
+
+    if(fileName.isEmpty())
+        return;
+
+    StandardMidiFile smf(fileName);
+    if( smf.open(QIODevice::ReadOnly) == false )
+    {
+        QMessageBox::warning(this, qApp->applicationName(), tr("Error. Could not open file %1.").arg( fileName ));
+        return;
+    }
+
+    MidiEventList midieventlist;
+    smf.readNextTrack(midieventlist);
+}
+
+void MainWindow::exportSMF()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Export User Patches to Standard MID File"),
+                               QStandardPaths::writableLocation(QStandardPaths::HomeLocation),
+                               tr("Standard MIDI Files (*.mid)"));
+
+    if(fileName.isEmpty())
+        return;
+
+    StandardMidiFile smf(fileName);
+    smf.setTrackNum(1);
+    smf.setTicksPerQuarterNote(96);
+    if( smf.open(QIODevice::WriteOnly) == false )
+    {
+        QMessageBox::warning(this, qApp->applicationName(), tr("Could not open file %1 for writing.").arg( fileName ));
+        return;
+    }
+
+    sendAll( false); // enque all midi events without sending them;
+    smf.writeTrack(midiOutQueue);
+    midiOutQueue.clear();
+
+    smf.close();
+    putGuiToTransmissionState(false, false);
 }
 
 char MainWindow::calcChecksum(const char *data, int dataLength)

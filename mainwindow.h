@@ -58,9 +58,9 @@ private:
 
 private slots:
     void requestAll();
-    void sendAll();
+    void sendAll(bool startMidiOutTimer = true);
     void requestPatch(int patchIndex);
-    void sendPatch(int patchIndex, bool sendToTmpArea = true, PatchListType type=User);
+    void sendPatch(int patchIndex, bool sendToTmpArea = true, PatchListType type=User,  bool startMidiOutTimer = true);
 
     void parameterToBeChanged(int offset, int length);
     void parameterChanged(int offset, int length);
@@ -80,6 +80,9 @@ private slots:
 
     void saveSettings();
     void restoreSettings();
+
+    void importSMF();
+    void exportSMF();
 
 private:
     void loadPresetPatches(int index, const QString &filename);
@@ -115,6 +118,8 @@ private:
     QVBoxLayout *patchListLayout;
 
     QAction *showPreferencesAction;
+    QAction *importSMFAction;
+    QAction *exportSMFAction;
 
     int currentPatchTransmitted;
     QPair<PatchListType, int> currentPatchEdited;

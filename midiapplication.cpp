@@ -217,7 +217,7 @@ MidiApplication::MidiApplication(int &argc, char **argv)
 
     connect(this, SIGNAL(aboutToQuit()), this, SLOT(isQuitting()));
 
-#if defined(QT_DEBUG) && defined(Q_OS_LINUX)
+#if 0
     if(argc > 2)
     {
         bool okclient, okport;

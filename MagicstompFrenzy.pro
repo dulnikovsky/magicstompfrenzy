@@ -90,7 +90,8 @@ SOURCES += main.cpp\
     effecteditwidgets/dynafilterwidget.cpp \
     effecteditwidgets/dynaflangewidget.cpp \
     effecteditwidgets/dynaphaserwidget.cpp \
-    effecteditwidgets/springreverbwidget.cpp
+    effecteditwidgets/springreverbwidget.cpp \
+    standardmidifile.cpp
 
 HEADERS  += mainwindow.h \
     midiportmodel.h \
@@ -161,7 +162,8 @@ HEADERS  += mainwindow.h \
     effecteditwidgets/dynaflangewidget.h \
     effecteditwidgets/dynaphaserwidget.h \
     effecteditwidgets/springreverbwidget.h \
-    userevents.h
+    userevents.h \
+    standardmidifile.h
 
 linux {
 
