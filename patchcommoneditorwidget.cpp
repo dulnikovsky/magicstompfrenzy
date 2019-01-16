@@ -50,6 +50,7 @@ PatchCommonEditorWidget::PatchCommonEditorWidget(QWidget *parent)
 
     mainLayout->addWidget(new QLabel(tr("Name:")), 0, 1);
     QLineEdit *nameLineEdit = new QLineEdit();
+    //nameLineEdit->setValidator(new QRegExpValidator( QRegExp("[a-z-A-Z_]+"), this ));
     nameLineEdit->setMaxLength(PatchNameLength);
     nameLineEdit->setProperty( ArrayDataEditWidget::dataOffsetProperty, PatchName);
     nameLineEdit->setProperty( ArrayDataEditWidget::dataLenghtProperty, PatchNameLength);

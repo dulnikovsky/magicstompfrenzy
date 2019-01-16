@@ -40,6 +40,8 @@ class MidiEvent;
 
 class QItemSelection;
 
+class QLabel;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -120,6 +122,8 @@ private:
     QAction *showPreferencesAction;
     QAction *importSMFAction;
     QAction *exportSMFAction;
+
+    QLabel *patchNameLabel;
 
     int currentPatchTransmitted;
     QPair<PatchListType, int> currentPatchEdited;

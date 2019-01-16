@@ -126,6 +126,9 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     //helpMenu->addAction(aboutAct);
     //helpMenu->addAction(aboutQtAct);
 
+    patchNameLabel = new QLabel();
+    patchNameLabel->setStyleSheet("font: 24pt;");
+
     QGroupBox *patchListGroupbox = new QGroupBox( tr("Patch List"));
 
     requestButton = new QPushButton("Request All");
@@ -193,6 +196,7 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     patchListLayout->addLayout( listEditButtonsLayout);
 
     QVBoxLayout *mainLeftlayout = new QVBoxLayout();
+    mainLeftlayout->addWidget( patchNameLabel);
     mainLeftlayout->addWidget( patchListGroupbox);
 
     QWidget *dockWidgetDummy = new QWidget();
@@ -582,6 +586,8 @@ void MainWindow::parameterChanged(int offset, int length)
     {
         length = 1;
         patchListModelList[currentPatchEdited.first]->patchUpdated(currentPatchEdited.second);
+        QByteArray &dataArrRef = newPatchDataList[currentPatchEdited.first][currentPatchEdited.second];
+        patchNameLabel->setText( dataArrRef.mid(PatchName, PatchNameLength));
     }
 
     MidiEvent *midiev = new MidiEvent(static_cast<QEvent::Type>(UserEventTypes::MidiSysEx));
@@ -699,6 +705,8 @@ void MainWindow::patchListDoubleClicked(const QModelIndex &idx)
             break;
     }
 
+    patchNameLabel->clear();
+
     if(i >= patchListModelList.size())
         return;
 
@@ -712,6 +720,8 @@ void MainWindow::patchListDoubleClicked(const QModelIndex &idx)
     ArrayDataEditWidget *widget = static_cast<ArrayDataEditWidget *>(centralWidget());
     widget->setDataArray(& newPatchDataList[type][idx.row()]);
     currentPatchEdited = QPair<PatchListType, int>(type, idx.row());
+
+    patchNameLabel->setText( newPatchDataList[type][idx.row()].mid(PatchName, PatchNameLength));
 }
 
 void MainWindow::patchListSelectionChanged()
