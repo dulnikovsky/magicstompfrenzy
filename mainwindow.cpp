@@ -31,6 +31,7 @@
 #include "preferencesdialog.h"
 
 #include "magicstomp.h"
+#include "importbankselectiondialog.h"
 
 #include "midiapplication.h"
 
@@ -70,7 +71,7 @@ static const unsigned char sysExParameterSendHeader[parameterSendHeaderLength] =
 MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod, QWidget *parent)
     : QMainWindow(parent), readablePortsModel(readPortsMod), writablePortsModel(writePortsMod),
       currentPatchTransmitted(-1), currentPatchEdited(QPair<PatchListType,int>(User,-1)),
-      cancelOperation(false), isInTransmissionState(false)
+      cancelOperation(false), isInTransmissionState(false), isInImportState(false)
 {
     newPatchDataList.append(QList<QByteArray>());
     for(int i=0; i<numOfPatches; i++)
@@ -79,7 +80,7 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
         tmpPatchDataList.append( QByteArray());
     }
 
-    for(int i=0; i<=(AcousticPreset+1); i++)
+    for(int i=0; i<NumPatchListTypes; i++)
     {
         backupPatchesMapList.append(QMap<int, QPair<QByteArray, bool>>());
     }
@@ -93,10 +94,17 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     newPatchDataList.append(QList<QByteArray>());
     loadPresetPatches( AcousticPreset, QStringLiteral("acousticpresets.ini"));
 
+    newPatchDataList.append(QList<QByteArray>()); // init SMF Import
+    for(int i=0; i<numOfPatches; i++)
+    {
+        newPatchDataList[SMFImport].append( QByteArray());
+    }
+
     patchListModelList.append(new PatchListModel( newPatchDataList.at(User), backupPatchesMapList.at(User), this));
     patchListModelList.append(new PatchListModel( newPatchDataList.at(GuitarPreset), backupPatchesMapList.at(GuitarPreset), this));
     patchListModelList.append(new PatchListModel( newPatchDataList.at(BassPreset), backupPatchesMapList.at(BassPreset), this));
     patchListModelList.append(new PatchListModel( newPatchDataList.at(AcousticPreset), backupPatchesMapList.at(AcousticPreset), this));
+    patchListModelList.append(new PatchListModel( newPatchDataList.at(SMFImport), backupPatchesMapList.at(SMFImport), this));
 
     timeOutTimer = new QTimer(this);
     timeOutTimer->setInterval(1000);
@@ -111,7 +119,7 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     connect(showPreferencesAction, &QAction::triggered, this, &MainWindow::showPreferences);
 
     importSMFAction = new QAction(tr("&Import SMF"), this);
-    connect(importSMFAction, &QAction::triggered, this, &MainWindow::importSMF);
+    connect(importSMFAction, &QAction::triggered, this, &MainWindow::onImportSMF);
 
     exportSMFAction = new QAction(tr("&Export SMF"), this);
     connect(exportSMFAction, &QAction::triggered, this, &MainWindow::exportSMF);
@@ -175,6 +183,16 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     connect(acousticPatchListView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
             this, SLOT(patchListSelectionChanged()));
     patchTabWidget->addTab( acousticPatchListView, tr("Acoustic Presets"));
+
+
+    QTableView *smfImportPatchListView = new QTableView();
+    smfImportPatchListView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    smfImportPatchListView->setModel(patchListModelList.at(SMFImport));
+    connect(smfImportPatchListView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(patchListDoubleClicked(QModelIndex)));
+    connect(smfImportPatchListView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
+            this, SLOT(patchListSelectionChanged()));
+    patchTabWidget->addTab( smfImportPatchListView, tr("Imported Patches"));
+
     patchListGroupbox->setLayout(patchListLayout);
     patchListLayout->addLayout(patchButtonsLayout);
     patchListLayout->addWidget(patchTabWidget);
@@ -287,7 +305,7 @@ void MainWindow::midiEvent(MidiEvent *ev)
             return;
         }
 
-        if(! isInTransmissionState) // incoming unexpected data
+        if(! isInTransmissionState && !isInImportState) // incoming unexpected data
         {
             qDebug("Incoming unexpected data!");
             return;
@@ -312,9 +330,11 @@ void MainWindow::midiEvent(MidiEvent *ev)
                 //patch dump end message. Lenght(?)==0
                 qDebug("Patch %d Dump End Message", inData->at(12));
                 timeOutTimer->stop();
-                patchListView->scrollTo(patchListView->model()->index(currentPatchTransmitted, 0));
+                if(! isInImportState)
+                    patchListView->scrollTo(patchListView->model()->index(currentPatchTransmitted, 0));
                 currentPatchTransmitted = -1;
-                requestPatch(inData->at(12)+1);
+                if(! isInImportState)
+                    requestPatch(inData->at(12)+1);
             }
         }
         else if( inData->at(8)==0x00 &&  inData->at(9)!=0x00)
@@ -587,7 +607,7 @@ void MainWindow::parameterChanged(int offset, int length)
         length = 1;
         patchListModelList[currentPatchEdited.first]->patchUpdated(currentPatchEdited.second);
         QByteArray &dataArrRef = newPatchDataList[currentPatchEdited.first][currentPatchEdited.second];
-        patchNameLabel->setText( dataArrRef.mid(PatchName, PatchNameLength));
+        patchNameLabel->setText( QString::number( currentPatchEdited.second +1).rightJustified(2, '0') + " " + dataArrRef.mid(PatchName, PatchNameLength));
     }
 
     MidiEvent *midiev = new MidiEvent(static_cast<QEvent::Type>(UserEventTypes::MidiSysEx));
@@ -721,7 +741,7 @@ void MainWindow::patchListDoubleClicked(const QModelIndex &idx)
     widget->setDataArray(& newPatchDataList[type][idx.row()]);
     currentPatchEdited = QPair<PatchListType, int>(type, idx.row());
 
-    patchNameLabel->setText( newPatchDataList[type][idx.row()].mid(PatchName, PatchNameLength));
+    patchNameLabel->setText( QString::number( currentPatchEdited.second +1).rightJustified(2, '0') + " " + newPatchDataList[type][idx.row()].mid(PatchName, PatchNameLength));
 }
 
 void MainWindow::patchListSelectionChanged()
@@ -977,24 +997,64 @@ void MainWindow::restoreSettings()
     }
 }
 
-void MainWindow::importSMF()
+void MainWindow::onImportSMF()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open SMF File"),
-                                                    QStandardPaths::writableLocation(QStandardPaths::HomeLocation),
-                                                    tr("Standard MIDI Files (*.mid)"));
-
-    if(fileName.isEmpty())
+    ImportBankSelectionDialog dial(this);
+    if( dial.exec() == QDialog::Rejected )
         return;
 
-    StandardMidiFile smf(fileName);
-    if( smf.open(QIODevice::ReadOnly) == false )
+    PatchListType type = dial.SelectedTab()==ImportBankSelectionDialog::ImportTab?SMFImport:User;
+    bool ret = importSMF( dial.fileName(), type);
+    if( ! ret)
     {
-        QMessageBox::warning(this, qApp->applicationName(), tr("Error. Could not open file %1.").arg( fileName ));
+        QMessageBox::warning(this, qApp->applicationName(), tr("Error. Could not open or read file %1.").arg( dial.fileName() ));
         return;
     }
 
+    patchTabWidget->setCurrentIndex( type);
+}
+
+bool MainWindow::importSMF(const QString &fileName, PatchListType type)
+{
+    StandardMidiFile smf(fileName);
+
+    if( ! smf.open(QIODevice::ReadOnly))
+        return false;
+
     MidiEventList midieventlist;
     smf.readNextTrack(midieventlist);
+
+    isInImportState = true;
+    for(int i=0; i< numOfPatches; i++)
+        tmpPatchDataList[i].clear();
+
+    for(int i=0; i<midieventlist.size(); i++)
+    {
+        MidiEvent *ev = midieventlist[i];
+        midiEvent( ev);
+        delete ev;
+    }
+    isInImportState = false;
+
+    bool importComplete = true;
+    for(int i=0; i<tmpPatchDataList.size(); i++)
+    {
+        if(tmpPatchDataList.at(i).size() != PatchTotalLength)
+        {
+            importComplete = false;
+            break;
+        }
+    }
+
+    if( ! importComplete)
+    {
+        return false;
+    }
+    newPatchDataList[type] = tmpPatchDataList;
+    patchListView->setModel( patchListModelList.at(type));
+    backupPatchesMapList[type].clear();
+
+    return true;
 }
 
 void MainWindow::exportSMF()

@@ -56,7 +56,7 @@ protected:
     void closeEvent(QCloseEvent *event) override;
 
 private:
-    enum PatchListType { User, GuitarPreset, BassPreset, AcousticPreset};
+    enum PatchListType { User, GuitarPreset, BassPreset, AcousticPreset, SMFImport, NumPatchListTypes};
 
 private slots:
     void requestAll();
@@ -83,10 +83,12 @@ private slots:
     void saveSettings();
     void restoreSettings();
 
-    void importSMF();
+    void onImportSMF();
     void exportSMF();
 
 private:
+    bool importSMF(const QString &fileName, PatchListType type);
+
     void loadPresetPatches(int index, const QString &filename);
     PatchListType getCurrentPatchType() const;
 
@@ -130,6 +132,7 @@ private:
 
     bool cancelOperation;
     bool isInTransmissionState;
+    bool isInImportState;
 
     static char calcChecksum(const char *data, int dataLength);
 };

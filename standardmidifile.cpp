@@ -88,7 +88,7 @@ bool StandardMidiFile::readNextTrack( MidiEventList &midieventlist)
     }
     quint32 trackLenght = qFromBigEndian(*(reinterpret_cast<quint32 *>(buffer)));
     quint32 bytesReadTotal = 0;
-    char lastStatus;
+    char lastStatus = 0;
     while(bytesReadTotal < trackLenght)
     {
         unsigned int bytesRead;
@@ -182,7 +182,7 @@ bool StandardMidiFile::readNextTrack( MidiEventList &midieventlist)
     }
     if( ! midieventlist.isEmpty())
     {
-        if(1/*midieventlist.last().Status() == MidiEvent::System &&
+        if(0/*midieventlist.last().Status() == MidiEvent::System &&
                 midieventlist.last().SystemStatus() == 0x0F &&
                 midieventlist.last().VariableDataArray()->at(0) == 0x2F*/)
         {
@@ -204,7 +204,7 @@ void StandardMidiFile::writeTrack(QQueue< MidiEvent *> &eventQueue)
     for (int i = 0; i < eventQueue.size(); ++i)
     {
         trackLen += 1; // delta time
-        trackLen += eventQueue.at(i)->sysExData()->length();
+        trackLen += eventQueue.at(i)->sysExData()->length()+1;
         QByteArray varLenArr = getVariableLengthQuantity(static_cast<quint32>(eventQueue.at(i)->sysExData()->length()-1));
         trackLen += varLenArr.size();
     }
@@ -217,7 +217,7 @@ void StandardMidiFile::writeTrack(QQueue< MidiEvent *> &eventQueue)
 
     while (! eventQueue.isEmpty())
     {
-        qToBigEndian(static_cast<qint32>(48), buffer);
+        qToBigEndian(static_cast<qint32>(56), buffer);
         write(buffer+3, 1);
 
         MidiEvent *ev = eventQueue.dequeue();
@@ -315,6 +315,8 @@ bool StandardMidiFile::readMetaData(unsigned int *bytesRead, QByteArray &arr)
 
 bool StandardMidiFile::readSysExData(unsigned int *bytesRead, QByteArray &array)
 {
+    *bytesRead =0;
+
     unsigned int vlenRead;
     quint32 lenToRead = readVariableLengthQuantity(&vlenRead);
     if(vlenRead == 0)

@@ -91,7 +91,8 @@ SOURCES += main.cpp\
     effecteditwidgets/dynaflangewidget.cpp \
     effecteditwidgets/dynaphaserwidget.cpp \
     effecteditwidgets/springreverbwidget.cpp \
-    standardmidifile.cpp
+    standardmidifile.cpp \
+    importbankselectiondialog.cpp
 
 HEADERS  += mainwindow.h \
     midiportmodel.h \
@@ -163,7 +164,8 @@ HEADERS  += mainwindow.h \
     effecteditwidgets/dynaphaserwidget.h \
     effecteditwidgets/springreverbwidget.h \
     userevents.h \
-    standardmidifile.h
+    standardmidifile.h \
+    importbankselectiondialog.h
 
 linux {
 
