@@ -124,11 +124,16 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     exportSMFAction = new QAction(tr("&Export SMF"), this);
     connect(exportSMFAction, &QAction::triggered, this, &MainWindow::exportSMF);
 
+    QAction *quitAction = new QAction(tr("&Quit"), this);
+    connect(quitAction, &QAction::triggered, this, &MainWindow::close);
+
     QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(importSMFAction);
     fileMenu->addAction(exportSMFAction);
     fileMenu->addSeparator();
     fileMenu->addAction(showPreferencesAction);
+    fileMenu->addSeparator();
+    fileMenu->addAction(quitAction);
 
     QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
     //helpMenu->addAction(aboutAct);
@@ -424,14 +429,10 @@ void MainWindow::requestPatch(int patchIndex)
 
 void MainWindow::sendAll(bool startMidiOutTimer)
 {
-    const QList<QByteArray> &userList = newPatchDataList.at(User);
-    for(int i=0; i<userList.size(); i++)
+    if( ! hasValidUserPatches())
     {
-        if(userList.at(i).size() != PatchTotalLength)
-        {
-            QMessageBox::warning(this, QStringLiteral("MagicstompFrenzy"), tr("Sending data to Magicstomp or exporting to SMF if User patch list is not complete is not possible."));
+        QMessageBox::warning(this, QStringLiteral("MagicstompFrenzy"), tr("Sending data to Magicstomp if User patch list is not complete is not possible."));
             return;
-        }
     }
 
     putGuiToTransmissionState(true, true);
@@ -692,6 +693,7 @@ void MainWindow::putGuiToTransmissionState(bool isTransmitting, bool sending)
         else
             progressWidget->setFormat(tr("Requesting... %p%"));
         patchListLayout->addWidget( progressWidget );
+        menuBar()->setEnabled(false);
     }
     else
     {
@@ -701,6 +703,8 @@ void MainWindow::putGuiToTransmissionState(bool isTransmitting, bool sending)
         requestButton->setEnabled(true);
         sendButton->setEnabled(true);
         patchTabWidget->setEnabled(true);
+
+        menuBar()->setEnabled(true);
 
         patchListSelectionChanged();
 
@@ -1059,6 +1063,12 @@ bool MainWindow::importSMF(const QString &fileName, PatchListType type)
 
 void MainWindow::exportSMF()
 {
+    if( ! hasValidUserPatches())
+    {
+        QMessageBox::warning(this, QStringLiteral("MagicstompFrenzy"), tr("Exporting to SMF if User patch list is not complete is not possible."));
+            return;
+    }
+
     QString fileName = QFileDialog::getSaveFileName(this, tr("Export User Patches to Standard MID File"),
                                QStandardPaths::writableLocation(QStandardPaths::HomeLocation),
                                tr("Standard MIDI Files (*.mid)"));
@@ -1076,11 +1086,29 @@ void MainWindow::exportSMF()
     }
 
     sendAll( false); // enque all midi events without sending them;
+    if( midiOutQueue.isEmpty())
+    {
+        smf.close();
+        return;
+    }
     smf.writeTrack(midiOutQueue);
     midiOutQueue.clear();
 
     smf.close();
     putGuiToTransmissionState(false, false);
+}
+
+bool MainWindow::hasValidUserPatches() const
+{
+    const QList<QByteArray> &userList = newPatchDataList.at(User);
+    for(int i=0; i<userList.size(); i++)
+    {
+        if(userList.at(i).size() != PatchTotalLength)
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
 char MainWindow::calcChecksum(const char *data, int dataLength)

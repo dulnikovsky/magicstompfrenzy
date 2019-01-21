@@ -87,6 +87,7 @@ private slots:
     void exportSMF();
 
 private:
+    bool hasValidUserPatches() const;
     bool importSMF(const QString &fileName, PatchListType type);
 
     void loadPresetPatches(int index, const QString &filename);
