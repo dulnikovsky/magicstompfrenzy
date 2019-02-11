@@ -75,7 +75,7 @@ PatchEditorWidget::PatchEditorWidget( QWidget *parent)
     : ArrayDataEditWidget( parent),effectEditWidget(nullptr)
 {
     mainLayout = new QVBoxLayout();
-    mainLayout->addWidget( new PatchCommonEditorWidget());
+    mainLayout->addWidget( patchCommonEditorWidget = new PatchCommonEditorWidget());
     mainLayout->addWidget( copyrightLabel = new QLabel(QString(copyrightStr) + ". Version: " + qApp->applicationVersion()), 16);
     setLayout( mainLayout);
 }
@@ -88,7 +88,7 @@ void PatchEditorWidget::setDataArray(QByteArray *arr)
     if(arr == nullptr || arr->size() != PatchTotalLength)
         return;
 
-    copyrightLabel->setText(copyrightStr);
+    copyrightLabel->setText(QString(copyrightStr) + ". Version: " + qApp->applicationVersion());
     mainLayout->removeWidget( copyrightLabel);
     if(effectEditWidget != nullptr)
     {
@@ -292,5 +292,6 @@ void PatchEditorWidget::setDataArray(QByteArray *arr)
     }
     effectEditWidget->setProperty( ArrayDataEditWidget::dataOffsetProperty, QVariant(PatchCommonLength));
     mainLayout->addWidget( copyrightLabel, 16);
+    patchCommonEditorWidget->onPatchTypeChanged( patchType);
     refreshData(0, PatchTotalLength);
 }

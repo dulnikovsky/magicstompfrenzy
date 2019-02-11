@@ -27,6 +27,7 @@
 
 class QVBoxLayout;
 class QLabel;
+class PatchCommonEditorWidget;
 
 class PatchEditorWidget : public ArrayDataEditWidget
 {
@@ -40,7 +41,8 @@ private:
     QVBoxLayout *mainLayout;
     QWidget *effectEditWidget;
     QLabel *copyrightLabel;
-    constexpr static const char *copyrightStr="MagicstompFrenzy (C) 2018 Robert Vetter";
+    PatchCommonEditorWidget *patchCommonEditorWidget;
+    constexpr static const char *copyrightStr="MagicstompFrenzy (C) 2018 - 2019 Robert Vetter";
 };
 
 #endif // PATCHCOMMONEDITOR_H

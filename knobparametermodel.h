@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2018 Robert Vetter.
+** Copyright (C) 2019 Robert Vetter.
 **
 ** This file is part of the MagicstompFrenzy - an editor for Yamaha Magicstomp
 ** effect processor
@@ -20,29 +20,28 @@
 ** be met: https://www.gnu.org/licenses/gpl-2.0.html and
 ** https://www.gnu.org/licenses/gpl-3.0.html.
 **/
-#ifndef PATCHCOMMONEDITORWIDGET_H
-#define PATCHCOMMONEDITORWIDGET_H
+#ifndef KNOBPARAMETERMODEL_H
+#define KNOBPARAMETERMODEL_H
 
-#include <QGroupBox>
+#include <QAbstractItemModel>
 
-class QComboBox;
-class QAbstractItemModel;
-
-class PatchCommonEditorWidget : public QGroupBox
+class KnobParameterModel : public QAbstractItemModel
 {
     Q_OBJECT
 public:
-    explicit PatchCommonEditorWidget( QWidget *parent = Q_NULLPTR);
+    explicit KnobParameterModel(const QMap<int, QString> &parameterMap, int numberOfRows, QObject *parent = 0);
 
-signals:
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
-public slots:
-    void onPatchTypeChanged(int type);
+    int rowCount(const QModelIndex &) const override { return nRows; }
+    int columnCount(const QModelIndex &) const override { return 1; }
+
+    QModelIndex index(int row, int column, const QModelIndex & = QModelIndex()) const override { return createIndex(row, column); }
+    QModelIndex parent(const QModelIndex &) const override { return QModelIndex(); }
+
 private:
-    QAbstractItemModel *knobparametermodel;
-    QComboBox *knob1ComboBox;
-    QComboBox *knob2ComboBox;
-    QComboBox *knob3ComboBox;
+    const QMap<int, QString> &parameterMap;
+    int nRows;
 };
 
-#endif // PATCHCOMMONEDITORWIDGET_H
+#endif // KNOBPARAMETERMODEL_H

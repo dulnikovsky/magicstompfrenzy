@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2018 Robert Vetter.
+** Copyright (C) 2019 Robert Vetter.
 **
 ** This file is part of the MagicstompFrenzy - an editor for Yamaha Magicstomp
 ** effect processor
@@ -20,29 +20,22 @@
 ** be met: https://www.gnu.org/licenses/gpl-2.0.html and
 ** https://www.gnu.org/licenses/gpl-3.0.html.
 **/
-#ifndef PATCHCOMMONEDITORWIDGET_H
-#define PATCHCOMMONEDITORWIDGET_H
+#include "knobparametermodel.h"
 
-#include <QGroupBox>
-
-class QComboBox;
-class QAbstractItemModel;
-
-class PatchCommonEditorWidget : public QGroupBox
+KnobParameterModel::KnobParameterModel(const QMap<int, QString> &parameterMap, int numberOfRows, QObject *parent)
+    : parameterMap(parameterMap), nRows(numberOfRows), QAbstractItemModel(parent)
 {
-    Q_OBJECT
-public:
-    explicit PatchCommonEditorWidget( QWidget *parent = Q_NULLPTR);
 
-signals:
+}
 
-public slots:
-    void onPatchTypeChanged(int type);
-private:
-    QAbstractItemModel *knobparametermodel;
-    QComboBox *knob1ComboBox;
-    QComboBox *knob2ComboBox;
-    QComboBox *knob3ComboBox;
-};
+QVariant KnobParameterModel::data(const QModelIndex &index, int role) const
+{
+    if(role == Qt::DisplayRole && index.column() == 0)
+    {
+        int row = index.row();
+        if( parameterMap.contains( row))
+            return parameterMap.value( row);
 
-#endif // PATCHCOMMONEDITORWIDGET_H
+    }
+    return QVariant();
+}

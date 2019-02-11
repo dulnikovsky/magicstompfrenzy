@@ -270,7 +270,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
             int ret = msgBox.exec();
             if(ret == QMessageBox::No)
             {
-                event->accept();
+                event->ignore();
                 return;
             }
             else

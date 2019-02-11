@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2018 Robert Vetter.
+** Copyright (C) 2019 Robert Vetter.
 **
 ** This file is part of the MagicstompFrenzy - an editor for Yamaha Magicstomp
 ** effect processor
@@ -20,29 +20,19 @@
 ** be met: https://www.gnu.org/licenses/gpl-2.0.html and
 ** https://www.gnu.org/licenses/gpl-3.0.html.
 **/
-#ifndef PATCHCOMMONEDITORWIDGET_H
-#define PATCHCOMMONEDITORWIDGET_H
 
-#include <QGroupBox>
+#ifndef KNOBPARAMETERS_H
+#define KNOBPARAMETERS_H
 
-class QComboBox;
-class QAbstractItemModel;
+#include <QMap>
+#include <QString>
 
-class PatchCommonEditorWidget : public QGroupBox
+const QMap<int, QString> AcousticMultiKnobParametes =
 {
-    Q_OBJECT
-public:
-    explicit PatchCommonEditorWidget( QWidget *parent = Q_NULLPTR);
+    { 0, QStringLiteral("----") },
+    { 5, QStringLiteral("Volume") }
 
-signals:
-
-public slots:
-    void onPatchTypeChanged(int type);
-private:
-    QAbstractItemModel *knobparametermodel;
-    QComboBox *knob1ComboBox;
-    QComboBox *knob2ComboBox;
-    QComboBox *knob3ComboBox;
 };
 
-#endif // PATCHCOMMONEDITORWIDGET_H
+
+#endif // KNOBPARAMETES_H

@@ -92,7 +92,8 @@ SOURCES += main.cpp\
     effecteditwidgets/dynaphaserwidget.cpp \
     effecteditwidgets/springreverbwidget.cpp \
     standardmidifile.cpp \
-    importbankselectiondialog.cpp
+    importbankselectiondialog.cpp \
+    knobparametermodel.cpp
 
 HEADERS  += mainwindow.h \
     midiportmodel.h \
@@ -165,7 +166,9 @@ HEADERS  += mainwindow.h \
     effecteditwidgets/springreverbwidget.h \
     userevents.h \
     standardmidifile.h \
-    importbankselectiondialog.h
+    importbankselectiondialog.h \
+    knobparametermodel.h \
+    knobparameters.h
 
 linux {
 
