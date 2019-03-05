@@ -61,26 +61,29 @@ PatchCommonEditorWidget::PatchCommonEditorWidget(QWidget *parent)
     nameLineEdit->setProperty( ArrayDataEditWidget::dataLenghtProperty, PatchNameLength);
     mainLayout->addWidget(nameLineEdit, 1, 1);
 
-    mainLayout->addWidget(new QLabel(tr("Knob 1(?):")), 0, 2);
+    mainLayout->addWidget(new QLabel(tr("Knob 1")), 0, 2);
     knob1ComboBox = new QComboBox();
     knob1ComboBox->setProperty( ArrayDataEditWidget::valuePropertyName, QStringLiteral("currentIndex"));
     knob1ComboBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, Control1);
     knob1ComboBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 2);
     mainLayout->addWidget(knob1ComboBox, 1, 2);
+    mainLayout->setColumnStretch( 2, 2);
 
-    mainLayout->addWidget(new QLabel(tr("Knob 2(?):")), 0, 3);
+    mainLayout->addWidget(new QLabel(tr("Knob 2")), 0, 3);
     knob2ComboBox = new QComboBox();
     knob2ComboBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, Control2);
     knob2ComboBox->setProperty( ArrayDataEditWidget::valuePropertyName, QStringLiteral("currentIndex"));
     knob2ComboBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 2);
     mainLayout->addWidget(knob2ComboBox, 1, 3);
+    mainLayout->setColumnStretch( 3, 2);
 
-    mainLayout->addWidget(new QLabel(tr("Knob 3(?):")), 0, 4);
+    mainLayout->addWidget(new QLabel(tr("Knob 3")), 0, 4);
     knob3ComboBox = new QComboBox();
     knob3ComboBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, Control3);
     knob3ComboBox->setProperty( ArrayDataEditWidget::valuePropertyName, QStringLiteral("currentIndex"));
     knob3ComboBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 2);
     mainLayout->addWidget(knob3ComboBox, 1, 4);
+    mainLayout->setColumnStretch( 4, 2);
 
     setLayout( mainLayout);
 }
@@ -104,7 +107,29 @@ void PatchCommonEditorWidget::onPatchTypeChanged(int type)
 
     switch (type) {
     case AcousticMulti:
-        knobparametermodel = new KnobParameterModel( AcousticMultiKnobParametes, 127, this);
+        knobparametermodel = new KnobParameterModel( AcousticMultiKnobParameters, 41, this);
+        break;
+    case EightBandParallelDelay:
+    case EightBandSeriesDelay:
+        knobparametermodel = new KnobParameterModel( EightBandParaDlyKnobParameters, 107, this);
+        break;
+    case FourBand2TapModDelay:
+        knobparametermodel = new KnobParameterModel( FourBand2TapModDlyKnobParameters, 107, this);
+        break;
+    case TwoBand4TapModDelay:
+        knobparametermodel = new KnobParameterModel( TwoBand4TapModDlyKnobParameters, 107, this);
+        break;
+    case EightMultiTapModDelay:
+        knobparametermodel = new KnobParameterModel( OneBand8TapModDlyKnobParameters, 107, this);
+        break;
+    case TwoBandLong4ShortModDelay:
+        knobparametermodel = new KnobParameterModel( TwoBandLong4ShortModDlyKnobParameters, 107, this);
+        break;
+    case ShortMediumLongModDelay:
+        knobparametermodel = new KnobParameterModel( ShortMediumLongModDlyKnobParameters, 107, this);
+        break;
+    case BassPreamp:
+        knobparametermodel = new KnobParameterModel( BassPreampKnobParameters, 41, this);
         break;
     default:
         break;

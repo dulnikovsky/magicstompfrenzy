@@ -33,8 +33,12 @@ QVariant KnobParameterModel::data(const QModelIndex &index, int role) const
     if(role == Qt::DisplayRole && index.column() == 0)
     {
         int row = index.row();
-        if( parameterMap.contains( row))
-            return parameterMap.value( row);
+        if( parameterMap.contains(row))
+            return parameterMap.value(row);
+#ifdef QT_DEBUG
+        else
+            return row;
+#endif
 
     }
     return QVariant();

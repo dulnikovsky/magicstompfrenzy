@@ -122,27 +122,30 @@ MultibandDelayWidget::MultibandDelayWidget(EffectTypeId effectid, QWidget *paren
         gridlyt->addWidget( new DelayBandWidget( LowCutFilter1 + BandLenght*3, 0.1, 1430.0, true), 4, 1);
         for(int i=4; i<8; i++)
         {
-            gridlyt->addWidget( new QLabel( tr("Short Band 2:Tap 1")+ QString::number(i+1)), i+1, 0);
+            gridlyt->addWidget( new QLabel( tr("Short Band ")+ QString::number(i-3)), i+1, 0);
             gridlyt->addWidget( new DelayBandWidget( LowCutFilter1 + BandLenght*i, 0.1, 696.0, false), i+1, 1);
         }
     }
     else if(effectid == ShortMediumLongModDelay )
     {
-        gridlyt->addWidget( new QLabel( tr("Short Band 1:Tap 1")), 1, 0);
+        gridlyt->addWidget( new QLabel( tr("Short Band")), 1, 0);
         gridlyt->addWidget( new DelayBandWidget( LowCutFilter1 + BandLenght*0, 0.1, 696.0, false), 1, 1);
 
-        gridlyt->addWidget( new QLabel( tr("Med. Band 2:Tap 1")), 2, 0);
+        gridlyt->addWidget( new QLabel( tr("Medium Band Tap 1")), 2, 0);
         gridlyt->addWidget( new DelayBandWidget( LowCutFilter1 + BandLenght*1, 0.2, 2180.0, false), 2, 1);
 
-        gridlyt->addWidget( new QLabel( tr("Med. Band 2:Tap 2")), 3, 0);
+        gridlyt->addWidget( new QLabel( tr("Medium Band Tap 2")), 3, 0);
         gridlyt->addWidget( new DelayBandWidget( LowCutFilter1 + BandLenght*2, 0.2, 2180.0, true), 3, 1);
 
-        gridlyt->addWidget( new QLabel( tr("Med. Band 2:Tap 3")), 4, 0);
+        gridlyt->addWidget( new QLabel( tr("Medium Band Tap 3")), 4, 0);
         gridlyt->addWidget( new DelayBandWidget( LowCutFilter1 + BandLenght*3, 0.2, 2180.0, true), 4, 1);
-        for(int i=4; i<8; i++)
+
+        gridlyt->addWidget( new QLabel(tr("Long Band Tap 1")), 5, 0);
+        gridlyt->addWidget( new DelayBandWidget( LowCutFilter1 + BandLenght*4, 0.1, 2920.0, false), 5, 1);
+        for(int i=5; i<8; i++)
         {
-            gridlyt->addWidget( new QLabel(tr("Long Band ")+ QString::number(i/4+1) + tr(":Tap ")+ QString::number(i%4+1)), i+1, 0);
-            gridlyt->addWidget( new DelayBandWidget( LowCutFilter1 + BandLenght*i, 0.1, 2920.0, false), i+1, 1);
+            gridlyt->addWidget( new QLabel(tr("Long Band ")+tr("Tap ")+ QString::number(i%4+1)), i+1, 0);
+            gridlyt->addWidget( new DelayBandWidget( LowCutFilter1 + BandLenght*i, 0.1, 2920.0, true), i+1, 1);
         }
     }
 
