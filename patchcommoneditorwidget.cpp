@@ -128,6 +128,56 @@ void PatchCommonEditorWidget::onPatchTypeChanged(int type)
     case ShortMediumLongModDelay:
         knobparametermodel = new KnobParameterModel( ShortMediumLongModDlyKnobParameters, 107, this);
         break;
+    case AmpSimulator:
+        knobparametermodel = new KnobParameterModel( AmpSimulatorKnobParameters, 35, this);
+        break;
+    case AmpMultiChorus:
+        knobparametermodel = new KnobParameterModel( AmpMultiChorusKnobParameters, 79, this);
+        break;
+    case AmpMultiFlange:
+        knobparametermodel = new KnobParameterModel( AmpMultiFlangeKnobParameters, 79, this);
+        break;
+    case AmpMultiTremolo:
+        knobparametermodel = new KnobParameterModel( AmpMultiTremoloKnobParameters, 79, this);
+        break;
+    case AmpMultiPhaser:
+        knobparametermodel = new KnobParameterModel( AmpMultiPhaserKnobParameters, 79, this);
+        break;
+    case Distortion:
+        knobparametermodel = new KnobParameterModel( DistortionKnobParameters, 46, this);
+        break;
+    case DistorionMultiChorus:
+        knobparametermodel = new KnobParameterModel( DistortionMultiChorusKnobParameters, 79, this);
+        break;
+    case DistorionMultiFlange:
+        knobparametermodel = new KnobParameterModel( DistortionMultiFlangeKnobParameters, 79, this);
+        break;
+    case DistorionMultiTremolo:
+        knobparametermodel = new KnobParameterModel( DistortionMultiTremoloKnobParameters, 79, this);
+        break;
+    case DistorionMultiPhaser:
+        knobparametermodel = new KnobParameterModel( DistortionMultiPhaseKnobParameters, 79, this);
+        break;
+    case Reverb:
+        knobparametermodel = new KnobParameterModel( ReverbKnobParameters, 30, this);
+        break;
+    case EarlyRef:
+    case GateReverb:
+    case ReverseGate:
+        knobparametermodel = new KnobParameterModel( EarlyRefKnobParameters, 30, this);
+        break;
+    case MonoDelay:
+        knobparametermodel = new KnobParameterModel( MonoDelayKnobParameters, 30, this);
+        break;
+    case StereoDelay:
+        knobparametermodel = new KnobParameterModel( StereoDelayKnobParameters, 30, this);
+        break;
+    case ModDelay:
+        knobparametermodel = new KnobParameterModel( ModulationDelayKnobParameters, 30, this);
+        break;
+    case DelayLCR:
+        knobparametermodel = new KnobParameterModel( DelayLCRKnobParameters, 30, this);
+        break;
     case BassPreamp:
         knobparametermodel = new KnobParameterModel( BassPreampKnobParameters, 41, this);
         break;
