@@ -291,7 +291,7 @@ void PatchEditorWidget::setDataArray(QByteArray *arr)
         break;
     }
     effectEditWidget->setProperty( ArrayDataEditWidget::dataOffsetProperty, QVariant(PatchCommonLength));
-    mainLayout->addWidget( copyrightLabel, 16);
+    mainLayout->addWidget( copyrightLabel, 128);
     patchCommonEditorWidget->onPatchTypeChanged( patchType);
     refreshData(0, PatchTotalLength);
 }

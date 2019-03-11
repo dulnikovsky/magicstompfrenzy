@@ -178,6 +178,66 @@ void PatchCommonEditorWidget::onPatchTypeChanged(int type)
     case DelayLCR:
         knobparametermodel = new KnobParameterModel( DelayLCRKnobParameters, 30, this);
         break;
+    case Echo:
+        knobparametermodel = new KnobParameterModel( EchoKnobParameters, 30, this);
+        break;
+    case Chorus:
+        knobparametermodel = new KnobParameterModel( ChorusKnobParameters, 30, this);
+        break;
+    case Flange:
+        knobparametermodel = new KnobParameterModel( FlangeKnobParameters, 30, this);
+        break;
+    case Symphonic:
+        knobparametermodel = new KnobParameterModel( SymphonicKnobParameters, 30, this);
+        break;
+    case Phaser:
+        knobparametermodel = new KnobParameterModel( PhaserKnobParameters, 30, this);
+        break;
+    case AutoPan:
+        knobparametermodel = new KnobParameterModel( AutoPanKnobParameters, 30, this);
+        break;
+    case Tremolo:
+        knobparametermodel = new KnobParameterModel( TremoloKnobParameters, 30, this);
+        break;
+    case HQPitch:
+        knobparametermodel = new KnobParameterModel( HQPitchKnobParameters, 30, this);
+        break;
+    case DualPitch:
+        knobparametermodel = new KnobParameterModel( DualPitchKnobParameters, 30, this);
+        break;
+    case RingMod:
+        knobparametermodel = new KnobParameterModel( RingModKnobParameters, 30, this);
+        break;
+    case ModFilter:
+        knobparametermodel = new KnobParameterModel( ModFilterKnobParameters, 30, this);
+        break;
+    case DigitalDistortion:
+        knobparametermodel = new KnobParameterModel( DigitalDistortionKnobParameters, 30, this);
+        break;
+    case DynaFilter:
+        knobparametermodel = new KnobParameterModel( DynaFilterKnobParameters, 30, this);
+        break;
+    case DynaFlange:
+        knobparametermodel = new KnobParameterModel( DynaFlangeKnobParameters, 30, this);
+        break;
+    case DynaPhaser:
+        knobparametermodel = new KnobParameterModel( DynaPhaserKnobParameters, 30, this);
+        break;
+    case ReverbChorusParallel:
+    case ReverbChorusSerial:
+        knobparametermodel = new KnobParameterModel( ReverbChorusKnobParameters, 30, this);
+        break;
+    case ReverbFlangeSerial:
+    case ReverbFlangeParallel:
+        knobparametermodel = new KnobParameterModel( ReverbFlangeKnobParameters, 30, this);
+        break;
+    case ReverbSymphonicSerial:
+    case ReverbSymphonicParallel:
+        knobparametermodel = new KnobParameterModel( ReverbSymphonicKnobParameters, 30, this);
+        break;
+    case ReverbPan:
+        knobparametermodel = new KnobParameterModel( ReverbPanKnobParameters, 30, this);
+        break;
     case BassPreamp:
         knobparametermodel = new KnobParameterModel( BassPreampKnobParameters, 41, this);
         break;

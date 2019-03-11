@@ -1172,6 +1172,289 @@ const QMap<int, QString> DelayLCRKnobParameters =
     {  29, QStringLiteral("Mix") }
 };
 
+const QMap<int, QString> EchoKnobParameters =
+{
+    {   0, QStringLiteral("Feedback Delay Right") },
+    {   8, QStringLiteral("Delay Left") },
+    {   9, QStringLiteral("Delay Right") },
+    {  10, QStringLiteral("Feedback Delay Left") },
+    {  19, QStringLiteral("Feedback Gain Left") },
+    {  20, QStringLiteral("Feedback Gain Right") },
+    {  21, QStringLiteral("L->R Feedback Gain") },
+    {  22, QStringLiteral("R->L Feedback Gain") },
+    {  23, QStringLiteral("High Ratio") },
+    {  24, QStringLiteral("High Pass Filter") },
+    {  25, QStringLiteral("Low Pass Filter") },
+    {  29, QStringLiteral("Mix") }
+};
+
+const QMap<int, QString> ChorusKnobParameters =
+{
+    {   0, QStringLiteral("Modulation Delay") },
+    {   8, QStringLiteral("Frequency") },
+    {   9, QStringLiteral("AM Depth") },
+    {  10, QStringLiteral("PM Depth") },
+    {  11, QStringLiteral("Wave") },
+    {  19, QStringLiteral("LSH Frequency") },
+    {  20, QStringLiteral("LSH Gain") },
+    {  21, QStringLiteral("EQ Frequency") },
+    {  22, QStringLiteral("EQ Gain") },
+    {  23, QStringLiteral("EQ Q") },
+    {  24, QStringLiteral("HSH Frequency") },
+    {  25, QStringLiteral("HSH Gain") },
+    {  29, QStringLiteral("Mix") }
+};
+
+const QMap<int, QString> FlangeKnobParameters =
+{
+    {   0, QStringLiteral("Modulation Delay") },
+    {   8, QStringLiteral("Frequency") },
+    {   9, QStringLiteral("Depth") },
+    {  10, QStringLiteral("Feedback") },
+    {  11, QStringLiteral("Wave") },
+    {  19, QStringLiteral("LSH Frequency") },
+    {  20, QStringLiteral("LSH Gain") },
+    {  21, QStringLiteral("EQ Frequency") },
+    {  22, QStringLiteral("EQ Gain") },
+    {  23, QStringLiteral("EQ Q") },
+    {  24, QStringLiteral("HSH Frequency") },
+    {  25, QStringLiteral("HSH Gain") },
+    {  29, QStringLiteral("Mix") }
+};
+
+const QMap<int, QString> SymphonicKnobParameters =
+{
+    {   8, QStringLiteral("Frequency") },
+    {   9, QStringLiteral("Depth") },
+    {  10, QStringLiteral("Modulation Delay") },
+    {  11, QStringLiteral("Wave") },
+    {  19, QStringLiteral("LSH Frequency") },
+    {  20, QStringLiteral("LSH Gain") },
+    {  21, QStringLiteral("EQ Frequency") },
+    {  22, QStringLiteral("EQ Gain") },
+    {  23, QStringLiteral("EQ Q") },
+    {  25, QStringLiteral("HSH Frequency") },
+    {  26, QStringLiteral("HSH Gain") },
+    {  29, QStringLiteral("Mix") }
+};
+
+const QMap<int, QString> PhaserKnobParameters =
+{
+    {   0, QStringLiteral("Offset") },
+    {   8, QStringLiteral("Frequency") },
+    {   9, QStringLiteral("Depth") },
+    {  10, QStringLiteral("Feedback Gain") },
+    {  11, QStringLiteral("Stage") },
+    {  19, QStringLiteral("Phase") },
+    {  20, QStringLiteral("LSH Frequency") },
+    {  21, QStringLiteral("LSH Gain") },
+    {  22, QStringLiteral("HSH Frequency") },
+    {  23, QStringLiteral("HSH Gain") },
+    {  29, QStringLiteral("Mix") }
+};
+
+const QMap<int, QString> AutoPanKnobParameters =
+{
+    {   0, QStringLiteral("Frequency") },
+    {  11, QStringLiteral("Wave") },
+    {  19, QStringLiteral("Depth") },
+    {  20, QStringLiteral("Direction") },
+    {  21, QStringLiteral("LSH Frequency") },
+    {  22, QStringLiteral("LSH Gain") },
+    {  24, QStringLiteral("EQ Frequency") },
+    {  25, QStringLiteral("EQ Gain") },
+    {  26, QStringLiteral("EQ Q") },
+    {  27, QStringLiteral("HSH Frequency") },
+    {  28, QStringLiteral("HSH Gain") }
+};
+
+const QMap<int, QString> TremoloKnobParameters =
+{
+    {   0, QStringLiteral("Frequency") },
+    {  11, QStringLiteral("Wave") },
+    {  19, QStringLiteral("Depth") },
+    {  20, QStringLiteral("LSH Frequency") },
+    {  21, QStringLiteral("LSH Gain") },
+    {  24, QStringLiteral("EQ Frequency") },
+    {  25, QStringLiteral("EQ Gain") },
+    {  26, QStringLiteral("EQ Q") },
+    {  27, QStringLiteral("HSH Frequency") },
+    {  28, QStringLiteral("HSH Gain") }
+};
+
+const QMap<int, QString> HQPitchKnobParameters =
+{
+    {   8, QStringLiteral("Delay") },
+    {   9, QStringLiteral("Feedback Gain") },
+    {  11, QStringLiteral("Mode") },
+    {  19, QStringLiteral("Pitch") },
+    {  20, QStringLiteral("Fine") },
+    {  29, QStringLiteral("Mix") }
+};
+
+const QMap<int, QString> DualPitchKnobParameters =
+{
+    {   0, QStringLiteral("2 Feedback Gain") },
+    {   8, QStringLiteral("1 Delay") },
+    {   9, QStringLiteral("1 Feedback Gain") },
+    {  10, QStringLiteral("2 Delay") },
+    {  11, QStringLiteral("Mode") },
+    {  19, QStringLiteral("1 Pitch") },
+    {  20, QStringLiteral("1 Fine") },
+    {  21, QStringLiteral("1 Level") },
+    {  22, QStringLiteral("1 Pan") },
+    {  23, QStringLiteral("2 Pitch") },
+    {  24, QStringLiteral("2 Fine") },
+    {  25, QStringLiteral("2 Level") },
+    {  26, QStringLiteral("2 Pan") },
+    {  29, QStringLiteral("Mix") }
+};
+
+const QMap<int, QString> RingModKnobParameters =
+{
+    {   8, QStringLiteral("OSC Freq") },
+    {   9, QStringLiteral("FM Freq") },
+    {  11, QStringLiteral("Source") },
+    {  22, QStringLiteral("FM Depth") },
+    {  29, QStringLiteral("Mix") }
+};
+
+const QMap<int, QString> ModFilterKnobParameters =
+{
+    {   0, QStringLiteral("Frequency") },
+    {  11, QStringLiteral("Type") },
+    {  19, QStringLiteral("Depth") },
+    {  20, QStringLiteral("Phase") },
+    {  21, QStringLiteral("Offset") },
+    {  22, QStringLiteral("Resonance") },
+    {  23, QStringLiteral("Level") },
+    {  29, QStringLiteral("Mix") }
+};
+
+const QMap<int, QString> DigitalDistortionKnobParameters =
+{
+    {  11, QStringLiteral("Type") },
+    {  19, QStringLiteral("Drive") },
+    {  20, QStringLiteral("Master") },
+    {  21, QStringLiteral("Tone") },
+    {  22, QStringLiteral("Noise Gate") }
+};
+
+const QMap<int, QString> DynaFilterKnobParameters =
+{
+    {  10, QStringLiteral("Decay") },
+    {  11, QStringLiteral("Type") },
+    {  19, QStringLiteral("Direction") },
+    {  20, QStringLiteral("Sensivity") },
+    {  21, QStringLiteral("Offset") },
+    {  22, QStringLiteral("Resonance") },
+    {  23, QStringLiteral("Level") },
+    {  29, QStringLiteral("Mix") }
+};
+
+const QMap<int, QString> DynaFlangeKnobParameters =
+{
+    {   0, QStringLiteral("Feedback Gain") },
+    {  10, QStringLiteral("Decay") },
+    {  11, QStringLiteral("Type") },
+    {  19, QStringLiteral("Direction") },
+    {  20, QStringLiteral("Sensivity") },
+    {  21, QStringLiteral("Offset") },
+    {  22, QStringLiteral("LSH Frequency") },
+    {  23, QStringLiteral("LSH Gain") },
+    {  24, QStringLiteral("EQ Frequency") },
+    {  25, QStringLiteral("EQ Gain") },
+    {  26, QStringLiteral("EQ Q") },
+    {  27, QStringLiteral("HSH Frequency") },
+    {  28, QStringLiteral("HSH Gain") },
+    {  29, QStringLiteral("Mix") }
+};
+
+const QMap<int, QString> DynaPhaserKnobParameters =
+{
+    {   0, QStringLiteral("Feedback Gain") },
+    {  10, QStringLiteral("Decay") },
+    {  19, QStringLiteral("Direction") },
+    {  20, QStringLiteral("Sensivity") },
+    {  21, QStringLiteral("Offset") },
+    {  22, QStringLiteral("Stage") },
+    {  24, QStringLiteral("LSH Frequency") },
+    {  25, QStringLiteral("LSH Gain") },
+    {  26, QStringLiteral("HSH Frequency") },
+    {  27, QStringLiteral("HSH Gain") },
+    {  29, QStringLiteral("Mix") }
+};
+
+const QMap<int, QString> ReverbChorusKnobParameters =
+{
+    {   8, QStringLiteral("Init Delay") },
+    {   9, QStringLiteral("Chorus Frequency") },
+    {  10, QStringLiteral("Modulation Delay") },
+    {  11, QStringLiteral("Wave") },
+    {  19, QStringLiteral("Reverb Time") },
+    {  20, QStringLiteral("High Ratio") },
+    {  21, QStringLiteral("Diffusion") },
+    {  22, QStringLiteral("Density") },
+    {  23, QStringLiteral("High Pass Filter") },
+    {  25, QStringLiteral("Low Pass Filter") },
+    {  26, QStringLiteral("Balance") },
+    {  27, QStringLiteral("AM Depth") },
+    {  28, QStringLiteral("PM Depth") },
+    {  29, QStringLiteral("Mix") }
+};
+
+const QMap<int, QString> ReverbFlangeKnobParameters =
+{
+    {   0, QStringLiteral("Feedback Gain") },
+    {   8, QStringLiteral("Init Delay") },
+    {   9, QStringLiteral("Flanger Frequency") },
+    {  10, QStringLiteral("Modulation Delay") },
+    {  11, QStringLiteral("Wave") },
+    {  19, QStringLiteral("Reverb Time") },
+    {  20, QStringLiteral("High Ratio") },
+    {  21, QStringLiteral("Diffusion") },
+    {  22, QStringLiteral("Density") },
+    {  23, QStringLiteral("High Pass Filter") },
+    {  25, QStringLiteral("Low Pass Filter") },
+    {  26, QStringLiteral("Balance") },
+    {  27, QStringLiteral("Depth") },
+    {  29, QStringLiteral("Mix") }
+};
+
+const QMap<int, QString> ReverbSymphonicKnobParameters =
+{
+    {   8, QStringLiteral("Init Delay") },
+    {   9, QStringLiteral("Symphonic Frequency") },
+    {  10, QStringLiteral("Modulation Delay") },
+    {  11, QStringLiteral("Wave") },
+    {  19, QStringLiteral("Reverb Time") },
+    {  20, QStringLiteral("High Ratio") },
+    {  21, QStringLiteral("Diffusion") },
+    {  22, QStringLiteral("Density") },
+    {  23, QStringLiteral("High Pass Filter") },
+    {  25, QStringLiteral("Low Pass Filter") },
+    {  26, QStringLiteral("Balance") },
+    {  27, QStringLiteral("Depth") },
+    {  29, QStringLiteral("Mix") }
+};
+
+const QMap<int, QString> ReverbPanKnobParameters =
+{
+    {   8, QStringLiteral("Init Delay") },
+    {   9, QStringLiteral("Pan Frequency") },
+    {  11, QStringLiteral("Wave") },
+    {  19, QStringLiteral("Reverb Time") },
+    {  20, QStringLiteral("High Ratio") },
+    {  21, QStringLiteral("Diffusion") },
+    {  22, QStringLiteral("Density") },
+    {  23, QStringLiteral("High Pass Filter") },
+    {  25, QStringLiteral("Low Pass Filter") },
+    {  26, QStringLiteral("Balance") },
+    {  27, QStringLiteral("Depth") },
+    {  28, QStringLiteral("Direction") },
+    {  29, QStringLiteral("Mix") }
+};
+
 const QMap<int, QString> BassPreampKnobParameters =
 {
     { 1, QStringLiteral("Parametric EQ Freq") },

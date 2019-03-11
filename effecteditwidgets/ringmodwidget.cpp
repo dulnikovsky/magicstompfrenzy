@@ -84,5 +84,7 @@ RingModWidget::RingModWidget( QWidget *parent) :
     spinBox->setSuffix(QStringLiteral(" %"));
     mainlyt->addWidget( spinBox, 1, 4);
 
+    mainlyt->setRowStretch( 2, 8);
+
     setLayout(mainlyt);
 }

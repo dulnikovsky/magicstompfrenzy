@@ -35,7 +35,7 @@ DistortionDelayWidget::DistortionDelayWidget( bool distortionOnly, QWidget *pare
     QDoubleSpinBox *dspinBox;
     QGridLayout *mainlyt = new QGridLayout();
 
-    QGroupBox *distortionGroupBox = new QGroupBox(QStringLiteral("Distorion"));
+    QGroupBox *distortionGroupBox = new QGroupBox(QStringLiteral("Distortion"));
     QGridLayout *distortionlayout = new QGridLayout();
 
     distortionlayout->addWidget(new QLabel(tr("Type")), 0, 0);

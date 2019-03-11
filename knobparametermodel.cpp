@@ -23,7 +23,7 @@
 #include "knobparametermodel.h"
 
 KnobParameterModel::KnobParameterModel(const QMap<int, QString> &parameterMap, int numberOfRows, QObject *parent)
-    : parameterMap(parameterMap), nRows(numberOfRows), QAbstractItemModel(parent)
+    : QAbstractItemModel(parent), parameterMap(parameterMap), nRows(numberOfRows)
 {
 
 }
@@ -39,7 +39,6 @@ QVariant KnobParameterModel::data(const QModelIndex &index, int role) const
         else
             return row;
 #endif
-
     }
     return QVariant();
 }
