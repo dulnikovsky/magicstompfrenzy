@@ -238,6 +238,30 @@ void PatchCommonEditorWidget::onPatchTypeChanged(int type)
     case ReverbPan:
         knobparametermodel = new KnobParameterModel( ReverbPanKnobParameters, 30, this);
         break;
+    case DelayEarlyRefSerial:
+    case DelayEarlyRefParallel:
+        knobparametermodel = new KnobParameterModel( DelayEarlyRefKnobParameters, 35, this);
+        break;
+    case DelayReverbSerial:
+    case DelayReverbParallel:
+        knobparametermodel = new KnobParameterModel( DelayReverbKnobParameters, 35, this);
+        break;
+    case DistortionDelay:
+        knobparametermodel = new KnobParameterModel( DistortionDelayKnobParameters, 28, this);
+        break;
+    case MultiFilter:
+        knobparametermodel = new KnobParameterModel( MultiFilterKnobParameters, 44, this);
+        break;
+    case MBandDyna:
+        knobparametermodel = new KnobParameterModel( MBandDynaKnobParameters, 56, this);
+        break;
+    case VintageFlange:
+        knobparametermodel = new KnobParameterModel( VintageFlangeKnobParameters, 24, this);
+        break;
+    case MonoVintagePhaser:
+    case StereoVintagePhaser:
+        knobparametermodel = new KnobParameterModel( MonoVintagePhaserKnobParameters, 24, this);
+        break;
     case BassPreamp:
         knobparametermodel = new KnobParameterModel( BassPreampKnobParameters, 41, this);
         break;

@@ -93,7 +93,8 @@ SOURCES += main.cpp\
     effecteditwidgets/springreverbwidget.cpp \
     standardmidifile.cpp \
     importbankselectiondialog.cpp \
-    knobparametermodel.cpp
+    knobparametermodel.cpp \
+    effecteditwidgets/renardseriesspinbox.cpp
 
 HEADERS  += mainwindow.h \
     midiportmodel.h \
@@ -168,7 +169,8 @@ HEADERS  += mainwindow.h \
     standardmidifile.h \
     importbankselectiondialog.h \
     knobparametermodel.h \
-    knobparameters.h
+    knobparameters.h \
+    effecteditwidgets/renardseriesspinbox.h
 
 linux {
 

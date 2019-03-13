@@ -32,6 +32,7 @@
 #include <QChildEvent>
 #include "effecteditwidgets/expspinbox.h"
 #include "effecteditwidgets/reverbtimespinbox.h"
+#include "effecteditwidgets/renardseriesspinbox.h"
 
 ArrayDataEditWidget::ArrayDataEditWidget( QWidget *parent)
         : QWidget( parent), dataArray(nullptr)
@@ -266,6 +267,12 @@ void ArrayDataEditWidget::connectObjectToValueChangedSlot( QObject *object)
     if( revtimebox != nullptr)
     {
         connect(revtimebox, SIGNAL(rawValueChanged(int)), this, SLOT(valueChanged()));
+        return;
+    }
+    RenardSeriesSpinBox *rsbox = dynamic_cast<RenardSeriesSpinBox *>(object);
+    if( rsbox != nullptr)
+    {
+        connect(rsbox, SIGNAL(rawValueChanged(int)), this, SLOT(valueChanged()));
         return;
     }
 }

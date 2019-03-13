@@ -38,7 +38,7 @@ MBandDynaWidget::MBandDynaWidget( QWidget *parent) :
 
     QGridLayout *mainlyt = new QGridLayout();
 
-    mainlyt->addWidget(new QLabel(tr("Type")), 0, 0);
+    mainlyt->addWidget(new QLabel(tr("Slope")), 0, 0);
     QComboBox *slopeComboBox = new QComboBox();
     slopeComboBox->addItem(QStringLiteral("-6 dB"));
     slopeComboBox->addItem(QStringLiteral("-12 dB"));

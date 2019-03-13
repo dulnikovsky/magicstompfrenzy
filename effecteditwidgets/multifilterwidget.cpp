@@ -26,6 +26,7 @@
 
 #include <QLabel>
 #include <QSpinBox>
+#include "renardseriesspinbox.h"
 #include <QComboBox>
 
 MultiFilterWidget::MultiFilterWidget( QWidget *parent) :
@@ -58,13 +59,13 @@ MultiFilterWidget::MultiFilterWidget( QWidget *parent) :
     distComboBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
     filter1Layout->addWidget( distComboBox, 1, 0);
 
-    filter1Layout->addWidget(new QLabel(tr("Freq(?)")), 0, 1);
-    spinBox = new QSpinBox();
-    spinBox->setMinimum(0);
-    spinBox->setMaximum(0x6E);
-    spinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, Freq1);
-    spinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
-    filter1Layout->addWidget(spinBox, 1, 1);
+    filter1Layout->addWidget(new QLabel(tr("Freqency (Hz)")), 0, 1);
+    RenardSeriesSpinBox *rspinBox = new RenardSeriesSpinBox();
+    rspinBox->setRawOffsetValue( 58);
+    rspinBox->setParameters( 40, 0, 0x6E );
+    rspinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, Freq1);
+    rspinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    filter1Layout->addWidget(rspinBox, 1, 1);
 
     filter1Layout->addWidget(new QLabel(tr("Resonance")), 0, 2);
     spinBox = new QSpinBox();
@@ -99,13 +100,13 @@ MultiFilterWidget::MultiFilterWidget( QWidget *parent) :
     distComboBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
     filter2Layout->addWidget( distComboBox, 1, 0);
 
-    filter2Layout->addWidget(new QLabel(tr("Freq(?)")), 0, 1);
-    spinBox = new QSpinBox();
-    spinBox->setMinimum(0);
-    spinBox->setMaximum(0x6E);
-    spinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, Freq2);
-    spinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
-    filter2Layout->addWidget(spinBox, 1, 1);
+    filter2Layout->addWidget(new QLabel(tr("Freqency (Hz)")), 0, 1);
+    rspinBox = new RenardSeriesSpinBox();
+    rspinBox->setRawOffsetValue( 58);
+    rspinBox->setParameters( 40, 0, 0x6E );
+    rspinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, Freq2);
+    rspinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    filter2Layout->addWidget(rspinBox, 1, 1);
 
     filter2Layout->addWidget(new QLabel(tr("Resonance")), 0, 2);
     spinBox = new QSpinBox();
@@ -139,13 +140,13 @@ MultiFilterWidget::MultiFilterWidget( QWidget *parent) :
     distComboBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
     filter3Layout->addWidget( distComboBox, 1, 0);
 
-    filter3Layout->addWidget(new QLabel(tr("Freq(?)")), 0, 1);
-    spinBox = new QSpinBox();
-    spinBox->setMinimum(0);
-    spinBox->setMaximum(0x6E);
-    spinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, Freq3);
-    spinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
-    filter3Layout->addWidget(spinBox, 1, 1);
+    filter3Layout->addWidget(new QLabel(tr("Freqency (Hz)")), 0, 1);
+    rspinBox = new RenardSeriesSpinBox();
+    rspinBox->setRawOffsetValue( 58);
+    rspinBox->setParameters( 40, 0, 0x6E );
+    rspinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, Freq3);
+    rspinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    filter3Layout->addWidget(rspinBox, 1, 1);
 
     filter3Layout->addWidget(new QLabel(tr("Resonance")), 0, 2);
     spinBox = new QSpinBox();
