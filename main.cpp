@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
     a.setApplicationName("MagicstompFrenzy");
     a.setOrganizationName("RobertVetter");
     a.setOrganizationDomain("www.robertvetter.com");
-    a.setApplicationVersion("0.907");
+    a.setApplicationVersion("0.910");
     a.setWindowIcon(QIcon(":magicstomp.png"));
 
     MainWindow w( a.ReadablePortsModel(), a.WritablePortsModel());
