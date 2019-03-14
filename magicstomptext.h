@@ -152,26 +152,6 @@ const QStringList BassPreampTypeNameList =
     QStringLiteral("Fuzz")
 };
 
-const QStringList BassPreampCompressorRatioNameList =
-{
-    QStringLiteral("1.1"),
-    QStringLiteral("1.1.1"),
-    QStringLiteral("1.3.1"),
-    QStringLiteral("1.5.1"),
-    QStringLiteral("1.7.1"),
-    QStringLiteral("2.1"),
-    QStringLiteral("2.5.1"),
-    QStringLiteral("3.1"),
-    QStringLiteral("3.5.1"),
-    QStringLiteral("4.1"),
-    QStringLiteral("5.1"),
-    QStringLiteral("6.1"),
-    QStringLiteral("8.1"),
-    QStringLiteral("10.1"),
-    QStringLiteral("20.1"),
-    QStringLiteral("00.1")
-};
-
 const QStringList BassPreampSpeakerSimNameList =
 {
     QStringLiteral("Off"),

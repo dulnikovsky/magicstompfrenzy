@@ -26,6 +26,7 @@
 #include <QDoubleSpinBox>
 #include <QLabel>
 #include <QSpinBox>
+#include "compressorreleasecombobox.h"
 
 CompressorWidget::CompressorWidget(
         int thresholdOffset,
@@ -49,26 +50,61 @@ CompressorWidget::CompressorWidget(
     dspinBox->setMaximum(0.0);
     dspinBox->setSingleStep(0.1);
     dspinBox->setDecimals(1);
+    dspinBox->setSuffix(QStringLiteral(" dB"));
     dspinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, thresholdOffset);
     dspinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 2);
     dspinBox->setProperty( ArrayDataEditWidget::convertMethodProperty, QStringLiteral("scaleAndAdd(0.1, -54)"));
     mainlyt->addWidget(dspinBox, 1, 0);
 
-    mainlyt->addWidget(new QLabel(tr("Ratio(?)")), 2, 0);
-    spinBox = createStandardRawSpinBox(ratioOffset, 0, 0x0F);
-    mainlyt->addWidget(spinBox, 3, 0);
+    mainlyt->addWidget(new QLabel(tr("Ratio")), 2, 0);
+    QComboBox *ratioComboBox = new QComboBox();
+    ratioComboBox->addItem(QStringLiteral("1 : 1"));
+    ratioComboBox->addItem(QStringLiteral("1.1 : 1"));
+    ratioComboBox->addItem(QStringLiteral("1.3 : 1"));
+    ratioComboBox->addItem(QStringLiteral("1.5 : 1"));
+    ratioComboBox->addItem(QStringLiteral("1.7 : 1"));
+    ratioComboBox->addItem(QStringLiteral("2 : 1"));
+    ratioComboBox->addItem(QStringLiteral("2.5 : 1"));
+    ratioComboBox->addItem(QStringLiteral("3 : 1"));
+    ratioComboBox->addItem(QStringLiteral("3.5 : 1"));
+    ratioComboBox->addItem(QStringLiteral("4 : 1"));
+    ratioComboBox->addItem(QStringLiteral("5 : 1"));
+    ratioComboBox->addItem(QStringLiteral("6 : 1"));
+    ratioComboBox->addItem(QStringLiteral("8 : 1"));
+    ratioComboBox->addItem(QStringLiteral("10 : 1"));
+    ratioComboBox->addItem(QStringLiteral("20 : 1"));
+    ratioComboBox->addItem(QString::fromWCharArray(L"\x221e : 1"));
+    ratioComboBox->setCurrentIndex(-1);
+    ratioComboBox->setProperty( ArrayDataEditWidget::valuePropertyName, QStringLiteral("currentIndex"));
+    ratioComboBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, ratioOffset);
+    ratioComboBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    mainlyt->addWidget(ratioComboBox, 3, 0);
 
     mainlyt->addWidget(new QLabel(tr("Attack")), 0, 1);
     spinBox = createStandardRawSpinBox(attackOffset, 0, 120);
+    spinBox->setSuffix(QStringLiteral(" ms"));
     mainlyt->addWidget(spinBox, 1, 1);
 
-    mainlyt->addWidget(new QLabel(tr("Release(?)")), 2, 1);
-    spinBox = createStandardRawSpinBox(releaseOffset, 0, 0x7F);
-    mainlyt->addWidget(spinBox, 3, 1);
+    mainlyt->addWidget(new QLabel(tr("Release")), 2, 1);
+    QComboBox *releaseComboBox = new CompressorReleaseComboBox();
+    releaseComboBox->setProperty( ArrayDataEditWidget::valuePropertyName, QStringLiteral("currentIndex"));
+    releaseComboBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, releaseOffset);
+    releaseComboBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    mainlyt->addWidget(releaseComboBox, 3, 1);
 
-    mainlyt->addWidget(new QLabel(tr("Knee(?)")), 0, 3);
-    spinBox = createStandardRawSpinBox(kneeOffset, 0, 5);
-    mainlyt->addWidget(spinBox, 1, 3);
+    mainlyt->addWidget(new QLabel(tr("Knee")), 0, 3);
+    QComboBox *kneeComboBox = new QComboBox();
+    kneeComboBox->addItem(QStringLiteral("Hard"));
+    kneeComboBox->addItem(QStringLiteral("1"));
+    kneeComboBox->addItem(QStringLiteral("2"));
+    kneeComboBox->addItem(QStringLiteral("3"));
+    kneeComboBox->addItem(QStringLiteral("4"));
+    kneeComboBox->addItem(QStringLiteral("5"));
+    kneeComboBox->setCurrentIndex(-1);
+    kneeComboBox->setProperty( ArrayDataEditWidget::valuePropertyName, QStringLiteral("currentIndex"));
+    kneeComboBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, kneeOffset);
+    kneeComboBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    mainlyt->addWidget(kneeComboBox, 1, 3);
 
     mainlyt->addWidget(new QLabel(tr("Gain")), 2, 3);
     dspinBox = new QDoubleSpinBox();
@@ -76,6 +112,7 @@ CompressorWidget::CompressorWidget(
     dspinBox->setMaximum(18.0);
     dspinBox->setSingleStep(0.5);
     dspinBox->setDecimals(1);
+    dspinBox->setSuffix(QStringLiteral(" dB"));
     dspinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, gainOffset);
     dspinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
     dspinBox->setProperty( ArrayDataEditWidget::convertMethodProperty, QStringLiteral("scaleAndAdd(0.5, 0)"));

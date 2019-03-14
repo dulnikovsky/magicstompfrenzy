@@ -109,6 +109,9 @@ void PatchCommonEditorWidget::onPatchTypeChanged(int type)
     case AcousticMulti:
         knobparametermodel = new KnobParameterModel( AcousticMultiKnobParameters, 41, this);
         break;
+    case BassPreamp:
+        knobparametermodel = new KnobParameterModel( BassPreampKnobParameters, 41, this);
+        break;
     case EightBandParallelDelay:
     case EightBandSeriesDelay:
         knobparametermodel = new KnobParameterModel( EightBandParaDlyKnobParameters, 107, this);
@@ -262,8 +265,17 @@ void PatchCommonEditorWidget::onPatchTypeChanged(int type)
     case StereoVintagePhaser:
         knobparametermodel = new KnobParameterModel( MonoVintagePhaserKnobParameters, 24, this);
         break;
-    case BassPreamp:
-        knobparametermodel = new KnobParameterModel( BassPreampKnobParameters, 41, this);
+    case ThreeBandParametricEQ:
+        knobparametermodel = new KnobParameterModel( ThreeBandParametricEQKnobParameters, 30, this);
+        break;
+    case SpringReverb:
+        knobparametermodel = new KnobParameterModel( SpringReverbKnobParameters, 2, this);
+        break;
+    case TapeEcho:
+        knobparametermodel = new KnobParameterModel( TapeEchoKnobParameters, 21, this);
+        break;
+    case Compressor:
+        knobparametermodel = new KnobParameterModel( CompressorKnobParameters, 28, this);
         break;
     default:
         break;

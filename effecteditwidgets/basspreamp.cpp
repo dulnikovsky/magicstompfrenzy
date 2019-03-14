@@ -27,7 +27,7 @@
 #include <QGridLayout>
 #include <QDoubleSpinBox>
 #include <QSpinBox>
-#include <QComboBox>
+#include "compressorreleasecombobox.h"
 
 BassPreampWidget::BassPreampWidget( QWidget *parent) :
     EffectEditBaseWidget(parent)
@@ -171,7 +171,22 @@ BassPreampWidget::BassPreampWidget( QWidget *parent) :
 
     mainlyt->addWidget(new QLabel(tr("Comp. Ratio")), 8, 0);
     QComboBox *compRatioComboBox = new QComboBox();
-    compRatioComboBox->addItems( BassPreampCompressorRatioNameList);
+    compRatioComboBox->addItem(QStringLiteral("1 : 1"));
+    compRatioComboBox->addItem(QStringLiteral("1.1 : 1"));
+    compRatioComboBox->addItem(QStringLiteral("1.3 : 1"));
+    compRatioComboBox->addItem(QStringLiteral("1.5 : 1"));
+    compRatioComboBox->addItem(QStringLiteral("1.7 : 1"));
+    compRatioComboBox->addItem(QStringLiteral("2 : 1"));
+    compRatioComboBox->addItem(QStringLiteral("2.5 : 1"));
+    compRatioComboBox->addItem(QStringLiteral("3 : 1"));
+    compRatioComboBox->addItem(QStringLiteral("3.5 : 1"));
+    compRatioComboBox->addItem(QStringLiteral("4 : 1"));
+    compRatioComboBox->addItem(QStringLiteral("5 : 1"));
+    compRatioComboBox->addItem(QStringLiteral("6 : 1"));
+    compRatioComboBox->addItem(QStringLiteral("8 : 1"));
+    compRatioComboBox->addItem(QStringLiteral("10 : 1"));
+    compRatioComboBox->addItem(QStringLiteral("20 : 1"));
+    compRatioComboBox->addItem(QString::fromWCharArray(L"\x221e : 1"));
     compRatioComboBox->setCurrentIndex(-1);
     compRatioComboBox->setProperty( ArrayDataEditWidget::valuePropertyName, QStringLiteral("currentIndex"));
     compRatioComboBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, Ratio);
@@ -197,20 +212,12 @@ BassPreampWidget::BassPreampWidget( QWidget *parent) :
     spinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
     mainlyt->addWidget(spinBox, 9, 2);
 
-    mainlyt->addWidget(new QLabel(tr("Comp. Release(?)")), 8, 3);
-//    extSpinBox = new ExpSpinBox();
-//    extSpinBox->setParameters(6.0, 11500.0);
-//    extSpinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, Release);
-//    extSpinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
-
-      spinBox = new QSpinBox();
-      spinBox->setMinimum(0);
-      spinBox->setMaximum(0x7F);
-//    spinBox->setSuffix(QStringLiteral(" ms"));
-      spinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, Release);
-      spinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
-//    spinBox->setProperty( ArrayDataEditWidget::convertMethodProperty, QStringLiteral("scaleAndAdd(6.0, 6.0)"));
-    mainlyt->addWidget(spinBox, 9, 3);
+    mainlyt->addWidget(new QLabel(tr("Comp. Release")), 8, 3);
+    QComboBox *releaseComboBox = new CompressorReleaseComboBox();
+    releaseComboBox->setProperty( ArrayDataEditWidget::valuePropertyName, QStringLiteral("currentIndex"));
+    releaseComboBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, Release);
+    releaseComboBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    mainlyt->addWidget(releaseComboBox, 9, 3);
 
     mainlyt->addWidget(new QLabel(tr("Comp. Gain")), 8, 4);
     dspinBox = new QDoubleSpinBox();
@@ -225,13 +232,18 @@ BassPreampWidget::BassPreampWidget( QWidget *parent) :
     mainlyt->addWidget(dspinBox, 9, 4);
 
     mainlyt->addWidget(new QLabel(tr("Comp. Knee")), 8, 5);
-    spinBox = new QSpinBox();
-    spinBox->setMinimum(0);
-    spinBox->setMaximum(5);
-    spinBox->setSpecialValueText(QStringLiteral("Hard"));
-    spinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, Knee);
-    spinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
-    mainlyt->addWidget(spinBox, 9, 5);
+    QComboBox *kneeComboBox = new QComboBox();
+    kneeComboBox->addItem(QStringLiteral("Hard"));
+    kneeComboBox->addItem(QStringLiteral("1"));
+    kneeComboBox->addItem(QStringLiteral("2"));
+    kneeComboBox->addItem(QStringLiteral("3"));
+    kneeComboBox->addItem(QStringLiteral("4"));
+    kneeComboBox->addItem(QStringLiteral("5"));
+    kneeComboBox->setCurrentIndex(-1);
+    kneeComboBox->setProperty( ArrayDataEditWidget::valuePropertyName, QStringLiteral("currentIndex"));
+    kneeComboBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, Knee);
+    kneeComboBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    mainlyt->addWidget(kneeComboBox, 9, 5);
 
     setLayout(mainlyt);
 }

@@ -1490,7 +1490,7 @@ const QMap<int, QString> DelayReverbKnobParameters =
     {  30, QStringLiteral("Reverb Time") },
     {  31, QStringLiteral("Reverb High Ratio") },
     {  32, QStringLiteral("Diffusion") },
-    {  33, QStringLiteral("Density") },
+    {  33, QStringLiteral("Density") }
 };
 
 const QMap<int, QString> DistortionDelayKnobParameters =
@@ -1550,7 +1550,7 @@ const QMap<int, QString> MBandDynaKnobParameters =
     {   43, QStringLiteral("Expander Release") },
     {   53, QStringLiteral("Limiter Attack") },
     {   54, QStringLiteral("Limiter Release") },
-    {   55, QStringLiteral("Limiter Knee") },
+    {   55, QStringLiteral("Limiter Knee") }
 };
 
 const QMap<int, QString> VintageFlangeKnobParameters =
@@ -1561,7 +1561,7 @@ const QMap<int, QString> VintageFlangeKnobParameters =
     {   20, QStringLiteral("Manual") },
     {   21, QStringLiteral("Feedback") },
     {   22, QStringLiteral("Spread") },
-    {   23, QStringLiteral("Mix") },
+    {   23, QStringLiteral("Mix") }
 };
 
 const QMap<int, QString> MonoVintagePhaserKnobParameters =
@@ -1572,7 +1572,43 @@ const QMap<int, QString> MonoVintagePhaserKnobParameters =
     {   20, QStringLiteral("Depth") },
     {   21, QStringLiteral("Manual") },
     {   22, QStringLiteral("Feedback") },
-    {   23, QStringLiteral("Color") },
+    {   23, QStringLiteral("Color") }
+};
+
+const QMap<int, QString> ThreeBandParametricEQKnobParameters =
+{
+    {  0, QStringLiteral("Level") },
+    {  8, QStringLiteral("EQ 1 Frequency") },
+    {  9, QStringLiteral("EQ 2 Frequency") },
+    { 10, QStringLiteral("EQ 3 Frequency") },
+    { 21, QStringLiteral("EQ 1 Gain") },
+    { 22, QStringLiteral("EQ 2 Gain") },
+    { 23, QStringLiteral("EQ 3 Gain") },
+    { 27, QStringLiteral("EQ 1 Q") },
+    { 28, QStringLiteral("EQ 2 Q") },
+    { 29, QStringLiteral("EQ 3 Q") }
+};
+
+const QMap<int, QString> SpringReverbKnobParameters =
+{
+    {  0, QStringLiteral("Reverb") }
+};
+
+const QMap<int, QString> TapeEchoKnobParameters =
+{
+    {  0, QStringLiteral("Time") },
+    { 19, QStringLiteral("Feedback") },
+    { 20, QStringLiteral("Level") }
+};
+
+const QMap<int, QString> CompressorKnobParameters =
+{
+    {  0, QStringLiteral("Threshold") },
+    { 19, QStringLiteral("Ratio") },
+    { 20, QStringLiteral("Attack") },
+    { 21, QStringLiteral("Release") },
+    { 22, QStringLiteral("Knee") },
+    { 23, QStringLiteral("Gain") }
 };
 
 const QMap<int, QString> BassPreampKnobParameters =

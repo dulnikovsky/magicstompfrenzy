@@ -26,6 +26,7 @@
 #include <QLabel>
 #include <QSpinBox>
 #include "expspinbox.h"
+#include "noisegatedecaycombobox.h"
 
 NoiseGateWidget::NoiseGateWidget(int thresholdOffset,
                                  int attackOffset,
@@ -56,15 +57,12 @@ NoiseGateWidget::NoiseGateWidget(int thresholdOffset,
     holdspinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
     mainlyt->addWidget(holdspinBox, 1, 1);
 
-    mainlyt->addWidget(new QLabel(tr("Decay(?)")), 2, 1);
-    QSpinBox *decayspinBox = createStandardRawSpinBox(decayOffset, 0, 0x4F);
-    /*QSpinBox *decayspinBox = new QSpinBox();
-    decayspinBox->setSuffix(QStringLiteral(" ms"));
-    decayspinBox->setMinimum(6);
-    decayspinBox->setMaximum(44500);
-    decayspinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, decayOffset);
-    decayspinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);*/
-    mainlyt->addWidget(decayspinBox, 3, 1);
+    mainlyt->addWidget(new QLabel(tr("Decay")), 2, 1);
+    QComboBox *decayComboBox = new NoiseGateDecayComboBox();
+    decayComboBox->setProperty( ArrayDataEditWidget::valuePropertyName, QStringLiteral("currentIndex"));
+    decayComboBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, decayOffset);
+    decayComboBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    mainlyt->addWidget(decayComboBox, 3, 1);
 
     mainlyt->setRowStretch(4, 16);
 

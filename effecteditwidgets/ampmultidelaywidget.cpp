@@ -26,6 +26,8 @@
 #include <QDoubleSpinBox>
 #include <QLabel>
 #include <QSpinBox>
+#include "hpfspinbox.h"
+#include "lpfspinbox.h"
 
 AmpMultiDelayWidget::AmpMultiDelayWidget(QWidget *parent) :
     EffectEditBaseWidget(parent)
@@ -80,13 +82,17 @@ AmpMultiDelayWidget::AmpMultiDelayWidget(QWidget *parent) :
     dspinBox->setProperty( ArrayDataEditWidget::convertMethodProperty, QStringLiteral("scaleAndAdd(0.1, 0)"));
     mainlyt->addWidget(dspinBox, 3, 2);
 
-    mainlyt->addWidget(new QLabel(tr("HPF(?)")), 0, 4);
-    spinBox = createStandardRawSpinBox(AmpMultiWidget::DelayHPF, 0, 0x68);
-    mainlyt->addWidget(spinBox, 1, 4);
+    mainlyt->addWidget(new QLabel(tr("HPF")), 0, 4);
+    HpfSpinBox *hpfSpinBox = new HpfSpinBox();
+    hpfSpinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, AmpMultiWidget::DelayHPF);
+    hpfSpinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    mainlyt->addWidget(hpfSpinBox, 1, 4);
 
-    mainlyt->addWidget(new QLabel(tr("LPF(?)")), 2, 4);
-    spinBox = createStandardRawSpinBox( AmpMultiWidget::DelayLPF, 0, 0x65);
-    mainlyt->addWidget(spinBox, 3, 4);
+    mainlyt->addWidget(new QLabel(tr("LPF")), 2, 4);
+    LpfSpinBox *lpfSpinBox = new LpfSpinBox();
+    lpfSpinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, AmpMultiWidget::DelayLPF);
+    lpfSpinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
+    mainlyt->addWidget(lpfSpinBox, 3, 4);
 
     setLayout(mainlyt);
 }

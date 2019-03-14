@@ -94,7 +94,9 @@ SOURCES += main.cpp\
     standardmidifile.cpp \
     importbankselectiondialog.cpp \
     knobparametermodel.cpp \
-    effecteditwidgets/renardseriesspinbox.cpp
+    effecteditwidgets/renardseriesspinbox.cpp \
+    effecteditwidgets/compressorreleasecombobox.cpp \
+    effecteditwidgets/noisegatedecaycombobox.cpp
 
 HEADERS  += mainwindow.h \
     midiportmodel.h \
@@ -170,7 +172,9 @@ HEADERS  += mainwindow.h \
     importbankselectiondialog.h \
     knobparametermodel.h \
     knobparameters.h \
-    effecteditwidgets/renardseriesspinbox.h
+    effecteditwidgets/renardseriesspinbox.h \
+    effecteditwidgets/compressorreleasecombobox.h \
+    effecteditwidgets/noisegatedecaycombobox.h
 
 linux {
 
