@@ -47,8 +47,15 @@ public:
 
     inline MidiEventType midiType() const { return static_cast<MidiEventType> (dataUnion.status>>4); }
 
-    inline quint8 Status() const { return dataUnion.status & 0xF0; }
+    inline quint8 Status() const { return dataUnion.status >> 4; }
     inline quint8 Channel() const { return dataUnion.status & 0x0F; }
+
+    inline quint8 Data1() const { return dataUnion.data1; }
+    inline quint8 Data2() const { return dataUnion.data2; }
+
+    inline void setStatusByte( quint8 status) { dataUnion.status = status; }
+    inline void setData1( quint8 data) { dataUnion.data1 = data; }
+    inline void setData2( quint8 data) { dataUnion.data2 = data; }
 
     inline quint32 Port() const { return port; }
     inline void setPort(quint32 val) { port=val; }

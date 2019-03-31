@@ -27,6 +27,7 @@
 #include <QListView>
 #include <QLabel>
 #include <QCheckBox>
+#include <QSpinBox>
 #include <QSettings>
 
 #include "midiportmodel.h"
@@ -91,8 +92,29 @@ PreferencesDialog::PreferencesDialog(MidiPortModel *portsInModel, MidiPortModel 
             settings.setValue(QStringLiteral("RestoreMidiConnectionsAtStartUp"), checked);
         }
     );
-
     mainLayout->addWidget(restoreConnectionsCheckBox);
+
+    QSpinBox *channelSpinBox = new QSpinBox();
+    channelSpinBox->setMinimum(0);
+    channelSpinBox->setMaximum(16);
+    channelSpinBox->setSpecialValueText(QStringLiteral("OMNI"));
+    channelSpinBox->setValue(settings.value(QStringLiteral("MIDIChannel"), 1).toInt());
+    connect( channelSpinBox, SIGNAL(valueChanged(int)), this, SIGNAL(midiChannelChanged(int)));
+    connect(
+        channelSpinBox, qOverload<int>(&QSpinBox::valueChanged),
+        [=]( int val) {
+            QSettings settings;
+            settings.setValue(QStringLiteral("MIDIChannel"), val);
+        }
+    );
+
+    QHBoxLayout *hchannellyt = new QHBoxLayout();
+    hchannellyt->addWidget( new QLabel("MIDI Channel:"));
+    hchannellyt->addWidget(channelSpinBox);
+    hchannellyt->addStretch(8);
+
+    mainLayout->addLayout(hchannellyt);
+
     mainLayout->addWidget(buttonBox);
 
     setLayout(mainLayout);

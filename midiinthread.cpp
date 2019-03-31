@@ -41,7 +41,7 @@ void MidiInThread::run()
 {
 #ifdef Q_OS_LINUX
     snd_seq_event_t *ev;
-    MidiEvent *midisysexevent = nullptr;
+    MidiEvent *midievent = nullptr;
     // IMPORTANT snd_seq_event_input blocks even after snd_seq_close has been execuded.
     // It will be  neccessary for this application to send an SND_SEQ_EVENT_CLIENT_EXIT to himself before terminating
     while (snd_seq_event_input(handle, &ev) >= 0)
@@ -49,25 +49,33 @@ void MidiInThread::run()
         if(ev->type==SND_SEQ_EVENT_SYSEX)
         {
             QByteArray arr((char *)ev->data.ext.ptr, ev->data.ext.len);
-            if( midisysexevent != nullptr)
+            if( midievent != nullptr)
             {
-                QByteArray *data = midisysexevent->sysExData();
+                QByteArray *data = midievent->sysExData();
                 data->append(arr);
             }
             else
             {
-                midisysexevent = new MidiEvent(static_cast<QEvent::Type>(UserEventTypes::MidiSysEx));
+                midievent = new MidiEvent(static_cast<QEvent::Type>(UserEventTypes::MidiSysEx));
                 quint32 port = ev->source.port;
                 port |= static_cast<quint32>(ev->source.client) << 8;
-                midisysexevent->setPort(port);
-                QByteArray *data = midisysexevent->sysExData();
+                midievent->setPort(port);
+                QByteArray *data = midievent->sysExData();
                 *data=arr;
             }
             if(static_cast<unsigned char>(arr.at(arr.size()-1)) == 0xF7)
             {
-                QApplication::postEvent(parent(), midisysexevent);
-                midisysexevent=nullptr;
+                QApplication::postEvent(parent(), midievent);
+                midievent=nullptr;
             }
+        }
+        else if(ev->type==SND_SEQ_EVENT_PGMCHANGE)
+        {
+            midievent = new MidiEvent(static_cast<QEvent::Type>(UserEventTypes::MidiCommon));
+            midievent->setStatusByte( (static_cast< unsigned char>(MidiEvent::MidiEventType::ProgramChange) << 4) | ( ev->data.raw8.d[0] & 0x0F ) );
+            midievent->setData1( ev->data.raw8.d[8] );
+            midievent->setData2(0);
+            QApplication::postEvent(parent(), midievent);
         }
         else if(ev->type==SND_SEQ_EVENT_PORT_SUBSCRIBED)
         {

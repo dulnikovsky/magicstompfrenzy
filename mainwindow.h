@@ -83,6 +83,8 @@ private slots:
     void saveSettings();
     void restoreSettings();
 
+    void setMIDIChannel(int val) { midiChannel = val; }
+
     void onImportSMF();
     void exportSMF();
 
@@ -127,6 +129,8 @@ private:
     QAction *exportSMFAction;
 
     QLabel *patchNameLabel;
+
+    int midiChannel{-1};
 
     int currentPatchTransmitted;
     QPair<PatchListType, int> currentPatchEdited;

@@ -38,6 +38,7 @@ public:
 signals:
     void midiInPortStatusChanged( MidiClientPortId portId, bool isSelected);
     void midiOutPortStatusChanged( MidiClientPortId portId, bool isSelected);
+    void midiChannelChanged( int channel);
 
 private slots:
     void midiInselectionChanged(const QItemSelection &selected, const QItemSelection &deselected);

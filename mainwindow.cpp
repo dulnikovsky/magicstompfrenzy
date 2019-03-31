@@ -293,7 +293,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::midiEvent(MidiEvent *ev)
 {
-    if( ev->type()==static_cast<QEvent::Type>(UserEventTypes::MidiSysEx))
+    if( ev->type() == static_cast<QEvent::Type>(UserEventTypes::MidiSysEx))
     {
         const QByteArray *inData = ev->sysExData();
         if( inData->size() < 13)
@@ -377,6 +377,19 @@ void MainWindow::midiEvent(MidiEvent *ev)
                         tmpPatchListModel->patchUpdated(currentPatchTransmitted);
                     }
                 }
+            }
+        }
+    }
+    else if( ev->type() == static_cast<QEvent::Type>(UserEventTypes::MidiCommon))
+    {
+        if(ev->Status() == MidiEvent::MidiEventType::ProgramChange)
+        {
+            if(midiChannel == 0 || (midiChannel == ev->Channel()+1) )
+            {
+                QModelIndex index = patchListModelList.at(0)->index( ev->Data1(), 0, QModelIndex());
+                patchListDoubleClicked( index );
+                patchTabWidget->setCurrentIndex( 0);
+                patchListView->selectRow(ev->Data1());
             }
         }
     }
@@ -941,6 +954,7 @@ void MainWindow::showPreferences()
     PreferencesDialog prefDialog(readablePortsModel, writablePortsModel, this);
     connect( &prefDialog, SIGNAL(midiInPortStatusChanged( MidiClientPortId, bool)), thisMidiApp, SLOT(changeReadableMidiPortStatus(MidiClientPortId,bool)) );
     connect( &prefDialog, SIGNAL(midiOutPortStatusChanged( MidiClientPortId, bool)), thisMidiApp, SLOT(changeWritebleMidiPortStatus(MidiClientPortId,bool)) );
+    connect( &prefDialog, SIGNAL(midiChannelChanged(int)), this, SLOT(setMIDIChannel(int)));
     prefDialog.exec();
 
     prefDialog.disconnect(thisMidiApp);
@@ -969,6 +983,8 @@ void MainWindow::restoreSettings()
     palette.setColor(QPalette::Window, Qt::gray);
     palette.setColor(QPalette::Base, Qt::lightGray);
     setPalette(palette);*/
+
+    setMIDIChannel(settings.value("MIDIChannel", 1).toInt());
 
     if(!settings.contains(QStringLiteral("RestoreMidiConnectionsAtStartUp")))
     {
