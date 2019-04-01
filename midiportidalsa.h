@@ -47,7 +47,6 @@ public:
 private:
     int client;
     int port;
-    QString name;
 };
 
 typedef MidiPortIdAlsa MidiClientPortId;

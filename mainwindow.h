@@ -49,14 +49,17 @@ class MainWindow : public QMainWindow
 public:
     MainWindow( MidiPortModel *readableportsmodel, MidiPortModel *writableportsmodel, QWidget *parent = Q_NULLPTR);
 
+    enum PatchListType { User, GuitarPreset, BassPreset, AcousticPreset, SMFImport, NumPatchListTypes};
 public slots:
     void midiEvent(MidiEvent *event);
 
+    bool importSMF(const QString &fileName, PatchListType type);
+
+    void hideEditor();
+    void restoreSettings();
+
 protected:
     void closeEvent(QCloseEvent *event) override;
-
-private:
-    enum PatchListType { User, GuitarPreset, BassPreset, AcousticPreset, SMFImport, NumPatchListTypes};
 
 private slots:
     void requestAll();
@@ -81,7 +84,6 @@ private slots:
     void showPreferences();
 
     void saveSettings();
-    void restoreSettings();
 
     void setMIDIChannel(int val) { midiChannel = val; }
 
@@ -90,7 +92,6 @@ private slots:
 
 private:
     bool hasValidUserPatches() const;
-    bool importSMF(const QString &fileName, PatchListType type);
 
     void loadPresetPatches(int index, const QString &filename);
     PatchListType getCurrentPatchType() const;
@@ -130,7 +131,7 @@ private:
 
     QLabel *patchNameLabel;
 
-    int midiChannel{-1};
+    int midiChannel{0};
 
     int currentPatchTransmitted;
     QPair<PatchListType, int> currentPatchEdited;

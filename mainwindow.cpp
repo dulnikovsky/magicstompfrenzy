@@ -140,7 +140,7 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     //helpMenu->addAction(aboutQtAct);
 
     patchNameLabel = new QLabel();
-    patchNameLabel->setStyleSheet("font: 24pt;");
+    patchNameLabel->setStyleSheet("font: 40pt;");
 
     QGroupBox *patchListGroupbox = new QGroupBox( tr("Patch List"));
 
@@ -253,7 +253,6 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     bassPatchListView->resizeColumnsToContents();
     acousticPatchListView->resizeColumnsToContents();
     setMinimumHeight(256);
-    restoreSettings();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -1139,4 +1138,9 @@ char MainWindow::calcChecksum(const char *data, int dataLength)
         checkSum += *data++;
     }
     return ((-checkSum) & 0x7f);
+}
+
+void MainWindow::hideEditor()
+{
+    centralWidget()->hide();
 }

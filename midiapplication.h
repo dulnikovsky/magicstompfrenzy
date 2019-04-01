@@ -79,8 +79,6 @@ public slots:
 
     bool sendMidiEvent(MidiEvent *ev);
 
-
-
 private slots:
 
     void onPortConnectionStatusChanged(MidiClientPortId srcId, MidiClientPortId destId, bool isConnected);
