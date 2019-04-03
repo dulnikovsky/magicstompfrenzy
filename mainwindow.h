@@ -39,6 +39,7 @@ class QListView;
 class MidiEvent;
 
 class QItemSelection;
+class QDoubleSpinBox;
 
 class QLabel;
 
@@ -90,6 +91,8 @@ private slots:
     void onImportSMF();
     void exportSMF();
 
+    void onPatchTypeEditorChanged( int typeId);
+
 private:
     bool hasValidUserPatches() const;
 
@@ -135,6 +138,15 @@ private:
 
     int currentPatchTransmitted;
     QPair<PatchListType, int> currentPatchEdited;
+
+    struct widgetWithVal
+    {
+        QDoubleSpinBox *dspinBox;
+        double storedValue;
+    };
+
+    QMap<int, widgetWithVal> ccToWidgetMap;
+    QMap<QString, int> nameToCCMap;
 
     bool cancelOperation;
     bool isInTransmissionState;

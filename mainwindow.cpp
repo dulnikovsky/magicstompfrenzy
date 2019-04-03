@@ -112,7 +112,6 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     connect(timeOutTimer, SIGNAL(timeout()), this, SLOT(timeout()));
 
     midiOutTimer = new QTimer(this);
-    midiOutTimer->setInterval(70);
     connect(midiOutTimer, SIGNAL(timeout()), this, SLOT(midiOutTimeOut()));
 
     showPreferencesAction = new QAction(tr("&Preferences"), this);
@@ -236,6 +235,7 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     PatchEditorWidget *editor = new PatchEditorWidget();
     connect(editor, SIGNAL(parameterAboutToBeChanged(int,int)), this, SLOT(parameterToBeChanged(int,int)));
     connect(editor, SIGNAL(parameterChanged(int,int)), this, SLOT(parameterChanged(int,int)));
+    connect(editor, SIGNAL(patchTypeEditorChanged(int)), this, SLOT(onPatchTypeEditorChanged(int)));
     setCentralWidget(editor);
 
 #if defined(QT_DEBUG) && defined(Q_OS_LINUX)
@@ -379,7 +379,7 @@ void MainWindow::midiEvent(MidiEvent *ev)
             }
         }
     }
-    else if( ev->type() == static_cast<QEvent::Type>(UserEventTypes::MidiCommon))
+    else if( ev->type() == static_cast<QEvent::Type>(UserEventTypes::MidiCommon) && !isInTransmissionState && !isInImportState)
     {
         if(ev->Status() == MidiEvent::MidiEventType::ProgramChange)
         {
@@ -389,6 +389,18 @@ void MainWindow::midiEvent(MidiEvent *ev)
                 patchListDoubleClicked( index );
                 patchTabWidget->setCurrentIndex( 0);
                 patchListView->selectRow(ev->Data1());
+            }
+        }
+        else if(ev->Status() == MidiEvent::MidiEventType::ControlChange)
+        {
+            if(midiChannel == 0 || (midiChannel == ev->Channel()+1) )
+            {
+                qDebug("CC %d %d", ev->Data1(), ev->Data2());
+                QMap<int, widgetWithVal>::const_iterator iter =ccToWidgetMap.find(ev->Data1());
+                if( iter != ccToWidgetMap.constEnd())
+                {
+                    iter.value().dspinBox->setValue( (static_cast<double>(ev->Data2())/127) * iter.value().storedValue);
+                }
             }
         }
     }
@@ -483,7 +495,10 @@ void MainWindow::sendAll(bool startMidiOutTimer)
     reqArr->append(static_cast<char>(0xF7));
     midiOutQueue.enqueue( midiev);
     if(startMidiOutTimer)
+    {
+        midiOutTimer->setInterval(70);
         midiOutTimer->start();
+    }
 }
 
 void MainWindow::sendPatch( int patchIdx, bool sendToTmpArea, PatchListType type, bool startMidiOutTimer )
@@ -515,7 +530,7 @@ void MainWindow::sendPatch( int patchIdx, bool sendToTmpArea, PatchListType type
     reqArr->append(calcChecksum( reqArr->constBegin()+ sysExBulkHeaderLength, reqArr->length()-sysExBulkHeaderLength));
     reqArr->append(static_cast<char>(0xF7));
     midiOutQueue.enqueue( midiev);
-#if QT_VERSION >= 0x059000
+#if QT_VERSION >= 0x050900
     qDebug() << "send Patch Common :" << reqArr->toHex(',');
 #endif
     midiev = new MidiEvent(static_cast<QEvent::Type>(UserEventTypes::MidiSysEx));
@@ -530,7 +545,7 @@ void MainWindow::sendPatch( int patchIdx, bool sendToTmpArea, PatchListType type
     reqArr->append(calcChecksum( reqArr->constBegin()+ sysExBulkHeaderLength, reqArr->length()-sysExBulkHeaderLength));
     reqArr->append(static_cast<char>(0xF7));
     midiOutQueue.enqueue( midiev);
-#if QT_VERSION >= 0x059000
+#if QT_VERSION >= 0x050900
     qDebug() << "send Patch Effect :" << reqArr->toHex(',');
 #endif
     midiev = new MidiEvent(static_cast<QEvent::Type>(UserEventTypes::MidiSysEx));
@@ -548,7 +563,10 @@ void MainWindow::sendPatch( int patchIdx, bool sendToTmpArea, PatchListType type
     reqArr->append(static_cast<char>(0xF7));
     midiOutQueue.enqueue( midiev);
     if(startMidiOutTimer)
+    {
+        midiOutTimer->setInterval(70);
         midiOutTimer->start();
+    }
 }
 
 void MainWindow::timeout()
@@ -629,7 +647,7 @@ void MainWindow::parameterChanged(int offset, int length)
 
     MidiEvent *midiev = new MidiEvent(static_cast<QEvent::Type>(UserEventTypes::MidiSysEx));
     QByteArray *reqArr = midiev->sysExData();
-    reqArr->append(QByteArray(reinterpret_cast<const char*>(&sysExParameterSendHeader[0]), parameterSendHeaderLength));
+    reqArr->append(QByteArray::fromRawData(reinterpret_cast<const char*>(&sysExParameterSendHeader[0]), parameterSendHeaderLength));
     reqArr->append(0x20);
     if(offset < PatchCommonLength)
     {
@@ -641,16 +659,39 @@ void MainWindow::parameterChanged(int offset, int length)
         reqArr->append(0x01);
         reqArr->append(static_cast<char>(offset - PatchCommonLength));
     }
-
     for(int i= 0; i< length; i++)
     {
         reqArr->append( *(editWidget->DataArray()->constData()+offset+i));
     }
     reqArr->append(static_cast<char>(0xF7));
-#if QT_VERSION >= 0x059000
+
+    //Check for multiple events for same parameter in the midi out queue.
+    //This can happen during fast changing a parameter by Control Change messages
+    QQueue<MidiEvent *>::iterator it = midiOutQueue.begin();
+    while (it != midiOutQueue.end())
+    {
+        QByteArray *sysexData = (*it)->sysExData();
+        if( sysexData->startsWith(reqArr->left(parameterSendHeaderLength +3)))
+        {
+            MidiEvent *eventToRemove = *it;
+            it = midiOutQueue.erase( it);
+            delete eventToRemove;
+            qDebug ("Removed item");
+        }
+        else
+        {
+            it++;
+        }
+    }
+#if QT_VERSION >= 0x050900
     qDebug() << reqArr->toHex(',');
 #endif
-    static_cast<MidiApplication *>(qApp)->sendMidiEvent(midiev);
+    midiOutQueue.enqueue( midiev);
+    if(! midiOutTimer->isActive())
+    {
+        midiOutTimer->setInterval(10);
+        midiOutTimer->start();
+    }
 
     if( offset == PatchName) // Name needs to be sent as single chars
     {
@@ -756,7 +797,7 @@ void MainWindow::patchListDoubleClicked(const QModelIndex &idx)
         return;
 
     sendPatch(idx.row(), true, type);
-    midiOutTimer->start();
+    //midiOutTimer->start();
     ArrayDataEditWidget *widget = static_cast<ArrayDataEditWidget *>(centralWidget());
     widget->setDataArray(& newPatchDataList[type][idx.row()]);
     currentPatchEdited = QPair<PatchListType, int>(type, idx.row());
@@ -1115,6 +1156,34 @@ void MainWindow::exportSMF()
 
     smf.close();
     putGuiToTransmissionState(false, false);
+}
+
+void MainWindow::onPatchTypeEditorChanged( int typeId)
+{
+    Q_UNUSED(typeId)
+    ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>(centralWidget());
+    if(editWidget == nullptr)
+        return;
+
+    ccToWidgetMap.clear();
+
+    nameToCCMap.insert("Master", 7);
+    nameToCCMap.insert("Gain", 80);
+
+    QMap<QString, int>::const_iterator iter = nameToCCMap.constBegin();
+    while (iter != nameToCCMap.constEnd())
+    {
+        QDoubleSpinBox *spinBox = editWidget->findChild<QDoubleSpinBox *>("Master");
+        spinBox = editWidget->findChild< QDoubleSpinBox *>( iter.key() );
+        if( spinBox != nullptr)
+        {
+            widgetWithVal wwv;
+            wwv.dspinBox = spinBox;
+            wwv.storedValue = spinBox->value();
+            ccToWidgetMap.insert( iter.value(), wwv );
+        }
+        ++iter;
+    }
 }
 
 bool MainWindow::hasValidUserPatches() const

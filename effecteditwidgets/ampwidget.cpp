@@ -56,10 +56,12 @@ AmpWidget::AmpWidget(QWidget *parent) :
 
     mainlyt->addWidget(new QLabel(tr("Gain")), 0, 1);
     dspinBox = createStandard10DblSpinBox( AmpMultiWidget::Gain);
+    dspinBox->setObjectName( QStringLiteral("Gain"));
     mainlyt->addWidget(dspinBox, 1, 1);
 
     mainlyt->addWidget(new QLabel(tr("Master")), 0, 2);
     dspinBox = createStandard10DblSpinBox( AmpMultiWidget::Master);
+    dspinBox->setObjectName( QStringLiteral("Master"));
     mainlyt->addWidget(dspinBox, 1, 2);
 
     mainlyt->addWidget(new QLabel(tr("Tone")), 0, 3);

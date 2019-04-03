@@ -48,7 +48,7 @@ void MidiInThread::run()
     {
         if(ev->type==SND_SEQ_EVENT_SYSEX)
         {
-            QByteArray arr((char *)ev->data.ext.ptr, ev->data.ext.len);
+            QByteArray arr(static_cast<char *>(ev->data.ext.ptr), static_cast<int>(ev->data.ext.len));
             if( midievent != nullptr)
             {
                 QByteArray *data = midievent->sysExData();
@@ -75,6 +75,14 @@ void MidiInThread::run()
             midievent->setStatusByte( (static_cast< unsigned char>(MidiEvent::MidiEventType::ProgramChange) << 4) | ( ev->data.raw8.d[0] & 0x0F ) );
             midievent->setData1( ev->data.raw8.d[8] );
             midievent->setData2(0);
+            QApplication::postEvent(parent(), midievent);
+        }
+        else if(ev->type==SND_SEQ_EVENT_CONTROLLER)
+        {
+            midievent = new MidiEvent(static_cast<QEvent::Type>(UserEventTypes::MidiCommon));
+            midievent->setStatusByte( (static_cast< unsigned char>(MidiEvent::MidiEventType::ControlChange) << 4) | ( ev->data.raw8.d[0] & 0x0F ) );
+            midievent->setData1( ev->data.raw8.d[4]);
+            midievent->setData2( ev->data.raw8.d[8]);
             QApplication::postEvent(parent(), midievent);
         }
         else if(ev->type==SND_SEQ_EVENT_PORT_SUBSCRIBED)

@@ -34,8 +34,10 @@ class PatchEditorWidget : public ArrayDataEditWidget
     Q_OBJECT
 public:
     explicit PatchEditorWidget(QWidget *parent = nullptr);
-
     void setDataArray(QByteArray *arr) override;
+
+signals:
+    void patchTypeEditorChanged(int typeId);
 
 private:
     QVBoxLayout *mainLayout;

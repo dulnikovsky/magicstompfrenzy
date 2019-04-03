@@ -39,6 +39,10 @@ int main(int argc, char *argv[])
 
     QObject::connect( &a, SIGNAL(midiEventReceived(MidiEvent *)), &mw, SLOT(midiEvent(MidiEvent*)));
 
+    /* Example command line for auto start:
+     * --ignorepreferences --hideeditor --mwx 0 --mwy 0 --mwh 400 --mww 600 --smf /home/robert/MagicstompHoldsworthSounds.mid --findandconnectms 0 --connectmidiinport MS1x1
+     */
+
     QCommandLineParser parser;
     parser.addHelpOption();
     parser.addVersionOption();

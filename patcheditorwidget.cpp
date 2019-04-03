@@ -294,4 +294,5 @@ void PatchEditorWidget::setDataArray(QByteArray *arr)
     mainLayout->addWidget( copyrightLabel, 128);
     patchCommonEditorWidget->onPatchTypeChanged( patchType);
     refreshData(0, PatchTotalLength);
+    emit patchTypeEditorChanged(patchType);
 }
