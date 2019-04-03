@@ -104,9 +104,24 @@ void MidiApplication::MIDIEngineReadProc(const MIDIPacketList *pktlist, void *ar
             else if(midiEvent == nullptr)
             {
                 //handle other MIDI messages here
-                 //midiEvent = new MidiEvent(static_cast<QEvent::Type>(MidiEvent::Common));
-                 //QApplication::postEvent( static_cast< QObject *>(arg), midiEvent);
-                 midiEvent = nullptr;
+                if( (packet->data[0] & 0xC0) == 0xC0 )
+                {
+                    midiEvent = new MidiEvent(static_cast<QEvent::Type>(UserEventTypes::MidiCommon));
+                    midiEvent->setStatusByte( (static_cast< unsigned char>(MidiEvent::MidiEventType::ProgramChange) << 4) | ( packet->data[0] & 0x0F ) );
+                    midiEvent->setData1( packet->data[1]);
+                    midiEvent->setData2(0);
+                    QApplication::postEvent( static_cast< QObject *>(arg), midiEvent);
+                }
+                else if( (packet->data[0] & 0xB0) == 0xB0 )
+                {
+                    midiEvent = new MidiEvent(static_cast<QEvent::Type>(UserEventTypes::MidiCommon));
+                    midiEvent->setStatusByte( (static_cast< unsigned char>(MidiEvent::MidiEventType::ControlChange) << 4) | ( packet->data[0] & 0x0F ) );
+                    midiEvent->setData1( packet->data[1]);
+                    midiEvent->setData2( packet->data[2]);
+                    QApplication::postEvent( static_cast< QObject *>(arg), midiEvent);
+                }
+                midiEvent = nullptr;
+                break;
             }
             else
             {
@@ -327,6 +342,7 @@ bool MidiApplication::sendMidiEvent(MidiEvent *ev)
             MIDIFlushOutput( *iter);
             ++iter;
         }
+        delete ev;
     }
 #endif
 #ifdef Q_OS_WIN
@@ -352,6 +368,7 @@ bool MidiApplication::sendMidiEvent(MidiEvent *ev)
             }
             ++iter;
         }
+        delete ev;
     }
 #endif
     return true;

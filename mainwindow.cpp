@@ -385,10 +385,13 @@ void MainWindow::midiEvent(MidiEvent *ev)
         {
             if(midiChannel == 0 || (midiChannel == ev->Channel()+1) )
             {
-                QModelIndex index = patchListModelList.at(0)->index( ev->Data1(), 0, QModelIndex());
-                patchListDoubleClicked( index );
-                patchTabWidget->setCurrentIndex( 0);
-                patchListView->selectRow(ev->Data1());
+                if(ev->Data1() < 100)
+                {
+                    QModelIndex index = patchListModelList.at(0)->index( ev->Data1(), 0, QModelIndex());
+                    patchListDoubleClicked( index );
+                    patchTabWidget->setCurrentIndex( 0);
+                    patchListView->selectRow(ev->Data1());
+                }
             }
         }
         else if(ev->Status() == MidiEvent::MidiEventType::ControlChange)
