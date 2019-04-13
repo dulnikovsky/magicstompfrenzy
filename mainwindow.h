@@ -68,8 +68,8 @@ private slots:
     void requestPatch(int patchIndex);
     void sendPatch(int patchIndex, bool sendToTmpArea = true, PatchListType type=User,  bool startMidiOutTimer = true);
 
-    void parameterToBeChanged(int offset, int length);
-    void parameterChanged(int offset, int length);
+    void parameterToBeChanged(int offset, int length, QWidget *editWidget);
+    void parameterChanged(int offset, int length, QWidget *editWidget);
 
     void timeout();
     void midiOutTimeOut();
@@ -92,12 +92,15 @@ private slots:
     void exportSMF();
 
     void onPatchTypeEditorChanged( int typeId);
+    void onParamToCCChaged( const QString &name, int newVal, int oldVal);
 
 private:
     bool hasValidUserPatches() const;
 
     void loadPresetPatches(int index, const QString &filename);
     PatchListType getCurrentPatchType() const;
+
+    void buildCCToWidgetMap();
 
     MidiPortModel *readablePortsModel;
     MidiPortModel *writablePortsModel;
@@ -139,14 +142,26 @@ private:
     int currentPatchTransmitted;
     QPair<PatchListType, int> currentPatchEdited;
 
+    enum CCMode { Continious, SwitchLatch };
+    enum CCInitMode { Miniumum, PatchValue };
+
     struct widgetWithVal
     {
         QDoubleSpinBox *dspinBox;
         double storedValue;
+        CCMode ccMode;
+        CCInitMode ccInitMode;
     };
 
     QMap<int, widgetWithVal> ccToWidgetMap;
+
     QMap<QString, int> nameToCCMap;
+    // value (int) bytes usage:
+    // Lowest byte - CC Number
+    // Lowe nibble of second lowest byte - CC Mode
+    // High nibble of second lowest byte - CC Init Mode
+
+    QByteArray tmpArray; // used to store parameter data needed to be restored after programatical ( CC ) change of data
 
     bool cancelOperation;
     bool isInTransmissionState;

@@ -233,8 +233,8 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     resizeDocks({dockWidget}, {600}, Qt::Horizontal); // workaroud for dock widget resize bug
 
     PatchEditorWidget *editor = new PatchEditorWidget();
-    connect(editor, SIGNAL(parameterAboutToBeChanged(int,int)), this, SLOT(parameterToBeChanged(int,int)));
-    connect(editor, SIGNAL(parameterChanged(int,int)), this, SLOT(parameterChanged(int,int)));
+    connect(editor, SIGNAL(parameterAboutToBeChanged(int,int,QWidget *)), this, SLOT(parameterToBeChanged(int,int,QWidget *)));
+    connect(editor, SIGNAL(parameterChanged(int,int,QWidget *)), this, SLOT(parameterChanged(int,int,QWidget *)));
     connect(editor, SIGNAL(patchTypeEditorChanged(int)), this, SLOT(onPatchTypeEditorChanged(int)));
     setCentralWidget(editor);
 
@@ -253,6 +253,10 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     bassPatchListView->resizeColumnsToContents();
     acousticPatchListView->resizeColumnsToContents();
     setMinimumHeight(256);
+
+    nameToCCMap.insert("Master", 7 | (1 << 12));
+    nameToCCMap.insert("Gain", 16 | (1 << 12));
+    nameToCCMap.insert("EffectLevel", 80 | (1 << 8) | (1 << 12));
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -399,10 +403,23 @@ void MainWindow::midiEvent(MidiEvent *ev)
             if(midiChannel == 0 || (midiChannel == ev->Channel()+1) )
             {
                 qDebug("CC %d %d", ev->Data1(), ev->Data2());
-                QMap<int, widgetWithVal>::const_iterator iter =ccToWidgetMap.find(ev->Data1());
+                QMap<int, widgetWithVal>::const_iterator iter = ccToWidgetMap.find(ev->Data1());
                 if( iter != ccToWidgetMap.constEnd())
                 {
-                    iter.value().dspinBox->setValue( (static_cast<double>(ev->Data2())/127) * iter.value().storedValue);
+                    if(iter.value().ccMode == SwitchLatch)
+                    {
+                        if(ev->Data2() != 0)
+                        {
+                            if( qFuzzyCompare(iter.value().dspinBox->minimum(), iter.value().dspinBox->value()) )
+                                iter.value().dspinBox->setValue( iter.value().storedValue);
+                            else
+                                iter.value().dspinBox->setValue( iter.value().dspinBox->minimum());
+                        }
+                    }
+                    else
+                    {
+                        iter.value().dspinBox->setValue( (static_cast<double>(ev->Data2())/127) * iter.value().storedValue);
+                    }
                 }
             }
         }
@@ -614,10 +631,10 @@ void MainWindow::midiOutTimeOut()
         progressWidget->setValue( 100 - (midiOutQueue.size() / 4));
 }
 
-void MainWindow::parameterToBeChanged(int offset, int length)
+void MainWindow::parameterToBeChanged(int offset, int length, QWidget *editWidget)
 {
-    Q_UNUSED(offset)
-    Q_UNUSED(length)
+    if( ! editWidget->hasFocus())
+        tmpArray = newPatchDataList[currentPatchEdited.first][currentPatchEdited.second].mid( offset, length);
 
     if(! backupPatchesMapList.at(currentPatchEdited.first).contains(currentPatchEdited.second))
     {
@@ -632,7 +649,7 @@ void MainWindow::parameterToBeChanged(int offset, int length)
     patchListSelectionChanged();
 }
 
-void MainWindow::parameterChanged(int offset, int length)
+void MainWindow::parameterChanged(int offset, int length, QWidget *paramEditWidget)
 {
     qDebug("parameterChanged(offset=%d,len=%d)", offset, length);
 
@@ -700,8 +717,25 @@ void MainWindow::parameterChanged(int offset, int length)
     {
         for(int i= PatchName + 1; i < PatchNameLast; i++)
         {
-            parameterChanged( i, 1);
+            parameterChanged( i, 1, paramEditWidget);
         }
+    }
+
+    if( (! paramEditWidget->hasFocus()) && (! tmpArray.isEmpty()))
+    {
+        newPatchDataList[currentPatchEdited.first][currentPatchEdited.second].replace(offset, length, tmpArray);
+        tmpArray.clear();
+    }
+
+    QMap<int, widgetWithVal>::const_iterator iter = ccToWidgetMap.constBegin();
+    while (iter != ccToWidgetMap.constEnd())
+    {
+        if( paramEditWidget->hasFocus() && iter.value().dspinBox == paramEditWidget)
+        {
+            buildCCToWidgetMap();
+            break;
+        }
+        iter++;
     }
 
     if( offset == PatchType)
@@ -994,13 +1028,25 @@ void MainWindow::showPreferences()
 {
     MidiApplication *thisMidiApp = static_cast<MidiApplication *>(qApp);
 
-    PreferencesDialog prefDialog(readablePortsModel, writablePortsModel, this);
+    PreferencesDialog prefDialog(readablePortsModel, writablePortsModel, nameToCCMap, this);
     connect( &prefDialog, SIGNAL(midiInPortStatusChanged( MidiClientPortId, bool)), thisMidiApp, SLOT(changeReadableMidiPortStatus(MidiClientPortId,bool)) );
     connect( &prefDialog, SIGNAL(midiOutPortStatusChanged( MidiClientPortId, bool)), thisMidiApp, SLOT(changeWritebleMidiPortStatus(MidiClientPortId,bool)) );
     connect( &prefDialog, SIGNAL(midiChannelChanged(int)), this, SLOT(setMIDIChannel(int)));
+    connect( &prefDialog, SIGNAL(paramToCCChanged(QString, int,int)), this, SLOT(onParamToCCChaged(QString, int,int)));
     prefDialog.exec();
 
     prefDialog.disconnect(thisMidiApp);
+}
+void MainWindow::onParamToCCChaged( const QString &name, int newVal, int oldVal)
+{
+    Q_UNUSED(name)
+
+    QMap<int, widgetWithVal>::iterator iter = ccToWidgetMap.find( oldVal & 0x7F);
+    if(iter == ccToWidgetMap.end())
+        return;
+
+    ccToWidgetMap.insert( newVal & 0x7F, iter.value());
+    ccToWidgetMap.erase(iter);
 }
 
 void MainWindow::saveSettings()
@@ -1012,6 +1058,19 @@ void MainWindow::saveSettings()
     settings.beginGroup("MidiConnections");
     settings.setValue(QStringLiteral("IncomingConnections"), readablePortsModel->currentConnectionsNameList());
     settings.setValue(QStringLiteral("OutgoingConnections"), writablePortsModel->currentConnectionsNameList());
+    settings.endGroup();
+
+    settings.beginGroup(QStringLiteral("MidiControls"));
+    QMap<QString, int>::const_iterator iter = nameToCCMap.constBegin();
+    while (iter != nameToCCMap.constEnd())
+    {
+        QStringList valList;
+        valList.append( QString::number(iter.value() & 0x7F));
+        valList.append( QString::number((iter.value() & 0x0F00) >>8));
+        valList.append( QString::number((iter.value() & 0xF000) >>12));
+        settings.setValue(iter.key(), valList);
+        iter++;
+    }
     settings.endGroup();
 }
 
@@ -1027,7 +1086,28 @@ void MainWindow::restoreSettings()
     palette.setColor(QPalette::Base, Qt::lightGray);
     setPalette(palette);*/
 
-    setMIDIChannel(settings.value("MIDIChannel", 1).toInt());
+    settings.beginGroup(QStringLiteral("MidiControls"));
+    QStringList keyList = settings.childKeys();
+    for(int i=0; i<keyList.size(); i++)
+    {
+        if(keyList.at(i) == QStringLiteral("MIDIChannel"))
+        {
+            setMIDIChannel(settings.value(keyList.at(i), 0).toInt());
+        }
+        else
+        {
+            QStringList valList = settings.value(keyList.at(i), 0).toStringList();
+            if(valList.size() < 3)
+                continue;
+            int ccNumber = valList.at(0).toInt();
+            int ccMode = valList.at(1).toInt();
+            int ccInitMode = valList.at(2).toInt();
+
+            int val = (ccNumber & 0x7F) | ((ccMode & 0x0F) << 8) | ((ccInitMode & 0x0F) << 12);
+            nameToCCMap.insert(keyList.at(i), val);
+        }
+    }
+    settings.endGroup();
 
     if(!settings.contains(QStringLiteral("RestoreMidiConnectionsAtStartUp")))
     {
@@ -1164,26 +1244,34 @@ void MainWindow::exportSMF()
 void MainWindow::onPatchTypeEditorChanged( int typeId)
 {
     Q_UNUSED(typeId)
+    buildCCToWidgetMap();
+}
+
+void MainWindow::buildCCToWidgetMap()
+{
     ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>(centralWidget());
     if(editWidget == nullptr)
         return;
 
     ccToWidgetMap.clear();
 
-    nameToCCMap.insert("Master", 7);
-    nameToCCMap.insert("Gain", 80);
-
     QMap<QString, int>::const_iterator iter = nameToCCMap.constBegin();
     while (iter != nameToCCMap.constEnd())
     {
-        QDoubleSpinBox *spinBox = editWidget->findChild<QDoubleSpinBox *>("Master");
+        QDoubleSpinBox *spinBox;
         spinBox = editWidget->findChild< QDoubleSpinBox *>( iter.key() );
         if( spinBox != nullptr)
         {
             widgetWithVal wwv;
             wwv.dspinBox = spinBox;
-            wwv.storedValue = spinBox->value();
-            ccToWidgetMap.insert( iter.value(), wwv );
+            if(wwv.ccInitMode == CCInitMode::Miniumum)
+                spinBox->setValue( spinBox->minimum());
+            else
+                wwv.storedValue = spinBox->value();
+            wwv.ccMode = static_cast<CCMode>((iter.value() & 0x0F00) >> 8);
+            wwv.ccInitMode = static_cast<CCInitMode>((iter.value() & 0xF000) >> 12);
+            ccToWidgetMap.insert( iter.value() & 0x7F, wwv );
+
         }
         ++iter;
     }

@@ -186,7 +186,7 @@ bool ArrayDataEditWidget::writeEditedParameter(QObject *editor)
             QVariant newVal = editor->property(valPropNameArr);
             if(newVal.isValid())
             {
-               emit parameterAboutToBeChanged(intParamOffset, intParamLenght);
+               emit parameterAboutToBeChanged(intParamOffset, intParamLenght, dynamic_cast<QWidget *>(editor));
                QVariant convertMethod = editor->property(convertMethodProperty);
                if(convertMethod.isValid())
                {
@@ -210,7 +210,7 @@ bool ArrayDataEditWidget::writeEditedParameter(QObject *editor)
                        eightToSeven(newVal.toInt(), *dataArray, intParamOffset, intParamLenght);
                    }
                }
-               emit parameterChanged(intParamOffset, intParamLenght);
+               emit parameterChanged(intParamOffset, intParamLenght, dynamic_cast<QWidget *>(editor));
                return true;
             }
         }
