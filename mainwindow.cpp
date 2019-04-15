@@ -836,8 +836,8 @@ void MainWindow::patchListDoubleClicked(const QModelIndex &idx)
     sendPatch(idx.row(), true, type);
     //midiOutTimer->start();
     ArrayDataEditWidget *widget = static_cast<ArrayDataEditWidget *>(centralWidget());
-    widget->setDataArray(& newPatchDataList[type][idx.row()]);
     currentPatchEdited = QPair<PatchListType, int>(type, idx.row());
+    widget->setDataArray(& newPatchDataList[type][idx.row()]);
 
     patchNameLabel->setText( QString::number( currentPatchEdited.second +1).rightJustified(2, '0') + " " + newPatchDataList[type][idx.row()].mid(PatchName, PatchNameLength));
 }
@@ -1264,14 +1264,13 @@ void MainWindow::buildCCToWidgetMap()
         {
             widgetWithVal wwv;
             wwv.dspinBox = spinBox;
+            wwv.ccMode = static_cast<CCMode>((iter.value() & 0x0F00) >> 8);
+            wwv.ccInitMode = static_cast<CCInitMode>((iter.value() & 0xF000) >> 12);
+            ccToWidgetMap.insert( iter.value() & 0x7F, wwv );
             if(wwv.ccInitMode == CCInitMode::Miniumum)
                 spinBox->setValue( spinBox->minimum());
             else
                 wwv.storedValue = spinBox->value();
-            wwv.ccMode = static_cast<CCMode>((iter.value() & 0x0F00) >> 8);
-            wwv.ccInitMode = static_cast<CCInitMode>((iter.value() & 0xF000) >> 12);
-            ccToWidgetMap.insert( iter.value() & 0x7F, wwv );
-
         }
         ++iter;
     }
