@@ -37,6 +37,7 @@ MultibandDelayWidget::MultibandDelayWidget(EffectTypeId effectid, QWidget *paren
 
     headerRowLayout->addWidget(new QLabel(tr("Effect Level")), 0, 0);
     dspinBox = createStandard10DblSpinBox( EffectLevel);
+    dspinBox->setObjectName(QStringLiteral("EffectLevel"));
     dspinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 2);
     headerRowLayout->addWidget(dspinBox, 1, 0);
 

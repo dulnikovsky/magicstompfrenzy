@@ -48,11 +48,13 @@ DistortionWidget::DistortionWidget(QWidget *parent) :
 
     mainlyt->addWidget(new QLabel(tr("Gain")), 0, 1);
     dspinBox = createStandard10DblSpinBox( Gain);
+    dspinBox->setObjectName(QStringLiteral("Gain"));
     dspinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 2);
     mainlyt->addWidget(dspinBox, 1, 1);
 
     mainlyt->addWidget(new QLabel(tr("Master")), 0, 2);
     dspinBox = createStandard10DblSpinBox( Master);
+    dspinBox->setObjectName(QStringLiteral("Master"));
     dspinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 2);
     mainlyt->addWidget(dspinBox, 1, 2);
 

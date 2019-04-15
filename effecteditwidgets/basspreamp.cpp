@@ -48,6 +48,7 @@ BassPreampWidget::BassPreampWidget( QWidget *parent) :
 
     mainlyt->addWidget(new QLabel(tr("Gain")), 2, 0);
     dspinBox = new QDoubleSpinBox();
+    dspinBox->setObjectName(QStringLiteral("Gain"));
     dspinBox->setMinimum(0.0);
     dspinBox->setMaximum(10.0);
     dspinBox->setSingleStep(0.1);
@@ -59,6 +60,7 @@ BassPreampWidget::BassPreampWidget( QWidget *parent) :
 
     mainlyt->addWidget(new QLabel(tr("Master")), 4, 0);
     dspinBox = new QDoubleSpinBox();
+    dspinBox->setObjectName(QStringLiteral("Master"));
     dspinBox->setMinimum(0.0);
     dspinBox->setMaximum(10.0);
     dspinBox->setSingleStep(0.1);

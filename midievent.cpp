@@ -26,5 +26,5 @@ MidiEvent::~MidiEvent()
 {
     if( type() == static_cast<int>(UserEventTypes::MidiSysEx) && dataUnion.dataArray!=nullptr)
         delete dataUnion.dataArray;
-    qDebug("MIDI Event deleted");
+    //qDebug("MIDI Event deleted");
 }
