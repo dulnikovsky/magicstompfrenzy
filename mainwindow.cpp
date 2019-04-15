@@ -1266,11 +1266,11 @@ void MainWindow::buildCCToWidgetMap()
             wwv.dspinBox = spinBox;
             wwv.ccMode = static_cast<CCMode>((iter.value() & 0x0F00) >> 8);
             wwv.ccInitMode = static_cast<CCInitMode>((iter.value() & 0xF000) >> 12);
-            ccToWidgetMap.insert( iter.value() & 0x7F, wwv );
             if(wwv.ccInitMode == CCInitMode::Miniumum)
                 spinBox->setValue( spinBox->minimum());
             else
                 wwv.storedValue = spinBox->value();
+            ccToWidgetMap.insert( iter.value() & 0x7F, wwv );
         }
         ++iter;
     }
