@@ -154,6 +154,13 @@ void CALLBACK MidiInProc(HMIDIIN hMidiIn, UINT wMsg, DWORD dwInstance, DWORD dwP
         { // Skip MIDI realtime messages
             return;
         }
+        {
+            MidiEvent *midiEvent = new MidiEvent(static_cast<QEvent::Type>(UserEventTypes::MidiCommon));
+            midiEvent->setStatusByte( dwParam1 & 0xFF);
+            midiEvent->setData1( (dwParam1 & 0x7F00) >>8);
+            midiEvent->setData2( (dwParam1 & 0x7F0000) >>16);
+            QApplication::postEvent( qApp, midiEvent);
+        }
         qDebug("wMsg=MIM_DATA, dwInstance=%08lx, dwParam1=%08lx, dwParam2=%08lx", dwInstance, dwParam1, dwParam2);
         break;
     case MIM_LONGDATA:
