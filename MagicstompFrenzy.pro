@@ -97,7 +97,8 @@ SOURCES += main.cpp\
     knobparametermodel.cpp \
     effecteditwidgets/renardseriesspinbox.cpp \
     effecteditwidgets/compressorreleasecombobox.cpp \
-    effecteditwidgets/noisegatedecaycombobox.cpp
+    effecteditwidgets/noisegatedecaycombobox.cpp \
+    aboutdialog.cpp
 
 HEADERS  += mainwindow.h \
     midiportmodel.h \
@@ -175,7 +176,8 @@ HEADERS  += mainwindow.h \
     knobparameters.h \
     effecteditwidgets/renardseriesspinbox.h \
     effecteditwidgets/compressorreleasecombobox.h \
-    effecteditwidgets/noisegatedecaycombobox.h
+    effecteditwidgets/noisegatedecaycombobox.h \
+    aboutdialog.h
 
 linux {
 

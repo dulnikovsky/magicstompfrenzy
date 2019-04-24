@@ -29,7 +29,7 @@
 #include "progresswidget.h"
 #include "patchcopydialog.h"
 #include "preferencesdialog.h"
-
+#include "aboutdialog.h"
 #include "magicstomp.h"
 #include "importbankselectiondialog.h"
 
@@ -135,8 +135,18 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     fileMenu->addAction(quitAction);
 
     QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
-    //helpMenu->addAction(aboutAct);
-    //helpMenu->addAction(aboutQtAct);
+    QAction *aboutAct = new QAction(tr("&About"), this);
+    connect(aboutAct, &QAction::triggered, [this]() {
+           AboutDialog abdialog(this);
+           abdialog.exec();
+       });
+
+    helpMenu->addAction(aboutAct);
+    QAction *aboutQtAct = new QAction(tr("About &Qt"), this);
+    connect(aboutQtAct, &QAction::triggered, [this]() {
+           QMessageBox::aboutQt(this);
+       });
+    helpMenu->addAction(aboutQtAct);
 
     patchNameLabel = new QLabel();
     patchNameLabel->setStyleSheet("font: 40pt;");
