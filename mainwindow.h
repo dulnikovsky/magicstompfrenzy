@@ -55,6 +55,7 @@ public slots:
     void midiEvent(MidiEvent *event);
 
     bool importSMF(const QString &fileName, PatchListType type);
+    bool importUB99(const QString &fileName, PatchListType type);
 
     void hideEditor();
     void restoreSettings();
@@ -88,7 +89,7 @@ private slots:
 
     void setMIDIChannel(int val) { midiChannel = val; }
 
-    void onImportSMF();
+    void onImport();
     void exportSMF();
 
     void onPatchTypeEditorChanged( int typeId);
@@ -132,7 +133,7 @@ private:
     QVBoxLayout *patchListLayout;
 
     QAction *showPreferencesAction;
-    QAction *importSMFAction;
+    QAction *importAction;
     QAction *exportSMFAction;
 
     QLabel *patchNameLabel;

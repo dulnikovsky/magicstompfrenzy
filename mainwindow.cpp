@@ -36,6 +36,7 @@
 #include "midiapplication.h"
 
 #include "standardmidifile.h"
+#include "ub99file.h"
 
 #include <QGroupBox>
 #include <QListView>
@@ -117,8 +118,8 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     showPreferencesAction = new QAction(tr("&Preferences"), this);
     connect(showPreferencesAction, &QAction::triggered, this, &MainWindow::showPreferences);
 
-    importSMFAction = new QAction(tr("&Import SMF"), this);
-    connect(importSMFAction, &QAction::triggered, this, &MainWindow::onImportSMF);
+    importAction = new QAction(tr("&Import"), this);
+    connect(importAction, &QAction::triggered, this, &MainWindow::onImport);
 
     exportSMFAction = new QAction(tr("&Export SMF"), this);
     connect(exportSMFAction, &QAction::triggered, this, &MainWindow::exportSMF);
@@ -127,7 +128,7 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     connect(quitAction, &QAction::triggered, this, &MainWindow::close);
 
     QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
-    fileMenu->addAction(importSMFAction);
+    fileMenu->addAction(importAction);
     fileMenu->addAction(exportSMFAction);
     fileMenu->addSeparator();
     fileMenu->addAction(showPreferencesAction);
@@ -1154,20 +1155,29 @@ void MainWindow::restoreSettings()
     }
 }
 
-void MainWindow::onImportSMF()
+void MainWindow::onImport()
 {
     ImportBankSelectionDialog dial(this);
     if( dial.exec() == QDialog::Rejected )
         return;
 
     PatchListType type = dial.SelectedTab()==ImportBankSelectionDialog::ImportTab?SMFImport:User;
-    bool ret = importSMF( dial.fileName(), type);
+
+    bool ret = false;
+    QFileInfo fileInfo(dial.fileName());
+    if(fileInfo.suffix() == "mid")
+    {
+        ret = importSMF( dial.fileName(), type);
+    }
+    else
+    {
+        ret = importUB99(dial.fileName(), type);
+    }
     if( ! ret)
     {
         QMessageBox::warning(this, qApp->applicationName(), tr("Error. Could not open or read file %1.").arg( dial.fileName() ));
         return;
     }
-
     patchTabWidget->setCurrentIndex( type);
 }
 
@@ -1208,6 +1218,22 @@ bool MainWindow::importSMF(const QString &fileName, PatchListType type)
         return false;
     }
     newPatchDataList[type] = tmpPatchDataList;
+    patchListView->setModel( patchListModelList.at(type));
+    backupPatchesMapList[type].clear();
+
+    return true;
+}
+
+bool MainWindow::importUB99(const QString &fileName, PatchListType type)
+{
+    UB99File ub99file(fileName);
+    if( ! ub99file.open(QIODevice::ReadOnly))
+        return false;
+
+    QList<QByteArray> ub99DataList;
+    ub99DataList = ub99file.patchData();
+
+    newPatchDataList[type] = ub99DataList;
     patchListView->setModel( patchListModelList.at(type));
     backupPatchesMapList[type].clear();
 

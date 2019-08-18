@@ -98,7 +98,8 @@ SOURCES += main.cpp\
     effecteditwidgets/renardseriesspinbox.cpp \
     effecteditwidgets/compressorreleasecombobox.cpp \
     effecteditwidgets/noisegatedecaycombobox.cpp \
-    aboutdialog.cpp
+    aboutdialog.cpp \
+    ub99file.cpp
 
 HEADERS  += mainwindow.h \
     midiportmodel.h \
@@ -169,6 +170,7 @@ HEADERS  += mainwindow.h \
     effecteditwidgets/dynaflangewidget.h \
     effecteditwidgets/dynaphaserwidget.h \
     effecteditwidgets/springreverbwidget.h \
+    ub99file.h \
     userevents.h \
     standardmidifile.h \
     importbankselectiondialog.h \

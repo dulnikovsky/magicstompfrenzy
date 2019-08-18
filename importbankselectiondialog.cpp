@@ -15,8 +15,7 @@
 
 ImportBankSelectionDialog::ImportBankSelectionDialog(QWidget *parent) : QDialog(parent)
 {
-
-    setWindowTitle(tr("Import Patches from Standard MIDI File"));
+    setWindowTitle(tr("Import Patches"));
 
     QVBoxLayout *layout= new QVBoxLayout();
 
@@ -33,7 +32,7 @@ ImportBankSelectionDialog::ImportBankSelectionDialog(QWidget *parent) : QDialog(
 
         QString fileName = QFileDialog::getOpenFileName(this, tr("Open SMF File"),
                                                         QStandardPaths::writableLocation(QStandardPaths::HomeLocation),
-                                                        tr("Standard MIDI Files (*.mid)"));
+                                                        tr("Standard MIDI Files (*.mid);;UB99 files (*.ub9 *.UB9)"));
 
         if(fileName.isEmpty())
             return;
