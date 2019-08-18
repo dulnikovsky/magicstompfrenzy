@@ -40,7 +40,7 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent)
 
     mainlyt->addWidget(new QLabel(tr("Online Manual: ")), 1,0);
     QLabel *helpLabel = new QLabel();
-    helpLabel->setText("<a href=\"https://github.com/dulnikovsky/magicstompfrenzy/blob/master/README.md\">Magicstomfrenzy Manual on GitHub</a>");
+    helpLabel->setText("<a href=\"https://github.com/dulnikovsky/magicstompfrenzy/blob/master/README.md\">Magicstompfrenzy Manual on GitHub</a>");
     helpLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
     connect(helpLabel, &QLabel::linkActivated, []() {
             QDesktopServices::openUrl(QUrl("https://github.com/dulnikovsky/magicstompfrenzy/blob/master/README.md"));
