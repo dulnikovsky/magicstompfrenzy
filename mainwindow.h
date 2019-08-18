@@ -90,7 +90,7 @@ private slots:
     void setMIDIChannel(int val) { midiChannel = val; }
 
     void onImport();
-    void exportSMF();
+    void onExport();
 
     void onPatchTypeEditorChanged( int typeId);
     void onParamToCCChaged( const QString &name, int newVal, int oldVal);
@@ -134,7 +134,7 @@ private:
 
     QAction *showPreferencesAction;
     QAction *importAction;
-    QAction *exportSMFAction;
+    QAction *exportAction;
 
     QLabel *patchNameLabel;
 

@@ -17,10 +17,19 @@ public:
     bool open(OpenMode mode) override;
     void close() override { return QFile::close(); }
 
+    void writePatchData( const QList<QByteArray> &patchDataList);
+
     QList<QByteArray> patchData();
 
 private:
-    const char UB99Header[10] = { 'U', 'B', '9', '9', ' ', 'V', '1', '.', '0', '0' };
+    static const int IdentifierLenght{10};
+    const char UB99Header[IdentifierLenght] = { 'U', 'B', '9', '9', ' ', 'V', '1', '.', '0', '0' };
+
+    static const int HeaderLenght{0x40};
+    static const int NamesBlockOffset = HeaderLenght*2;
+    static const int NamesBlockLenght{0x600 - NamesBlockOffset};
+    static const int PatchDataBlockOffset = NamesBlockOffset + NamesBlockLenght;
+    static const int PatchDataBlockLenght{0x4400 - PatchDataBlockOffset};
 
 };
 

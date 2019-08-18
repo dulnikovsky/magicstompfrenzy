@@ -5,18 +5,47 @@
 bool UB99File::open(OpenMode mode)
 {
     bool ret = false;
+    ret = QFile::open(mode);
+    if(ret == false)
+        return ret;
+
     if((mode & QIODevice::ReadOnly) == QIODevice::ReadOnly)
     {
-        ret = QFile::open(mode);
-        if(ret == false)
-            return ret;
-
-        char buffer[10];
-        qint64 len = readData(buffer, 10);
-        if(len != 10 || strncmp( UB99Header, buffer, 10) != 0)
+        char buffer[IdentifierLenght];
+        qint64 len = readData(buffer, IdentifierLenght);
+        if(len != IdentifierLenght || strncmp( UB99Header, buffer, IdentifierLenght) != 0)
         {
             close();
             return false;
+        }
+        if( seek( HeaderLenght) == false)
+        {
+            close();
+            return false;
+        }
+        len = readData(buffer, IdentifierLenght);
+        if(len != IdentifierLenght || strncmp( UB99Header, buffer, IdentifierLenght) != 0)
+        {
+            close();
+            return false;
+        }
+    }
+    else if((mode & QIODevice::WriteOnly) == QIODevice::WriteOnly)
+    {
+        for(int i=0; i<2; i++)
+        {
+            if( write(UB99Header, IdentifierLenght) != IdentifierLenght)
+            {
+                return false;
+            }
+            for(int j = 0; j<HeaderLenght-IdentifierLenght; j++)
+            {
+                const char c = 0;
+                if( write(&c, 1) != 1)
+                {
+                    return false;
+                }
+            }
         }
     }
     return true;
@@ -27,7 +56,7 @@ QList<QByteArray> UB99File::patchData()
     QList<QByteArray> dataList;
 
     seek(0);
-    if( seek(0x600) == false)
+    if( seek( PatchDataBlockOffset) == false)
         return dataList;
 
     char *buffer = new char[MagistompPatchDesc::PatchTotalLength];
@@ -40,4 +69,34 @@ QList<QByteArray> UB99File::patchData()
 
     delete[] buffer;
     return dataList;
+}
+
+void UB99File::writePatchData( const QList<QByteArray> &patchDataList)
+{
+    qint64 totalWritten = 0;
+    for(int i=0; i<patchDataList.size(); i++)
+    {
+        if( patchDataList.at(i).length() != PatchTotalLength )
+            continue;
+        qint64 len = write( patchDataList.at(i).data()+PatchName, PatchNameLength);
+        totalWritten += len;
+    }
+    for(int i = 0; i<NamesBlockLenght-totalWritten; i++)
+    {
+        const char c = 0;
+        write(&c, 1);
+    }
+    totalWritten = 0;
+    for(int i=0; i<patchDataList.size(); i++)
+    {
+        if( patchDataList.at(i).length() != PatchTotalLength )
+            continue;
+        qint64 len = write( patchDataList.at(i).data(), PatchTotalLength);
+        totalWritten += len;
+    }
+    for(int i = 0; i<PatchDataBlockLenght-totalWritten; i++)
+    {
+        const char c = 0;
+        write(&c, 1);
+    }
 }

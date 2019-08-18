@@ -121,15 +121,15 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     importAction = new QAction(tr("&Import"), this);
     connect(importAction, &QAction::triggered, this, &MainWindow::onImport);
 
-    exportSMFAction = new QAction(tr("&Export SMF"), this);
-    connect(exportSMFAction, &QAction::triggered, this, &MainWindow::exportSMF);
+    exportAction = new QAction(tr("&Export"), this);
+    connect(exportAction, &QAction::triggered, this, &MainWindow::onExport);
 
     QAction *quitAction = new QAction(tr("&Quit"), this);
     connect(quitAction, &QAction::triggered, this, &MainWindow::close);
 
     QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(importAction);
-    fileMenu->addAction(exportSMFAction);
+    fileMenu->addAction(exportAction);
     fileMenu->addSeparator();
     fileMenu->addAction(showPreferencesAction);
     fileMenu->addSeparator();
@@ -1240,41 +1240,53 @@ bool MainWindow::importUB99(const QString &fileName, PatchListType type)
     return true;
 }
 
-void MainWindow::exportSMF()
+void MainWindow::onExport()
 {
     if( ! hasValidUserPatches())
     {
-        QMessageBox::warning(this, QStringLiteral("MagicstompFrenzy"), tr("Exporting to SMF if User patch list is not complete is not possible."));
+        QMessageBox::warning(this, QStringLiteral("MagicstompFrenzy"), tr("Exporting if User patch list is not complete is not possible."));
             return;
     }
-
     QString fileName = QFileDialog::getSaveFileName(this, tr("Export User Patches to Standard MID File"),
                                QStandardPaths::writableLocation(QStandardPaths::HomeLocation),
-                               tr("Standard MIDI Files (*.mid)"));
+                               tr("UB99 files (*.ub9);;Standard MIDI Files (*.mid)"));
 
     if(fileName.isEmpty())
         return;
 
-    StandardMidiFile smf(fileName);
-    smf.setTrackNum(1);
-    smf.setTicksPerQuarterNote(96);
-    if( smf.open(QIODevice::WriteOnly) == false )
+    QFileInfo fileInfo(fileName);
+    if( fileInfo.suffix() == "mid")
     {
-        QMessageBox::warning(this, qApp->applicationName(), tr("Could not open file %1 for writing.").arg( fileName ));
-        return;
-    }
-
-    sendAll( false); // enque all midi events without sending them;
-    if( midiOutQueue.isEmpty())
-    {
+        StandardMidiFile smf(fileName);
+        smf.setTrackNum(1);
+        smf.setTicksPerQuarterNote(96);
+        if( smf.open(QIODevice::WriteOnly) == false )
+        {
+            QMessageBox::warning(this, qApp->applicationName(), tr("Could not open file %1 for writing.").arg( fileName ));
+            return;
+        }
+        sendAll( false); // enque all midi events without sending them;
+        if( midiOutQueue.isEmpty())
+        {
+            smf.close();
+            return;
+        }
+        smf.writeTrack(midiOutQueue);
+        midiOutQueue.clear();
         smf.close();
-        return;
+        putGuiToTransmissionState(false, false);
     }
-    smf.writeTrack(midiOutQueue);
-    midiOutQueue.clear();
-
-    smf.close();
-    putGuiToTransmissionState(false, false);
+    else
+    {
+        UB99File ub99file(fileName);
+        if( ub99file.open(QIODevice::WriteOnly) == false )
+        {
+            QMessageBox::warning(this, qApp->applicationName(), tr("Could not open file %1 for writing.").arg( fileName ));
+            return;
+        }
+        ub99file.writePatchData(newPatchDataList.at(User));
+        ub99file.close();
+    }
 }
 
 void MainWindow::onPatchTypeEditorChanged( int typeId)

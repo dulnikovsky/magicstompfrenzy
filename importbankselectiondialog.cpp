@@ -32,7 +32,7 @@ ImportBankSelectionDialog::ImportBankSelectionDialog(QWidget *parent) : QDialog(
 
         QString fileName = QFileDialog::getOpenFileName(this, tr("Open SMF File"),
                                                         QStandardPaths::writableLocation(QStandardPaths::HomeLocation),
-                                                        tr("Standard MIDI Files (*.mid);;UB99 files (*.ub9 *.UB9)"));
+                                                        tr("UB99 files (*.ub9 *.UB9);;Standard MIDI Files (*.mid)"));
 
         if(fileName.isEmpty())
             return;
