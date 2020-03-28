@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
     a.setApplicationName("MagicstompFrenzy");
     a.setOrganizationName("RobertVetter");
     a.setOrganizationDomain("www.robertvetter.com");
-    a.setApplicationVersion("0.915");
+    a.setApplicationVersion("0.920");
     a.setWindowIcon(QIcon(":magicstomp.png"));
 
     MainWindow mw( a.ReadablePortsModel(), a.WritablePortsModel());
@@ -47,8 +47,8 @@ int main(int argc, char *argv[])
     parser.addHelpOption();
     parser.addVersionOption();
 
-    QCommandLineOption hideEditorWindowOption(QStringList() << "hideeditor", "No editor");
-    parser.addOption(hideEditorWindowOption);
+    //QCommandLineOption hideEditorWindowOption(QStringList() << "hideeditor", "No editor");
+    //parser.addOption(hideEditorWindowOption);
 
     QCommandLineOption ignorePreferencesOption(QStringList() << "ignorepreferences", "No preferences");
     parser.addOption(ignorePreferencesOption);
@@ -80,10 +80,10 @@ int main(int argc, char *argv[])
     {
         mw.restoreSettings();
     }
-    if(parser.isSet(hideEditorWindowOption))
-    {
-        mw.hideEditor();
-    }
+//    if(parser.isSet(hideEditorWindowOption))
+//    {
+//        mw.hideEditor();
+//    }
 
     if(parser.isSet(mwxOption) && parser.isSet(mwyOption))
     {

@@ -35,7 +35,7 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent)
 
     QGridLayout *mainlyt = new QGridLayout();
 
-    QLabel *appLabel = new QLabel( qApp->applicationName() + " (C) 2018-2019 Robert Vetter. Version: " + qApp->applicationVersion());
+    QLabel *appLabel = new QLabel( qApp->applicationName() + " (C) 2018-2020 Robert Vetter. Version: " + qApp->applicationVersion());
     mainlyt->addWidget(appLabel, 0,0, 1, 2);
 
     mainlyt->addWidget(new QLabel(tr("Online Manual: ")), 1,0);

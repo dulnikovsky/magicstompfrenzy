@@ -47,7 +47,7 @@
 #include <QLabel>
 #include <QSpinBox>
 #include <QPushButton>
-#include <QDockWidget>
+#include <QSplitter>
 #include <QTimer>
 #include <QMessageBox>
 #include <QProgressDialog>
@@ -236,18 +236,24 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
     dockWidgetDummy->setMinimumSize(440, 196);
     dockWidgetDummy->setLayout(mainLeftlayout);
 
-    QDockWidget *dockWidget = new QDockWidget();
+    QSplitter *splitter = new QSplitter( Qt::Horizontal);
+    splitter->addWidget( dockWidgetDummy);
+
+    /*QDockWidget *dockWidget = new QDockWidget();
     dockWidget->setFeatures( QDockWidget::DockWidgetMovable  | QDockWidget::DockWidgetFloatable);
     dockWidget->setObjectName( QStringLiteral("dockWidget"));
     dockWidget->setWidget(dockWidgetDummy);
-    addDockWidget(Qt::LeftDockWidgetArea, dockWidget);
-    resizeDocks({dockWidget}, {600}, Qt::Horizontal); // workaroud for dock widget resize bug
+    addDockWidget(Qt::LeftDockWidgetArea, dockWidget);*/
+    //resizeDocks({dockWidget}, {600}, Qt::Horizontal); // workaroud for dock widget resize bug
 
     PatchEditorWidget *editor = new PatchEditorWidget();
     connect(editor, SIGNAL(parameterAboutToBeChanged(int,int,QWidget *)), this, SLOT(parameterToBeChanged(int,int,QWidget *)));
     connect(editor, SIGNAL(parameterChanged(int,int,QWidget *)), this, SLOT(parameterChanged(int,int,QWidget *)));
     connect(editor, SIGNAL(patchTypeEditorChanged(int)), this, SLOT(onPatchTypeEditorChanged(int)));
-    setCentralWidget(editor);
+
+    splitter->addWidget( editor);
+
+    setCentralWidget(splitter);
 
 #if defined(QT_DEBUG) && defined(Q_OS_LINUX)
     QSettings cacheSettings(QStandardPaths::writableLocation(QStandardPaths::CacheLocation)+QStringLiteral("/patchcache.ini"), QSettings::IniFormat);
@@ -664,7 +670,7 @@ void MainWindow::parameterChanged(int offset, int length, QWidget *paramEditWidg
 {
     qDebug("parameterChanged(offset=%d,len=%d)", offset, length);
 
-    ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>(centralWidget());
+    ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>( static_cast<QSplitter *>(centralWidget())->widget(1));
     if(editWidget == nullptr)
         return;
 
@@ -781,12 +787,14 @@ void MainWindow::parameterChanged(int offset, int length, QWidget *paramEditWidg
 
 void MainWindow::putGuiToTransmissionState(bool isTransmitting, bool sending)
 {
+    ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>( static_cast<QSplitter *>(centralWidget())->widget(1));
+
     if( isTransmitting)
     {
         requestButton->setEnabled(false);
         sendButton->setEnabled(false);
         patchTabWidget->setEnabled(false);
-        centralWidget()->setEnabled( false);
+        editWidget->setEnabled( false);
         swapButton->setEnabled(false);
         copyButton->setEnabled(false);
 
@@ -802,7 +810,6 @@ void MainWindow::putGuiToTransmissionState(bool isTransmitting, bool sending)
     }
     else
     {
-        ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>(centralWidget());
         if( editWidget->DataArray() != nullptr )
             editWidget->setEnabled( true);
         requestButton->setEnabled(true);
@@ -846,7 +853,7 @@ void MainWindow::patchListDoubleClicked(const QModelIndex &idx)
 
     sendPatch(idx.row(), true, type);
     //midiOutTimer->start();
-    ArrayDataEditWidget *widget = static_cast<ArrayDataEditWidget *>(centralWidget());
+    ArrayDataEditWidget *widget = static_cast<ArrayDataEditWidget *>( static_cast<QSplitter *>(centralWidget())->widget(1));
     currentPatchEdited = QPair<PatchListType, int>(type, idx.row());
     widget->setDataArray(& newPatchDataList[type][idx.row()]);
 
@@ -945,13 +952,13 @@ void MainWindow::swapButtonPressed()
     if(QPair<PatchListType, int>( User, rowA) == currentPatchEdited)
     {
         currentPatchEdited =  QPair<PatchListType, int>( User, rowB);
-        ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>(centralWidget());
+        ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>( static_cast<QSplitter *>(centralWidget())->widget(1));
         editWidget->setDataArray(& newPatchDataList[User][rowB]);
     }
     else if(QPair<PatchListType, int>( User, rowB)  == currentPatchEdited)
     {
         currentPatchEdited =  QPair<PatchListType, int>( User, rowA);
-        ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>(centralWidget());
+        ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>( static_cast<QSplitter *>(centralWidget())->widget(1));
         editWidget->setDataArray(& newPatchDataList[User][rowA]);
     }
     patchListModelList[User]->patchUpdated(rowA);
@@ -974,7 +981,7 @@ void MainWindow::copyButtonPressed()
         patchListModelList[User]->patchUpdated(targetRow);
         if(QPair<PatchListType, int>( User, targetRow) == currentPatchEdited)
         {
-            ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>(centralWidget());
+            ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>( static_cast<QSplitter *>(centralWidget())->widget(1));
             editWidget->setDataArray(& (newPatchDataList[User][targetRow]));
             sendPatch(targetRow);
         }
@@ -996,7 +1003,7 @@ void MainWindow::undoRedoButtonPressed()
     pairVal.first = tmpArray;
     backupPatchesMapList[type].insert(row, pairVal);
 
-    ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>(centralWidget());
+    ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>( static_cast<QSplitter *>(centralWidget())->widget(1));
     editWidget->setDataArray(& (newPatchDataList[type][row]));
     sendPatch(row, true, type);
 
@@ -1297,7 +1304,7 @@ void MainWindow::onPatchTypeEditorChanged( int typeId)
 
 void MainWindow::buildCCToWidgetMap()
 {
-    ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>(centralWidget());
+    ArrayDataEditWidget *editWidget = static_cast<ArrayDataEditWidget *>( static_cast<QSplitter *>(centralWidget())->widget(1));
     if(editWidget == nullptr)
         return;
 
