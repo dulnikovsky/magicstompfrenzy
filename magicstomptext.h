@@ -28,7 +28,7 @@
 const QStringList EffectTypeNameList =
 {
     QStringLiteral("Acoustic Multi"),
-    QStringLiteral("8 Band Paralell Delay"),
+    QStringLiteral("8 Band Parallel Delay"),
     QStringLiteral("8 Band Series Delay"),
     QStringLiteral("4 Band 2 Tap Mod. Delay"),
     QStringLiteral("2 Band 4 Tap Mod. Delay"),
