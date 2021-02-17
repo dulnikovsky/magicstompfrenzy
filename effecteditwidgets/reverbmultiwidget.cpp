@@ -41,7 +41,7 @@ ReverbMultiWidget::ReverbMultiWidget(QWidget *parent) :
     mainlyt->addWidget(new QLabel(tr("Time")), 0, 0);
     ReverbTimeSpinBox *revTimeSpinBox = new ReverbTimeSpinBox();
     revTimeSpinBox->setParameters(0, 0x53);
-    revTimeSpinBox->setSuffix(" ms");
+    revTimeSpinBox->setSuffix(" s");
     revTimeSpinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, Time);
     revTimeSpinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
     mainlyt->addWidget(revTimeSpinBox, 1, 0);

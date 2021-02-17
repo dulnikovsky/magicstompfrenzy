@@ -75,7 +75,7 @@ DelayReverbWidget::DelayReverbWidget(bool isParallel, QWidget *parent) :
     erLayout->addWidget(new QLabel(tr("Time")), 0, 1);
     ReverbTimeSpinBox *revTimeSpinBox = new ReverbTimeSpinBox();
     revTimeSpinBox->setParameters(0, 0x53);
-    revTimeSpinBox->setSuffix(" ms");
+    revTimeSpinBox->setSuffix(" s");
     revTimeSpinBox->setProperty( ArrayDataEditWidget::dataOffsetProperty, ReverbTime);
     revTimeSpinBox->setProperty( ArrayDataEditWidget::dataLenghtProperty, 1);
     erLayout->addWidget(revTimeSpinBox, 1, 1);
