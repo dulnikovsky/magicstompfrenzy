@@ -47,6 +47,7 @@
 #include <QLabel>
 #include <QSpinBox>
 #include <QPushButton>
+#include <QSpinBox>
 #include <QSplitter>
 #include <QTimer>
 #include <QMessageBox>
@@ -650,7 +651,8 @@ void MainWindow::midiOutTimeOut()
 
 void MainWindow::parameterToBeChanged(int offset, int length, QWidget *editWidget)
 {
-    if( ! editWidget->hasFocus())
+    tmpArray.clear();
+    if( ! editWidget->hasFocus() && dynamic_cast< QSpinBox *>(editWidget) != nullptr)
         tmpArray = newPatchDataList[currentPatchEdited.first][currentPatchEdited.second].mid( offset, length);
 
     if(! backupPatchesMapList.at(currentPatchEdited.first).contains(currentPatchEdited.second))
