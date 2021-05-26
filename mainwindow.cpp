@@ -1227,7 +1227,6 @@ bool MainWindow::importSMF(const QString &fileName, PatchListType type)
         return false;
     }
     newPatchDataList[type] = tmpPatchDataList;
-    patchListView->setModel( patchListModelList.at(type));
     backupPatchesMapList[type].clear();
 
     return true;
@@ -1243,7 +1242,6 @@ bool MainWindow::importUB99(const QString &fileName, PatchListType type)
     ub99DataList = ub99file.patchData();
 
     newPatchDataList[type] = ub99DataList;
-    patchListView->setModel( patchListModelList.at(type));
     backupPatchesMapList[type].clear();
 
     return true;
