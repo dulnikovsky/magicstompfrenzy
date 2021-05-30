@@ -256,16 +256,6 @@ MainWindow::MainWindow(MidiPortModel *readPortsMod, MidiPortModel *writePortsMod
 
     setCentralWidget(splitter);
 
-#if defined(QT_DEBUG) && defined(Q_OS_LINUX)
-    QSettings cacheSettings(QStandardPaths::writableLocation(QStandardPaths::CacheLocation)+QStringLiteral("/patchcache.ini"), QSettings::IniFormat);
-    for(int i=0; i<numOfPatches;i++)
-    {
-        QByteArray arr;
-        arr = cacheSettings.value("Patchdata"+QString::number(i+1).rightJustified(2, '0')).toByteArray();
-        if(arr.size() == PatchTotalLength && arr.at(PatchType+1)<EffectTypeNUMBER)
-            newPatchDataList[User][i] = arr;
-    }
-#endif
     //patchListView->resizeColumnsToContents();
     guitarPatchListView->resizeColumnsToContents();
     bassPatchListView->resizeColumnsToContents();
