@@ -14,6 +14,8 @@ MagicstompFrenzy is an editor for Magicstomp multieffect processor by YAMAHA. It
 
 * On Windows application is currently distributed as zip file. In order to start it unpack the zip archive including the exe file and the ini files. Start the application by double click on the exe file.
 
+* Remember to have USB MIDI driver from Yamaha installed on your computer ( applies to MacOS and Windows, Linux does not need it, it works from the scratch!). Otherwise this application won't work!
+
 ## Working with the editor
 
 ### Setting MIDI connections
