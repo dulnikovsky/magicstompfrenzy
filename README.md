@@ -4,6 +4,8 @@
 
 MagicstompFrenzy is an editor for Magicstomp multieffect processor by YAMAHA. It works on MacOS, Linux and Windows
 
+![image description](doc/img/MainWindow.png)
+
 ## Installation
 
 * On Linux the application has to be build from source.
@@ -16,7 +18,9 @@ MagicstompFrenzy is an editor for Magicstomp multieffect processor by YAMAHA. It
 
 ### Setting MIDI connections
 
-When MagicstompFrenzy is run for the first time the preferences window appears. You have to make connections to the MIDI In and Out ports of the Magicstomp by selecting them in the lists. If no MIDI ports of the Magistomp appear there you have to install the YAMAHA MIDI USB driver first and/or connect the Magicstomp to your PC. On Windows no MIDI hotplugging is supported, so you habe to restart the application. After that you can close the preferences window.
+When MagicstompFrenzy is run for the first time the Preferences window appears. You have to make connections to the MIDI In and Out ports of the Magicstomp by selecting them in the lists. If no MIDI ports of the Magistomp appear there you have to install the YAMAHA MIDI USB driver first and/or connect the Magicstomp to your PC. On Windows no MIDI hotplugging is supported, so you habe to restart the application. After that you can close the preferences window.
+
+![image description](doc/img/Preferences.png)
 
 ### Requesting patches
 
@@ -26,11 +30,19 @@ The main window contains of the patch list window and the patch editor window. T
 
 After that you can edit patches. To choose the patch to edit double-click on it in the patches list. The chosen patch will be transferred to the temporary memory of your Magicstomp and will become the "active" patch. This will also activate the editor window. In this window you can change the parameters of the chosen patch. The changes will become audible immidiately. When a patch has been changed it will be also marked with a yellow box in the list. Using the "Undo/Redo" button you can compare the orginal patch with the edited patch.
 
-You can also swap and copy patches in the list using according buttons.
+### Copying and swapping patches
+
+You can swap and copy patches using according buttons. Swapping can be done in user memory tab only. Copying  can be done to user memory only as well.
+
+### Importing and exporting patches
+
+You can import patches from UB9 or SMF files into either the user or imported tab using the "File" menu. If imported into user tab you can transit all imported patches at once into your magicstomp. If imported into imported tab you can pick single patches and copy them into user tab and transfer then new setup into your magicstomp. 
+
+User patches can be exported into UB9 or SMF file as well.
 
 ### Saving patches
 
-You can transmit all user patches back to youy Magicstomp using the "Send All" button. Alternatively you can save the active patch using the mathod described in the manual if the Magicstomp ( using the "Store" and "+" "-" buttons on your Magicstomp.
+You can transmit all user patches back to youy Magicstomp using the "Send All" button. Alternatively you can save the active patch using the method described in the manual if the Magicstomp ( using the "Store" and "+" "-" buttons on your Magicstomp.
 
 ## For the interested: Building MagicstompFrenzy on Linux
 
