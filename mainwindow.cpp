@@ -1149,7 +1149,11 @@ void MainWindow::restoreSettings()
 
         if( !failedPorts.isEmpty())
         {
-            QMessageBox::warning(this, qApp->applicationName(), tr("Could not open MIDI ports used last time:\n %1").arg( QStringList(failedPorts.toList()).join('\n')));
+            QStringList failedPortsStringList;
+            foreach (const QString &value, failedPorts)
+                failedPortsStringList << value;
+
+            QMessageBox::warning(this, qApp->applicationName(), tr("Could not open MIDI ports used last time:\n %1").arg( QStringList(failedPortsStringList).join('\n')));
         }
     }
 }
