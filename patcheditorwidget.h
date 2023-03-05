@@ -44,7 +44,7 @@ private:
     QWidget *effectEditWidget;
     QLabel *copyrightLabel;
     PatchCommonEditorWidget *patchCommonEditorWidget;
-    constexpr static const char *copyrightStr="MagicstompFrenzy (C) 2018 - 2021 Robert Vetter";
+    constexpr static const char *copyrightStr="MagicstompFrenzy (C) 2018 - 2023 Robert Vetter";
 };
 
 #endif // PATCHCOMMONEDITOR_H
