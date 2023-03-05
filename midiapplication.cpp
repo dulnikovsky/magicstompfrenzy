@@ -29,11 +29,11 @@
 #include <AudioToolbox/AudioToolbox.h>
 #endif
 #ifdef Q_OS_WIN
-#include "inmidiheaderusedevent.h"
 #include <windows.h>
 #include <mmsystem.h>
 #include <QThread>
 #include <QMessageBox>
+#include "inmidiheaderusedevent.h"
 #endif
 
 
@@ -140,7 +140,7 @@ void MidiApplication::sysexCompletionProc(MIDISysexSendRequest *req)
 }
 #endif
 #ifdef Q_OS_WIN
-void CALLBACK MidiInProc(HMIDIIN hMidiIn, UINT wMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2)
+void CALLBACK MidiInProc(HMIDIIN hMidiIn, UINT wMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2)
 {
     switch(wMsg) {
     case MIM_OPEN:
@@ -161,7 +161,7 @@ void CALLBACK MidiInProc(HMIDIIN hMidiIn, UINT wMsg, DWORD dwInstance, DWORD dwP
             midiEvent->setData2( (dwParam1 & 0x7F0000) >>16);
             QApplication::postEvent( qApp, midiEvent);
         }
-        qDebug("wMsg=MIM_DATA, dwInstance=%08lx, dwParam1=%08lx, dwParam2=%08lx", dwInstance, dwParam1, dwParam2);
+        qDebug("wMsg=MIM_DATA, dwInstance=%08llx, dwParam1=%08llx, dwParam2=%08llx", dwInstance, dwParam1, dwParam2);
         break;
     case MIM_LONGDATA:
         qDebug("wMsg=MIM_LONGDATA");
@@ -170,7 +170,7 @@ void CALLBACK MidiInProc(HMIDIIN hMidiIn, UINT wMsg, DWORD dwInstance, DWORD dwP
             QByteArray dataArr = QByteArray::fromRawData((char *)(midihdr->lpData), midihdr->dwBytesRecorded);
             if(midihdr->dwBytesRecorded > 2 && dataArr.at(0) == static_cast<char>(0xF0) && dataArr.at(midihdr->dwBytesRecorded - 1) == static_cast<char>(0xF7))
             {
-                qDebug("Sysex. Len=%d", midihdr->dwBytesRecorded);
+                qDebug("Sysex. Len=%ld", midihdr->dwBytesRecorded);
 
                 MidiEvent *midiEvent = new MidiEvent(static_cast<QEvent::Type>(UserEventTypes::MidiSysEx));
                 QByteArray *data = midiEvent->sysExData();
@@ -179,6 +179,7 @@ void CALLBACK MidiInProc(HMIDIIN hMidiIn, UINT wMsg, DWORD dwInstance, DWORD dwP
                 InMidiHeaderUsedEvent *midiheaderev = new InMidiHeaderUsedEvent(static_cast<QEvent::Type>(UserEventTypes::MidiHeaderUsedEvent), hMidiIn, midihdr);
                 MidiPortModel *portmodel = reinterpret_cast<MidiPortModel *>(dwInstance);
                 QApplication::postEvent( portmodel, midiheaderev);
+                //midiInAddBuffer(hMidiIn, midihdr, sizeof(MIDIHDR));
             }
         }
         break;
@@ -371,7 +372,7 @@ bool MidiApplication::sendMidiEvent(MidiEvent *ev)
             }
             while (MIDIERR_STILLPLAYING == midiOutUnprepareHeader((HMIDIOUT)iter.value(), &midihdr, sizeof(MIDIHDR)))
             {
-                QThread::msleep(5);
+                QThread::msleep(1);
             }
             ++iter;
         }
@@ -393,6 +394,10 @@ void MidiApplication::onPortClientPortStatusChanged(MidiClientPortId mpId, bool 
 #ifdef Q_OS_LINUX
    Q_UNUSED(mpId)
    Q_UNUSED(isExisting)
+#endif
+#ifdef Q_OS_WIN
+    Q_UNUSED(mpId)
+    Q_UNUSED(isExisting)
 #endif
 #ifdef Q_OS_MACOS
     // In MacOS there is no notification on disconecting before removing a connected midi client

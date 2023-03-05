@@ -75,7 +75,7 @@ private:
     void emitPortChanged(MidiClientPortId id);
 
 #ifdef Q_OS_WIN
-    const int inBufferCount = 4;
+    const int inBufferCount = 8;
     const int inBufferSize = 256;
     QMultiMap<void *, LPMIDIHDR> inHeaderMap;
 #endif

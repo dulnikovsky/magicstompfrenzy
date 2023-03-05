@@ -31,7 +31,7 @@
 #include <windows.h>
 #include <mmsystem.h>
 #include "inmidiheaderusedevent.h"
-extern void CALLBACK MidiInProc(HMIDIIN hMidiIn, UINT wMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2);
+extern void CALLBACK MidiInProc(HMIDIIN hMidiIn, UINT wMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2);
 #endif
 
 QVariant MidiPortModel::data(const QModelIndex &index, int role) const
@@ -204,14 +204,14 @@ bool MidiPortModel::connectPorts(MidiClientPortId srcId, MidiClientPortId destId
                 return true;
 #ifdef Q_OS_WIN
             HMIDIIN hmidiin;
-            retval = midiInOpen(&hmidiin, srcId, (DWORD_PTR)MidiInProc, (DWORD_PTR)this, CALLBACK_FUNCTION);
+            retval = midiInOpen(&hmidiin, srcId, (DWORD_PTR)(void *)MidiInProc, (DWORD_PTR)(void *)this, CALLBACK_FUNCTION);
             if (retval == MMSYSERR_NOERROR)
             {
                 for( int i = 0; i< inBufferCount; i++)
                 {
                     LPMIDIHDR hdr = (LPMIDIHDR) malloc(sizeof(MIDIHDR));
                     hdr->dwBufferLength = inBufferSize;
-                    hdr->lpData = (char *) malloc(inBufferSize);
+                    hdr->lpData = (LPSTR) malloc(inBufferSize);
                     hdr->dwFlags = 0;
                     midiInPrepareHeader(hmidiin, hdr, sizeof(MIDIHDR));
                     midiInAddBuffer(hmidiin, hdr, sizeof(MIDIHDR));
