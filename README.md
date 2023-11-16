@@ -20,7 +20,7 @@ MagicstompFrenzy is an editor for Magicstomp multieffect processor by YAMAHA. It
 
 ### Setting MIDI connections
 
-When MagicstompFrenzy is run for the first time the Preferences window appears. You have to make connections to the MIDI In and Out ports of the Magicstomp by selecting them in the lists. If no MIDI ports of the Magistomp appear there you have to install the YAMAHA MIDI USB driver first and/or connect the Magicstomp to your PC. On Windows no MIDI hotplugging is supported, so you habe to restart the application. After that you can close the preferences window.
+When MagicstompFrenzy is run for the first time the Preferences window appears. You have to make connections to the MIDI In and Out ports of the Magicstomp by selecting them in the lists. If no MIDI ports of the Magistomp appear there you have to install the [YAMAHA MIDI USB driver](https://usa.yamaha.com/products/contents/music_production/downloads/firmware_software/index.html?c=music_production&k=USB-MIDI) first and/or connect the Magicstomp to your PC. On Windows no MIDI hotplugging is supported, so you habe to restart the application. After that you can close the preferences window.
 
 ![image description](doc/img/Preferences.png)
 
