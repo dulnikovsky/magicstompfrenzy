@@ -195,7 +195,7 @@ LIBS += -lasound
 }
 
 macx {
-
+QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.15
 LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit -framework CoreFoundation -framework CoreMIDI
 
 ICON = magicstomp.icns
@@ -203,7 +203,7 @@ ICON = magicstomp.icns
 
 win64 {
 HEADERS += inmidiheaderusedevent.h
-SOURCES += inmidiheaderusedevent.cpp
+SOURCES += inmidiheaderusedevent.cppś
 LIBS += -lwinmm
 }
 
