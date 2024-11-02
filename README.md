@@ -26,7 +26,7 @@ When MagicstompFrenzy is run for the first time the Preferences window appears. 
 
 ### Requesting patches
 
-The main window contains of the patch list window and the patch editor window. The patch list window includes user patch list and three preset patch lists plus buttons to manage patches. First you have to request user patches from the user memory of your Magicstomp. This is done by clicking on the "Request All" button. If your MIDI connection have been set corectly you will see user patches being transmitted. This will take about 1 - 2 minutes for all 100 user patches.
+The main window contains of the patch list window and the patch editor window. The patch list window includes user patch list and three preset patch lists plus buttons to manage patches. First you have to request user patches from the user memory of your Magicstomp. This is done by clicking on the "Request All" button. If your MIDI connection have been set correctly you will see user patches being transmitted. This will take about 1 - 2 minutes for all 100 user patches.
 
 ### Editing patches
 
