@@ -600,7 +600,7 @@ void MainWindow::sendPatch( int patchIdx, bool sendToTmpArea, PatchListType type
 void MainWindow::timeout()
 {
     currentPatchTransmitted = -1;
-    QMessageBox::warning(this, tr("MIDI communication error"), tr("No response from Magictomp. Check MIDI connection."), QMessageBox::Ok );
+    QMessageBox::warning(this, tr("MIDI communication error"), tr("No response from Magicstomp. Check MIDI connection."), QMessageBox::Ok );
     if(isInTransmissionState)
         putGuiToTransmissionState(false, false);
     cancelOperation = false;
