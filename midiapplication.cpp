@@ -276,7 +276,7 @@ void  MidiApplication::midiSystemInit()
 #ifdef Q_OS_LINUX
 
     int err;
-    err = snd_seq_open(&handle, "default", SND_SEQ_OPEN_DUPLEX, 0);
+    err = snd_seq_open(&handle, "default", SND_SEQ_OPEN_DUPLEX, SND_SEQ_NONBLOCK);
 
     snd_seq_set_client_name(handle, applicationName().toLocal8Bit().constData());
 
@@ -416,7 +416,7 @@ void MidiApplication::onPortClientPortStatusChanged(MidiClientPortId mpId, bool 
 void MidiApplication::isQuitting()
 {
 #ifdef Q_OS_LINUX
-    midiInThread->terminate();
+    midiInThread->exitEventLoop();
     midiInThread->wait();
 
     midiOutThread->quit();

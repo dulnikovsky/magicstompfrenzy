@@ -27,13 +27,16 @@
 
 #include "midiportidalsa.h"
 
-typedef struct _snd_seq snd_seq_t;
+#ifdef Q_OS_LINUX
+#include <alsa/asoundlib.h>
+#endif
 
 class MidiInThread : public QThread
 {
     Q_OBJECT
 public:
     MidiInThread(snd_seq_t *handle, QObject *parent=0);
+    void exitEventLoop() { doRun = false; }
 
 signals:
     void portConnectionStatusChanged(MidiClientPortId src, MidiClientPortId dest, bool isConnected);
@@ -42,6 +45,8 @@ protected:
     void run();
 private:
     snd_seq_t *handle;
+    struct pollfd seqPollFd;
+    bool doRun{true};
 };
 
 #endif // MIDIINTHREAD_H
