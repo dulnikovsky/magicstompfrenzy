@@ -749,7 +749,20 @@ void MainWindow::parameterChanged(int offset, int length, QWidget *paramEditWidg
 
     if( offset == PatchType)
     {
-        QSettings effectiniSettings(QApplication::applicationDirPath()+"/effects.ini", QSettings::IniFormat);
+        QString effectIniPath;
+#if defined(Q_OS_LINUX)
+        QStringList dirList = QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation);
+        for(int i=0; i<dirList.size(); i++) {
+            QString f = dirList.at(i) + "/" + QCoreApplication::applicationName() + QStringLiteral("/effects.ini");
+            if( QFileInfo::exists(f)) {
+                effectIniPath = f;
+                break;
+            }
+        }
+#else
+        effectIniPath = QCoreApplication::applicationDirPath() + QStringLiteral("/effects.ini");
+#endif
+        QSettings effectiniSettings(effectIniPath, QSettings::IniFormat);
         QByteArray initArr;
         int patchId = static_cast<EffectTypeId>( *(editWidget->DataArray()->constData()+PatchType+1));
         QString key = "Type" + (QString::number(patchId, 16).rightJustified(2, '0').toUpper());
@@ -757,7 +770,6 @@ void MainWindow::parameterChanged(int offset, int length, QWidget *paramEditWidg
         if(initArr.size() == PatchTotalLength && initArr.at(1) == patchId)
         {
             QByteArray &dataArrRef = newPatchDataList[currentPatchEdited.first][currentPatchEdited.second];
-
             QByteArray oldPatchName = dataArrRef.mid(PatchName, PatchNameLength);
             dataArrRef = initArr;
             dataArrRef.replace(PatchName, PatchNameLength, oldPatchName);
