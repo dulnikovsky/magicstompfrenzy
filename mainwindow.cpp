@@ -1005,8 +1005,27 @@ void MainWindow::undoRedoButtonPressed()
 
 void MainWindow::loadPresetPatches(int index, const QString &filename)
 {
-    QString dir = QCoreApplication::applicationDirPath();
-    QSettings cacheSettings(dir + "/"+ filename, QSettings::IniFormat);
+
+    QString fullPath;
+#if defined(Q_OS_LINUX)
+    QStringList dirList = QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation);
+    for(int i=0; i<dirList.size(); i++) {
+        QString f = dirList.at(i) + "/" + QCoreApplication::applicationName() + "/" + filename;
+        if( QFileInfo::exists(f)) {
+            fullPath = f;
+            break;
+        }
+    }
+    if(fullPath.isEmpty()) {
+        return;
+    }
+#else
+    fullPath = QCoreApplication::applicationDirPath() + "/" + filename;
+    if( ! QFileInfo::exists(fullPath)) {
+        return;
+    }
+#endif
+    QSettings cacheSettings(fullPath, QSettings::IniFormat);
     for(int i=0; i<numOfPatches;i++)
     {
         QByteArray arr;
